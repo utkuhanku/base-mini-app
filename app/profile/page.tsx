@@ -192,11 +192,6 @@ export default function ProfilePage() {
     );
   }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
-  } as const;
-
   return (
     <motion.div
       className={styles.container}
