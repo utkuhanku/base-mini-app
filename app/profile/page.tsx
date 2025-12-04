@@ -217,7 +217,7 @@ export default function ProfilePage() {
           <div className={styles.cardHeader}>
             <div className={styles.chip}></div>
             <div className={styles.baseLogo}>
-              <div className={styles.baseCircle}></div>
+              <img src="/base-logo.svg" alt="Base" style={{ width: '28px', height: '28px' }} />
               Base
             </div>
           </div>

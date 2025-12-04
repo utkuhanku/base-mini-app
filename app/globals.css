@@ -1,11 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@300;400;500&display=swap');
+
 :root {
-  --bg-anthracite: #121212;
-  --bg-card: #1E1E1E;
-  --primary-blue: #0052FF;
+  /* Base Official Colors */
+  --base-blue: #1652F0;
+  --base-blue-dark: #0A2E9C;
+  --base-blue-light: #3D7BFF;
+
+  /* Background Colors */
+  --bg-anthracite: #0A0B0D;
+  --bg-card: #1A1B1F;
+  --bg-elevated: #252629;
+
+  /* Text Colors */
   --text-primary: #FFFFFF;
   --text-secondary: #A0A0A0;
-  --border-color: #333333;
-  --font-inter: 'Inter', sans-serif;
+  --text-tertiary: #6B6B6B;
+
+  /* Border & Accent */
+  --border-color: #2A2B2F;
+  --accent-glow: rgba(22, 82, 240, 0.2);
+
+  /* Fonts - Base Sans (using Outfit as alternative) */
+  --font-base: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
 }
 
 * {
@@ -20,8 +37,9 @@ body {
   overflow-x: hidden;
   background: var(--bg-anthracite);
   color: var(--text-primary);
-  font-family: var(--font-inter);
+  font-family: var(--font-base);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -31,4 +49,5 @@ a {
 
 button {
   font-family: inherit;
+  cursor: pointer;
 }

@@ -21,7 +21,7 @@
 }
 
 .dot {
-  color: var(--primary-blue);
+  color: var(--base-blue);
 }
 
 /* Business Card Styles */
@@ -58,7 +58,7 @@
   right: -50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(0, 82, 255, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(22, 82, 240, 0.4) 0%, transparent 70%);
   filter: blur(40px);
   pointer-events: none;
 }
@@ -90,7 +90,7 @@
 .baseCircle {
   width: 24px;
   height: 24px;
-  background: var(--primary-blue);
+  background: var(--base-blue);
   border-radius: 50%;
   position: relative;
 }
@@ -200,7 +200,7 @@
 
 .label {
   font-size: 0.75rem;
-  color: var(--primary-blue);
+  color: var(--base-blue);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -220,7 +220,7 @@
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--primary-blue);
+  border-color: var(--base-blue);
 }
 
 .textarea {
@@ -239,7 +239,7 @@
 .button {
   width: 100%;
   padding: 1.2rem;
-  background: var(--primary-blue);
+  background: var(--base-blue);
   color: white;
   border: none;
   font-weight: 700;
@@ -263,8 +263,8 @@
 }
 
 .secondaryButton:hover {
-  border-color: var(--primary-blue);
-  color: var(--primary-blue);
+  border-color: var(--base-blue);
+  color: var(--base-blue);
 }
 
 .qrContainer {

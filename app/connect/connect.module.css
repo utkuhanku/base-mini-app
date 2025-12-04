@@ -19,7 +19,7 @@
 }
 
 .dot {
-    color: var(--primary-blue);
+    color: var(--base-blue);
 }
 
 .cameraFrame {
@@ -36,7 +36,7 @@
     position: absolute;
     width: 20px;
     height: 20px;
-    border: 2px solid var(--primary-blue);
+    border: 2px solid var(--base-blue);
     z-index: 10;
 }
 
@@ -103,7 +103,7 @@
 
 .label {
     font-size: 0.75rem;
-    color: var(--primary-blue);
+    color: var(--base-blue);
     font-weight: 700;
     letter-spacing: 1px;
 }
@@ -114,13 +114,13 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    font-family: var(--font-inter);
+    font-family: var(--font-base);
     font-size: 1rem;
 }
 
 .input:focus {
     outline: none;
-    border-color: var(--primary-blue);
+    border-color: var(--base-blue);
 }
 
 .button,
@@ -141,12 +141,12 @@
 }
 
 .button:hover {
-    border-color: var(--primary-blue);
-    color: var(--primary-blue);
+    border-color: var(--base-blue);
+    color: var(--base-blue);
 }
 
 .mintButton {
-    background: var(--primary-blue);
+    background: var(--base-blue);
     color: white;
 }
 
@@ -169,10 +169,10 @@
 .status {
     margin-top: 1rem;
     padding: 1rem;
-    background: rgba(0, 82, 255, 0.1);
-    color: var(--primary-blue);
-    border: 1px solid var(--primary-blue);
-    font-family: monospace;
+    background: rgba(22, 82, 240, 0.1);
+    color: var(--base-blue);
+    border: 1px solid var(--base-blue);
+    font-family: var(--font-mono);
     font-size: 0.9rem;
     display: flex;
     align-items: center;
@@ -182,7 +182,7 @@
 .statusDot {
     width: 8px;
     height: 8px;
-    background: var(--primary-blue);
+    background: var(--base-blue);
     border-radius: 50%;
     animation: pulse 1s infinite;
 }

@@ -35,9 +35,18 @@ export default function Home() {
         <motion.div
           className={styles.marquee}
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, ease: "linear", duration: 10 }}
+          transition={{ repeat: Infinity, ease: "linear", duration: 15 }}
         >
-          <span>BASE IS FOR EVERYONE &nbsp;•&nbsp; BASE IS FOR EVERYONE &nbsp;•&nbsp; BASE IS FOR EVERYONE &nbsp;•&nbsp; BASE IS FOR EVERYONE &nbsp;•&nbsp; </span>
+          <span>
+            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', marginRight: '12px' }} />
+            BASE IS FOR EVERYONE &nbsp;•&nbsp;
+            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            BASE IS FOR EVERYONE &nbsp;•&nbsp;
+            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            BASE IS FOR EVERYONE &nbsp;•&nbsp;
+            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            BASE IS FOR EVERYONE &nbsp;•&nbsp;
+          </span>
         </motion.div>
       </div>
 
@@ -47,6 +56,10 @@ export default function Home() {
         initial="hidden"
         animate="visible"
       >
+        <motion.div variants={itemVariants} style={{ marginBottom: '1rem', opacity: 0.6 }}>
+          <img src="/base-logo.svg" alt="Base" style={{ width: '48px', height: '48px' }} />
+        </motion.div>
+
         <motion.h1 className={styles.title} variants={itemVariants}>
           IDENTITY<span className={styles.dot}>.</span>
         </motion.h1>
