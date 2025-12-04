@@ -11,7 +11,7 @@ const config: HardhatUserConfig = {
             url: "https://sepolia.base.org",
             accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
             gasPrice: 1000000000,
-        },
+        } as any,
     },
     sourcify: {
         enabled: true
