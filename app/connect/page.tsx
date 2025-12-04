@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
+import { motion } from "framer-motion";
 import styles from "./connect.module.css";
 
 export default function ConnectPage() {
@@ -26,64 +27,107 @@ export default function ConnectPage() {
             return;
         }
 
-        setStatus("Minting Connection SBT... (Simulation)");
-
-        // TODO: Integrate actual smart contract call here
-        // 1. Upload image to IPFS (simulated)
-        // 2. Call ConnectionSBT.mintConnection(partnerAddress, ipfsUri)
+        setStatus("INITIALIZING MINT SEQUENCE...");
 
         setTimeout(() => {
-            setStatus("Success! Connection SBT minted.");
+            setStatus("CONNECTION ESTABLISHED. TOKEN MINTED.");
         }, 2000);
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { y: 0, opacity: 1 }
+    } as const;
+
     return (
-        <div className={styles.container}>
-            <h1 className={styles.title}>Mint Connection</h1>
+        <motion.div
+            className={styles.container}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <motion.h1 className={styles.title} variants={itemVariants}>
+                MINT CONNECTION<span className={styles.dot}>.</span>
+            </motion.h1>
 
-            <div className={styles.cameraContainer}>
-                {imgSrc ? (
-                    <img src={imgSrc} alt="Selfie" className={styles.previewImage} />
-                ) : (
-                    <Webcam
-                        audio={false}
-                        ref={webcamRef}
-                        screenshotFormat="image/jpeg"
-                        className={styles.webcam}
-                        videoConstraints={{ facingMode: "user" }}
-                    />
-                )}
-            </div>
+            <motion.div className={styles.cameraFrame} variants={itemVariants}>
+                <div className={styles.cornerTL}></div>
+                <div className={styles.cornerTR}></div>
+                <div className={styles.cornerBL}></div>
+                <div className={styles.cornerBR}></div>
 
-            <div className={styles.controls}>
+                <div className={styles.cameraContainer}>
+                    {imgSrc ? (
+                        <img src={imgSrc} alt="Selfie" className={styles.previewImage} />
+                    ) : (
+                        <Webcam
+                            audio={false}
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            className={styles.webcam}
+                            videoConstraints={{ facingMode: "user" }}
+                        />
+                    )}
+                </div>
+            </motion.div>
+
+            <motion.div className={styles.controls} variants={itemVariants}>
                 {!imgSrc ? (
-                    <button className={styles.button} onClick={capture}>
-                        Take Selfie
-                    </button>
+                    <motion.button
+                        className={styles.button}
+                        onClick={capture}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        CAPTURE IMAGE
+                    </motion.button>
                 ) : (
-                    <button className={styles.secondaryButton} onClick={retake}>
-                        Retake Photo
-                    </button>
+                    <motion.button
+                        className={styles.secondaryButton}
+                        onClick={retake}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        RETAKE
+                    </motion.button>
                 )}
 
-                <input
-                    className={styles.input}
-                    placeholder="Partner's Wallet Address (0x...)"
-                    value={partnerAddress}
-                    onChange={(e) => setPartnerAddress(e.target.value)}
-                />
+                <div className={styles.inputGroup}>
+                    <label className={styles.label}>PARTNER ADDRESS</label>
+                    <input
+                        className={styles.input}
+                        placeholder="0x..."
+                        value={partnerAddress}
+                        onChange={(e) => setPartnerAddress(e.target.value)}
+                    />
+                </div>
 
-                <button
-                    className={styles.button}
+                <motion.button
+                    className={styles.mintButton}
                     onClick={handleMint}
                     disabled={!imgSrc || !partnerAddress}
-                    style={{ opacity: (!imgSrc || !partnerAddress) ? 0.5 : 1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                 >
-                    Mint Connection SBT
-                </button>
+                    MINT SBT
+                </motion.button>
 
-                {status && <div className={styles.status}>{status}</div>}
-            </div>
-        </div>
+                {status && (
+                    <motion.div
+                        className={styles.status}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
+                        <span className={styles.statusDot}></span>
+                        {status}
+                    </motion.div>
+                )}
+            </motion.div>
+        </motion.div>
     );
 }

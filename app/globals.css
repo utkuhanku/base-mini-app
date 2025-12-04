@@ -1,11 +1,10 @@
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --primary: #0052ff;
-  --primary-gradient: linear-gradient(135deg, #0052ff 0%, #4c82fb 100%);
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --radius: 24px;
+  --bg-anthracite: #121212;
+  --bg-card: #1E1E1E;
+  --primary-blue: #0052FF;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --border-color: #333333;
   --font-inter: 'Inter', sans-serif;
 }
 
@@ -19,8 +18,8 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-anthracite);
+  color: var(--text-primary);
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
 }
@@ -30,19 +29,6 @@ a {
   text-decoration: none;
 }
 
-/* Global Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+button {
+  font-family: inherit;
 }
