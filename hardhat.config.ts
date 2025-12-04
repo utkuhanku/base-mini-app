@@ -13,9 +13,6 @@ const config: HardhatUserConfig = {
             gasPrice: 1000000000,
         } as any,
     },
-    sourcify: {
-        enabled: true
-    },
     etherscan: {
         apiKey: {
             "base-sepolia": "PLACEHOLDER_STRING"
