@@ -1,5 +1,6 @@
 "use client";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import styles from "./page.module.css";
@@ -38,13 +39,13 @@ export default function Home() {
           transition={{ repeat: Infinity, ease: "linear", duration: 15 }}
         >
           <span>
-            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', marginRight: '12px' }} />
+            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '12px' }} />
             BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
             BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
             BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <img src="/base-logo.svg" alt="Base" style={{ width: '24px', height: '24px', display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
+            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
             BASE IS FOR EVERYONE &nbsp;•&nbsp;
           </span>
         </motion.div>
@@ -57,7 +58,7 @@ export default function Home() {
         animate="visible"
       >
         <motion.div variants={itemVariants} style={{ marginBottom: '1rem', opacity: 0.6 }}>
-          <img src="/base-logo.svg" alt="Base" style={{ width: '48px', height: '48px' }} />
+          <Image src="/base-logo.svg" alt="Base" width={48} height={48} />
         </motion.div>
 
         <motion.h1 className={styles.title} variants={itemVariants}>

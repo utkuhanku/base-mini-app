@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
@@ -37,7 +38,13 @@ export default function ProfilePage() {
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
-      setProfile(JSON.parse(savedProfile));
+      try {
+        setProfile(JSON.parse(savedProfile));
+      } catch (e) {
+        console.error("Failed to parse profile from local storage", e);
+        // Fallback to default or clear invalid data
+        localStorage.removeItem("userProfile");
+      }
     } else if (context?.user?.displayName) {
       setProfile(prev => ({ ...prev, name: context.user.displayName || "" }));
       setIsEditing(true);
@@ -212,14 +219,14 @@ export default function ProfilePage() {
           <div className={styles.cardHeader}>
             <div className={styles.chip}></div>
             <div className={styles.baseLogo}>
-              <img src="/base-logo.svg" alt="Base" style={{ width: '28px', height: '28px' }} />
+              <Image src="/base-logo.svg" alt="Base" width={28} height={28} />
               Base
             </div>
           </div>
 
           <div className={styles.cardBody}>
             {profile.profilePicUrl ? (
-              <img src={profile.profilePicUrl} alt="Profile" className={styles.cardProfilePic} />
+              <Image src={profile.profilePicUrl} alt="Profile" width={70} height={70} className={styles.cardProfilePic} />
             ) : (
               <div className={styles.cardProfilePlaceholder}>{profile.name.charAt(0)}</div>
             )}

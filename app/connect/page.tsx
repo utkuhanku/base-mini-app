@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { motion } from "framer-motion";
@@ -63,7 +64,7 @@ export default function ConnectPage() {
 
                 <div className={styles.cameraContainer}>
                     {imgSrc ? (
-                        <img src={imgSrc} alt="Selfie" className={styles.previewImage} />
+                        <Image src={imgSrc} alt="Selfie" fill className={styles.previewImage} />
                     ) : (
                         <Webcam
                             audio={false}
