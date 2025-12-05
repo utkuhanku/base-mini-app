@@ -4,17 +4,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAccount } from "wagmi";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { context } = useMiniKit();
+  const { address, isConnected: wagmiConnected } = useAccount();
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (context?.user?.walletAddress) {
+    if (wagmiConnected && address) {
       setIsConnected(true);
+    } else {
+      setIsConnected(false);
     }
-  }, [context]);
+  }, [wagmiConnected, address]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
