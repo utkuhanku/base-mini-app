@@ -3,9 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ConnectionSBT is ERC721, ERC721URIStorage, Ownable {
+contract ConnectionSBT is ERC721, ERC721URIStorage, ERC721Enumerable, Ownable {
     uint256 private _nextTokenId;
 
     constructor() ERC721("ConnectionSBT", "CSBT") Ownable(msg.sender) {}
@@ -23,7 +24,7 @@ contract ConnectionSBT is ERC721, ERC721URIStorage, Ownable {
     // Soulbound: Prevent transfers
     function _update(address to, uint256 tokenId, address auth)
         internal
-        override(ERC721)
+        override(ERC721, ERC721Enumerable)
         returns (address)
     {
         address from = _ownerOf(tokenId);
@@ -31,6 +32,13 @@ contract ConnectionSBT is ERC721, ERC721URIStorage, Ownable {
             revert("ConnectionSBT: Soulbound token cannot be transferred");
         }
         return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value)
+        internal
+        override(ERC721, ERC721Enumerable)
+    {
+        super._increaseBalance(account, value);
     }
 
     function tokenURI(uint256 tokenId)
@@ -45,7 +53,7 @@ contract ConnectionSBT is ERC721, ERC721URIStorage, Ownable {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, ERC721URIStorage)
+        override(ERC721, ERC721URIStorage, ERC721Enumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

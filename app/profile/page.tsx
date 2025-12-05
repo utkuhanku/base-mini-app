@@ -4,7 +4,36 @@ import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
+import { useAccount, useReadContract } from "wagmi";
 import styles from "./profile.module.css";
+
+const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS_HERE"; // TODO: Replace with deployed address
+const ABI = [
+  {
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+    "name": "balanceOf",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "tokenOfOwnerByIndex",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+    "name": "tokenURI",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
 
 interface Link {
   title: string;
@@ -16,6 +45,65 @@ interface Profile {
   bio: string;
   profilePicUrl: string;
   links: Link[];
+}
+
+function Gallery() {
+  const { address } = useAccount();
+  const [tokens, setTokens] = useState<string[]>([]);
+
+  // 1. Get Balance
+  const { data: balance } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+  });
+
+  // Note: For a real app, we should use a loop or a multicall to fetch all tokens.
+  // For this demo, we'll just try to fetch the first few if balance exists.
+  // A better approach in production is using an Indexer (The Graph) or an API.
+  // Here we will just mock fetching the first token if balance > 0 for demonstration of the pattern.
+
+  const { data: firstTokenId } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "tokenOfOwnerByIndex",
+    args: address && balance && Number(balance) > 0 ? [address, BigInt(0)] : undefined,
+  });
+
+  const { data: firstTokenURI } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "tokenURI",
+    args: firstTokenId !== undefined ? [firstTokenId] : undefined,
+  });
+
+  useEffect(() => {
+    if (firstTokenURI) {
+      setTokens([firstTokenURI]);
+    }
+  }, [firstTokenURI]);
+
+  if (!address || !balance || Number(balance) === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.galleryContainer}>
+      <h3 className={styles.galleryTitle}>MY CONNECTIONS</h3>
+      <div className={styles.galleryGrid}>
+        {tokens.map((uri, i) => (
+          <div key={i} className={styles.galleryItem}>
+            {/* Handling IPFS or direct URLs. For this demo we assume http/https */}
+            <Image src={uri} alt={`Connection ${i}`} width={100} height={100} className={styles.galleryImage} />
+          </div>
+        ))}
+        {Number(balance) > tokens.length && (
+          <div className={styles.moreCount}>+{Number(balance) - tokens.length} more</div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ProfilePage() {
@@ -245,6 +333,8 @@ export default function ProfilePage() {
           </div>
         </div>
       </motion.div>
+
+      <Gallery />
 
       <div className={styles.actionButtons}>
         <button className={styles.button} onClick={() => setIsEditing(true)}>

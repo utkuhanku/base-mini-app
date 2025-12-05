@@ -2,11 +2,19 @@
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { context } = useMiniKit();
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    if (context?.user?.walletAddress) {
+      setIsConnected(true);
+    }
+  }, [context]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -69,39 +77,48 @@ export default function Home() {
           Welcome, {context?.user?.displayName || "Guest"}.
         </motion.p>
 
-        <div className={styles.menu}>
-          <Link href="/profile" style={{ textDecoration: 'none' }}>
-            <motion.div
-              className={styles.menuItem}
-              variants={itemVariants}
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className={styles.menuIcon}>👤</div>
-              <div className={styles.menuText}>
-                <h3>My Profile</h3>
-                <p>Manage your digital identity</p>
-              </div>
-              <div className={styles.arrow}>→</div>
-            </motion.div>
-          </Link>
+        {!isConnected ? (
+          <motion.div variants={itemVariants} className={styles.connectPrompt}>
+            <p>Please connect your wallet to continue.</p>
+            {/* The MiniKit provider handles the actual connection modal automatically or via its own UI, 
+                 but we can show a message here if it's not connected yet. 
+                 In a real Base App, the wallet is usually provided by the host. */}
+          </motion.div>
+        ) : (
+          <div className={styles.menu}>
+            <Link href="/profile" style={{ textDecoration: 'none' }}>
+              <motion.div
+                className={styles.menuItem}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={styles.menuIcon}>👤</div>
+                <div className={styles.menuText}>
+                  <h3>My Profile</h3>
+                  <p>Manage your digital identity</p>
+                </div>
+                <div className={styles.arrow}>→</div>
+              </motion.div>
+            </Link>
 
-          <Link href="/connect" style={{ textDecoration: 'none' }}>
-            <motion.div
-              className={styles.menuItem}
-              variants={itemVariants}
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className={styles.menuIcon}>🤝</div>
-              <div className={styles.menuText}>
-                <h3>Mint Connection</h3>
-                <p>Establish a new bond</p>
-              </div>
-              <div className={styles.arrow}>→</div>
-            </motion.div>
-          </Link>
-        </div>
+            <Link href="/connect" style={{ textDecoration: 'none' }}>
+              <motion.div
+                className={styles.menuItem}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={styles.menuIcon}>🤝</div>
+                <div className={styles.menuText}>
+                  <h3>Mint Connection</h3>
+                  <p>Establish a new bond</p>
+                </div>
+                <div className={styles.arrow}>→</div>
+              </motion.div>
+            </Link>
+          </div>
+        )}
       </motion.div>
     </div>
   );

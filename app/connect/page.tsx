@@ -1,15 +1,43 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import { motion } from "framer-motion";
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import styles from "./connect.module.css";
+
+const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS_HERE"; // TODO: Replace with deployed address
+const ABI = [
+    {
+        "inputs": [
+            { "internalType": "address", "name": "partner", "type": "address" },
+            { "internalType": "string", "name": "uri", "type": "string" }
+        ],
+        "name": "mintConnection",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+] as const;
 
 export default function ConnectPage() {
     const webcamRef = useRef<Webcam>(null);
     const [imgSrc, setImgSrc] = useState<string | null>(null);
     const [partnerAddress, setPartnerAddress] = useState("");
     const [status, setStatus] = useState("");
+
+    const { address } = useAccount();
+    const { data: hash, writeContract, isPending, error: writeError } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+        hash,
+    });
+
+    useEffect(() => {
+        if (isPending) setStatus("Confirming in wallet...");
+        if (isConfirming) setStatus("Processing transaction...");
+        if (isConfirmed) setStatus("CONNECTION ESTABLISHED. TOKEN MINTED.");
+        if (writeError) setStatus(`Error: ${writeError.message}`);
+    }, [isPending, isConfirming, isConfirmed, writeError]);
 
     const capture = useCallback(() => {
         if (webcamRef.current) {
@@ -20,6 +48,7 @@ export default function ConnectPage() {
 
     const retake = () => {
         setImgSrc(null);
+        setStatus("");
     };
 
     const handleMint = async () => {
@@ -28,11 +57,27 @@ export default function ConnectPage() {
             return;
         }
 
-        setStatus("INITIALIZING MINT SEQUENCE...");
+        if (!address) {
+            setStatus("Please connect your wallet first.");
+            return;
+        }
 
-        setTimeout(() => {
-            setStatus("CONNECTION ESTABLISHED. TOKEN MINTED.");
-        }, 2000);
+        // In a real app, upload imgSrc to IPFS/Storage here and get the URI.
+        // For this demo, we'll use a placeholder or the data URL (not recommended for on-chain but works for demo if short enough, though likely too long).
+        // Using a placeholder for now as per plan.
+        const tokenURI = "https://placehold.co/600x400/0052FF/FFFFFF/png?text=Connection+SBT";
+
+        try {
+            writeContract({
+                address: CONTRACT_ADDRESS,
+                abi: ABI,
+                functionName: "mintConnection",
+                args: [partnerAddress as `0x${string}`, tokenURI],
+            });
+        } catch (e) {
+            console.error(e);
+            setStatus("Minting failed to start.");
+        }
     };
 
     const containerVariants = {
@@ -111,11 +156,11 @@ export default function ConnectPage() {
                 <motion.button
                     className={styles.mintButton}
                     onClick={handleMint}
-                    disabled={!imgSrc || !partnerAddress}
+                    disabled={!imgSrc || !partnerAddress || isPending || isConfirming}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >
-                    MINT SBT
+                    {isPending || isConfirming ? "MINTING..." : "MINT SBT"}
                 </motion.button>
 
                 {status && (

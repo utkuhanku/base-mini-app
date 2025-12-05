@@ -2,6 +2,7 @@
   "name": "new-mini-app-quickstart",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -27,14 +28,22 @@
     "@eslint/eslintrc": "^3",
     "@farcaster/quick-auth": "^0.0.7",
     "@next/eslint-plugin-next": "^15.3.4",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-network-helpers": "^3.0.3",
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@nomicfoundation/hardhat-verify": "^3.0.8",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^5.2.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "chai": "^6.2.1",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "hardhat": "^3.0.16",
+    "hardhat-gas-reporter": "^2.3.0",
+    "solidity-coverage": "^0.8.16",
     "typescript": "^5"
   }
 }
