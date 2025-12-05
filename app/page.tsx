@@ -1,5 +1,19 @@
 "use client";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import {
+  ConnectWallet,
+  Wallet,
+  WalletDropdown,
+  WalletDropdownLink,
+  WalletDropdownDisconnect
+} from '@coinbase/onchainkit/wallet';
+import {
+  Address,
+  Avatar,
+  Name,
+  Identity,
+  EthBalance,
+} from '@coinbase/onchainkit/identity';
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -83,10 +97,27 @@ export default function Home() {
 
         {!isConnected ? (
           <motion.div variants={itemVariants} className={styles.connectPrompt}>
-            <p>Please connect your wallet to continue.</p>
-            {/* The MiniKit provider handles the actual connection modal automatically or via its own UI, 
-                 but we can show a message here if it's not connected yet. 
-                 In a real Base App, the wallet is usually provided by the host. */}
+            <p style={{ marginBottom: '1rem' }}>Please connect your wallet to continue.</p>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Wallet>
+                <ConnectWallet>
+                  <Avatar className="h-6 w-6" />
+                  <Name />
+                </ConnectWallet>
+                <WalletDropdown>
+                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                    <Avatar />
+                    <Name />
+                    <Address />
+                    <EthBalance />
+                  </Identity>
+                  <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com">
+                    Wallet
+                  </WalletDropdownLink>
+                  <WalletDropdownDisconnect />
+                </WalletDropdown>
+              </Wallet>
+            </div>
           </motion.div>
         ) : (
           <div className={styles.menu}>
