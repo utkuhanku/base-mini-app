@@ -79,21 +79,6 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <button
-        className={styles.button}
-        onClick={() => router.push("/profile")}
-      >
-        MY IDENTITY
-      </button>
-
-      <button
-        // Secondary style for Explore
-        className={styles.secondaryButton}
-        style={{ marginTop: '0.8rem', width: '100%', padding: '1.2rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase' }}
-        onClick={() => router.push("/explore")}
-      >
-        EXPLORE
-      </button>
       <motion.div
         className={styles.content}
         variants={containerVariants}
@@ -149,6 +134,22 @@ export default function Home() {
                 <div className={styles.menuText}>
                   <h3>My Profile</h3>
                   <p>Manage your digital identity</p>
+                </div>
+                <div className={styles.arrow}>→</div>
+              </motion.div>
+            </Link>
+
+            <Link href="/explore" style={{ textDecoration: 'none' }}>
+              <motion.div
+                className={styles.menuItem}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={styles.menuIcon}>🔍</div>
+                <div className={styles.menuText}>
+                  <h3>Explore</h3>
+                  <p>Find others on Base</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
