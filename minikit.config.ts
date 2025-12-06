@@ -26,11 +26,11 @@ export const minikitConfig = {
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "social",
     tags: ["marketing", "ads", "quickstart", "waitlist"],
-    heroImageUrl: `${ROOT_URL}/social-preview.png`,
+    heroImageUrl: `${ROOT_URL}/social-preview.png?v=2`,
     tagline: "Your onchain identity.",
     ogTitle: "Identity 🔵",
     ogDescription: "Your onchain identity and event history.",
-    ogImageUrl: `${ROOT_URL}/social-preview.png`,
+    ogImageUrl: `${ROOT_URL}/social-preview.png?v=2`,
   },
 } as const;
 
