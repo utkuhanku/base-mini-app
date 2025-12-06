@@ -77,6 +77,21 @@ export default function Home() {
         </motion.div>
       </div>
 
+      <button
+        className={styles.button}
+        onClick={() => router.push("/profile")}
+      >
+        MY IDENTITY
+      </button>
+
+      <button
+        // Secondary style for Explore
+        className={styles.secondaryButton}
+        style={{ marginTop: '0.8rem', width: '100%', padding: '1.2rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase' }}
+        onClick={() => router.push("/explore")}
+      >
+        EXPLORE
+      </button>
       <motion.div
         className={styles.content}
         variants={containerVariants}
