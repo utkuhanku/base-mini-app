@@ -89,9 +89,14 @@ export default function ProfilePage() {
     setProfile({ ...profile, links: newLinks });
   };
 
+  // Deep Link for Mobile/QR (Forces open in Wallet App)
+  const deepLink = shareUrl
+    ? `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(shareUrl)}`
+    : "";
+
   const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl || window.location.href);
-    alert("Profile link copied!");
+    navigator.clipboard.writeText(deepLink || window.location.href);
+    alert("Deep link copied! Share this to open directly in the App.");
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -119,14 +124,14 @@ export default function ProfilePage() {
         <div className={styles.shareCard}>
           <div className={styles.qrContainer}>
             <QRCodeSVG
-              value={shareUrl || ""}
+              value={deepLink || window.location.href}
               size={200}
               bgColor="#FFFFFF"
               fgColor="#000000"
               level="H"
             />
           </div>
-          <p className={styles.shareText}>Scan to view profile</p>
+          <p className={styles.shareText}>Scan to open in Base App</p>
 
           <button className={styles.button} onClick={copyLink}>
             COPY LINK
