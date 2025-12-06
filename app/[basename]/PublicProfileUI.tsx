@@ -11,6 +11,16 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     const sharedName = searchParams.get("name");
     const sharedBio = searchParams.get("bio");
 
+    let sharedLinks: { title: string; url: string }[] = [];
+    try {
+        const linksParam = searchParams.get("links");
+        if (linksParam) {
+            sharedLinks = JSON.parse(linksParam);
+        }
+    } catch (e) {
+        console.error("Failed to parse links", e);
+    }
+
     // 3D Tilt Logic
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -71,9 +81,17 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                         </div>
                     </div>
                     <div className={styles.cardFooter}>
-                        <a href={`https://basescan.org/address/${basename}`} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
-                            Basescan ↗
-                        </a>
+                        {sharedLinks.length > 0 ? (
+                            sharedLinks.map((link, i) => (
+                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
+                                    {link.title} ↗
+                                </a>
+                            ))
+                        ) : (
+                            <a href={`https://basescan.org/address/${basename}`} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
+                                Basescan ↗
+                            </a>
+                        )}
                     </div>
                 </div>
             </motion.div>

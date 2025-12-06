@@ -45,10 +45,13 @@ export default function ProfilePage() {
       const params = new URLSearchParams();
       if (profile.name) params.set("name", profile.name);
       if (profile.bio) params.set("bio", profile.bio);
+      if (profile.links && profile.links.length > 0) {
+        params.set("links", JSON.stringify(profile.links));
+      }
 
       setShareUrl(`${baseUrl}?${params.toString()}`);
     }
-  }, [address, profile.name, profile.bio]);
+  }, [address, profile.name, profile.bio, profile.links]);
 
   // 3D Tilt Logic
   const x = useMotionValue(0);
