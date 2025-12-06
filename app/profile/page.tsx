@@ -140,13 +140,34 @@ export default function ProfilePage() {
 
         <div className={styles.form}>
           <div className={styles.inputGroup}>
-            <label className={styles.label}>PROFILE PICTURE URL</label>
+            <label className={styles.label}>PROFILE PICTURE</label>
+            {/* File Upload Logic */}
             <input
+              type="file"
+              accept="image/*"
               className={styles.input}
-              value={profile.profilePicUrl}
-              onChange={(e) => setProfile({ ...profile, profilePicUrl: e.target.value })}
-              placeholder="https://..."
+              style={{ paddingTop: '0.8rem' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Limit size to < 500kb for localStorage safety (basic check)
+                  if (file.size > 500000) {
+                    alert("Image too large! Please choose an image under 500KB.");
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setProfile({ ...profile, profilePicUrl: reader.result as string });
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
             />
+            {profile.profilePicUrl && (
+              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#0052FF', cursor: 'pointer' }} onClick={() => setProfile({ ...profile, profilePicUrl: '' })}>
+                Remove Image
+              </div>
+            )}
           </div>
 
           <div className={styles.inputGroup}>
@@ -263,6 +284,21 @@ export default function ProfilePage() {
 
       {/* 2. Share / Edit Actions / Nearby Events */}
       <div className={styles.actionButtons}>
+        {/* New: Share Post on Warpcast */}
+        <button
+          className={styles.button}
+          style={{ background: '#4c2a9c', border: 'none' }} // Warpcast Purple
+          onClick={() => {
+            const text = encodeURIComponent('Create your Identity. with me 🟦');
+            const url = encodeURIComponent(window.location.href);
+            // Ideally this should link to the public profile, but current URL is a good fallback for now
+            const warpcastUrl = `https://warpcast.com/~/compose?text=${text}&embeds[]=${url}`;
+            window.open(warpcastUrl, '_blank');
+          }}
+        >
+          POST IDENTITY
+        </button>
+
         <button className={styles.button} onClick={() => setIsEditing(true)}>
           EDIT IDENTITY
         </button>
