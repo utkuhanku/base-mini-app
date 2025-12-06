@@ -1,3 +1,4 @@
 <svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <text x="10" y="45" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="white">base</text>
+<rect width="200" height="60" fill="black"/>
+<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="40" fill="white">Base</text>
 </svg>

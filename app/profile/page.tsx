@@ -4,36 +4,11 @@ import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { useAccount, useReadContract } from "wagmi";
+// import { useAccount, useReadContract } from "wagmi";
 import styles from "./profile.module.css";
 
-const CONTRACT_ADDRESS = "0xYOUR_CONTRACT_ADDRESS_HERE"; // TODO: Replace with deployed address
-const ABI = [
-  {
-    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
-    "name": "balanceOf",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "owner", "type": "address" },
-      { "internalType": "uint256", "name": "index", "type": "uint256" }
-    ],
-    "name": "tokenOfOwnerByIndex",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
-    "name": "tokenURI",
-    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
+// const CONTRACT_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+// const ABI = ...
 
 interface Link {
   title: string;
@@ -45,65 +20,6 @@ interface Profile {
   bio: string;
   profilePicUrl: string;
   links: Link[];
-}
-
-function Gallery() {
-  const { address } = useAccount();
-  const [tokens, setTokens] = useState<string[]>([]);
-
-  // 1. Get Balance
-  const { data: balance } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "balanceOf",
-    args: address ? [address] : undefined,
-  });
-
-  // Note: For a real app, we should use a loop or a multicall to fetch all tokens.
-  // For this demo, we'll just try to fetch the first few if balance exists.
-  // A better approach in production is using an Indexer (The Graph) or an API.
-  // Here we will just mock fetching the first token if balance > 0 for demonstration of the pattern.
-
-  const { data: firstTokenId } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "tokenOfOwnerByIndex",
-    args: address && balance && Number(balance) > 0 ? [address, BigInt(0)] : undefined,
-  });
-
-  const { data: firstTokenURI } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "tokenURI",
-    args: firstTokenId !== undefined ? [firstTokenId] : undefined,
-  });
-
-  useEffect(() => {
-    if (firstTokenURI) {
-      setTokens([firstTokenURI]);
-    }
-  }, [firstTokenURI]);
-
-  if (!address || !balance || Number(balance) === 0) {
-    return null;
-  }
-
-  return (
-    <div className={styles.galleryContainer}>
-      <h3 className={styles.galleryTitle}>MY CONNECTIONS</h3>
-      <div className={styles.galleryGrid}>
-        {tokens.map((uri, i) => (
-          <div key={i} className={styles.galleryItem}>
-            {/* Handling IPFS or direct URLs. For this demo we assume http/https */}
-            <Image src={uri} alt={`Connection ${i}`} width={100} height={100} className={styles.galleryImage} />
-          </div>
-        ))}
-        {Number(balance) > tokens.length && (
-          <div className={styles.moreCount}>+{Number(balance) - tokens.length} more</div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export default function ProfilePage() {
@@ -295,6 +211,7 @@ export default function ProfilePage() {
     >
       <motion.h1 className={styles.title}>MY IDENTITY<span className={styles.dot}>.</span></motion.h1>
 
+      {/* 1. Identity Card */}
       <motion.div
         className={styles.cardContainer}
         style={{ rotateX, rotateY, z: 100 }}
@@ -305,6 +222,16 @@ export default function ProfilePage() {
           <div className={styles.cardAccent}></div>
 
           <div className={styles.cardHeader}>
+            {/* Back Button */}
+            <button
+              className={styles.backButton}
+              onClick={() => window.history.back()}
+              aria-label="Go Back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
             <div className={styles.chip}></div>
             <div className={styles.baseLogo}>
               <Image src="/base-logo.svg" alt="Base" width={28} height={28} />
@@ -334,8 +261,7 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
-      <Gallery />
-
+      {/* 2. Share / Edit Actions / Nearby Events */}
       <div className={styles.actionButtons}>
         <button className={styles.button} onClick={() => setIsEditing(true)}>
           EDIT IDENTITY
@@ -344,7 +270,33 @@ export default function ProfilePage() {
         <button className={styles.secondaryButton} onClick={() => setShowShare(true)}>
           SHARE CARD
         </button>
+
+        <button
+          className={styles.nearbyButton}
+          onClick={() => alert("Coming Soon!")}
+        >
+          NEARBY EVENTS (Coming Soon)
+        </button>
       </div>
+
+      {/* 3. Minted SBTs (Gallery) */}
+      <div className={styles.sectionDivider} />
+      <div className={styles.galleryContainer}>
+        <h3 className={styles.galleryTitle}>MINTED CONNECTIONS</h3>
+        <div className={styles.emptyState}>
+          Minting is currently paused. Check back soon.
+        </div>
+      </div>
+
+      {/* 4. Attended Events */}
+      <div className={styles.sectionDivider} />
+      <div className={styles.galleryContainer}>
+        <h3 className={styles.galleryTitle}>ATTENDED EVENTS</h3>
+        <div className={styles.emptyState}>
+          No events attended yet.
+        </div>
+      </div>
+
     </motion.div>
   );
 }

@@ -78,6 +78,22 @@
   opacity: 0.8;
 }
 
+.backButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.backButton:hover {
+  transform: translateX(-2px);
+}
+
 .baseLogo {
   color: white;
   display: flex;
@@ -306,4 +322,59 @@
   border: none;
   width: 40px;
   cursor: pointer;
+}
+
+.sectionDivider {
+  width: 100%;
+  max-width: 400px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 2rem 0;
+}
+
+.galleryContainer {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.galleryTitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.emptyState {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.nearbyButton {
+  width: 100%;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: not-allowed;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.nearbyButton:hover {
+  border-color: var(--base-blue);
+  color: var(--base-blue);
 }
