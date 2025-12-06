@@ -35,14 +35,20 @@ export default function ProfilePage() {
   const [showShare, setShowShare] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
 
-  // Construct dynamic share URL
+  // Construct dynamic share URL with embedded data (since we have no backend)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Use address if available, otherwise fallback to /profile
       const identifier = address || "profile";
-      setShareUrl(`${window.location.origin}/${identifier}`);
+      const baseUrl = `${window.location.origin}/${identifier}`;
+
+      // Embed simple data in URL to survive browser transitions
+      const params = new URLSearchParams();
+      if (profile.name) params.set("name", profile.name);
+      if (profile.bio) params.set("bio", profile.bio);
+
+      setShareUrl(`${baseUrl}?${params.toString()}`);
     }
-  }, [address]);
+  }, [address, profile.name, profile.bio]);
 
   // 3D Tilt Logic
   const x = useMotionValue(0);

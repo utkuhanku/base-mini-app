@@ -4,7 +4,13 @@ import Image from "next/image";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import styles from "./publicProfile.module.css";
 
+import { useSearchParams } from "next/navigation";
+
 export default function PublicProfileUI({ basename }: { basename: string }) {
+    const searchParams = useSearchParams();
+    const sharedName = searchParams.get("name");
+    const sharedBio = searchParams.get("bio");
+
     // 3D Tilt Logic
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -51,13 +57,17 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                     </div>
                     <div className={styles.cardBody}>
                         {/* Placeholder for now since we can't fetch profile pic yet */}
-                        <div className={styles.cardProfilePlaceholder}>{basename.charAt(0).toUpperCase()}</div>
+                        <div className={styles.cardProfilePlaceholder}>
+                            {(sharedName || basename).charAt(0).toUpperCase()}
+                        </div>
                         <div className={styles.cardInfo}>
-                            {/* Display Address/Basename as Name for Public View */}
+                            {/* Use Shared Name if available, else fallback to formatted Address */}
                             <h2 className={styles.cardName}>
-                                {basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename}
+                                {sharedName || (basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename)}
                             </h2>
-                            <p className={styles.cardBio}>Onchain Identity</p>
+                            <p className={styles.cardBio}>
+                                {sharedBio || "Onchain Identity"}
+                            </p>
                         </div>
                     </div>
                     <div className={styles.cardFooter}>
