@@ -8,16 +8,21 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: minikitConfig.miniapp.name,
-    description: minikitConfig.miniapp.description,
+    title: "Identity 🔵",
+    description: "Your onchain identity and event history.",
+    openGraph: {
+      title: "Identity 🔵",
+      description: "Your onchain identity and event history.",
+      images: [minikitConfig.miniapp.heroImageUrl],
+    },
     other: {
       "fc:frame": JSON.stringify({
         version: minikitConfig.miniapp.version,
         imageUrl: minikitConfig.miniapp.heroImageUrl,
         button: {
-          title: `Join the ${minikitConfig.miniapp.name} Waitlist`,
+          title: "Identity",
           action: {
-            name: `Launch ${minikitConfig.miniapp.name}`,
+            name: "Open Identity",
             type: "launch_frame",
           },
         },

@@ -27,9 +27,9 @@ export const minikitConfig = {
     primaryCategory: "social",
     tags: ["marketing", "ads", "quickstart", "waitlist"],
     heroImageUrl: `${ROOT_URL}/social-preview.png`,
-    tagline: "Create your Identity.",
-    ogTitle: "Base Mini App",
-    ogDescription: "Join the waitlist",
+    tagline: "Your onchain identity.",
+    ogTitle: "Identity 🔵",
+    ogDescription: "Your onchain identity and event history.",
     ogImageUrl: `${ROOT_URL}/social-preview.png`,
   },
 } as const;
