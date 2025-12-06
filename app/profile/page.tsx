@@ -147,19 +147,58 @@ export default function ProfilePage() {
               accept="image/*"
               className={styles.input}
               style={{ paddingTop: '0.8rem' }}
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Limit size to < 500kb for localStorage safety (basic check)
-                  if (file.size > 500000) {
-                    alert("Image too large! Please choose an image under 500KB.");
-                    return;
+                  try {
+                    // Automatic Image Compression
+                    const compressImage = (file: File): Promise<string> => {
+                      return new Promise((resolve, reject) => {
+                        const img = document.createElement('img');
+                        const reader = new FileReader();
+                        reader.onload = (e) => { img.src = e.target?.result as string; };
+                        reader.onerror = reject;
+
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          let width = img.width;
+                          let height = img.height;
+                          const MAX_SIZE = 800; // Resize to max 800px to save space
+
+                          if (width > height) {
+                            if (width > MAX_SIZE) {
+                              height *= MAX_SIZE / width;
+                              width = MAX_SIZE;
+                            }
+                          } else {
+                            if (height > MAX_SIZE) {
+                              width *= MAX_SIZE / height;
+                              height = MAX_SIZE;
+                            }
+                          }
+
+                          canvas.width = width;
+                          canvas.height = height;
+                          const ctx = canvas.getContext('2d');
+                          if (ctx) {
+                            ctx.drawImage(img, 0, 0, width, height);
+                            // Compress to JPEG at 70% quality
+                            resolve(canvas.toDataURL('image/jpeg', 0.7));
+                          } else {
+                            reject(new Error("Canvas context failed"));
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    };
+
+                    const compressedBase64 = await compressImage(file);
+                    setProfile({ ...profile, profilePicUrl: compressedBase64 });
+
+                  } catch (error) {
+                    console.error("Image compression failed", error);
+                    alert("Failed to process image. Please try another one.");
                   }
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setProfile({ ...profile, profilePicUrl: reader.result as string });
-                  };
-                  reader.readAsDataURL(file);
                 }
               }}
             />
