@@ -6,11 +6,29 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import styles from "./publicProfile.module.css";
 // import { useReadContract } from "wagmi"; // Future integration
 
-// Mock Data for Demo
-const MOCK_EVENTS = [
-    { name: "Base Meetup Istanbul", date: "2024-10-15", location: "Istanbul, TR" },
-    { name: "ETHGlobal Hackathon", date: "2024-11-12", location: "Bangkok, TH" },
-];
+import { Metadata } from 'next';
+
+type Props = {
+    params: Promise<{ basename: string }>
+}
+
+export async function generateMetadata(
+    { params }: Props
+): Promise<Metadata> {
+    // read route params
+    const { basename } = await params;
+    const decodedName = decodeURIComponent(basename);
+
+    return {
+        title: `${decodedName} | Identity`,
+        description: `Check out ${decodedName}'s Onchain Identity.`,
+        openGraph: {
+            title: `${decodedName} | Identity`,
+            description: `Check out ${decodedName}'s Onchain Identity.`,
+            images: [`/api/og?name=${encodeURIComponent(decodedName)}`],
+        },
+    };
+}
 
 const MOCK_POAPS = [
     { id: 1, image: "https://placehold.co/100x100/4F46E5/FFFFFF/png?text=POAP+1", name: "Early Adopter" },

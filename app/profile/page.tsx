@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-// import { useAccount, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
 import styles from "./profile.module.css";
 
 // const CONTRACT_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
@@ -24,6 +24,7 @@ interface Profile {
 
 export default function ProfilePage() {
   const { context } = useMiniKit();
+  const { address } = useAccount(); // Get connected wallet address
   const [profile, setProfile] = useState<Profile>({
     name: "",
     bio: "",
@@ -32,6 +33,16 @@ export default function ProfilePage() {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+
+  // Construct dynamic share URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Use address if available, otherwise fallback to /profile
+      const identifier = address || "profile";
+      setShareUrl(`${window.location.origin}/${identifier}`);
+    }
+  }, [address]);
 
   // 3D Tilt Logic
   const x = useMotionValue(0);
@@ -79,7 +90,7 @@ export default function ProfilePage() {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(shareUrl || window.location.href);
     alert("Profile link copied!");
   };
 
@@ -108,7 +119,7 @@ export default function ProfilePage() {
         <div className={styles.shareCard}>
           <div className={styles.qrContainer}>
             <QRCodeSVG
-              value={typeof window !== 'undefined' ? window.location.href : ""}
+              value={shareUrl || ""}
               size={200}
               bgColor="#FFFFFF"
               fgColor="#000000"
@@ -329,7 +340,7 @@ export default function ProfilePage() {
           style={{ background: '#4c2a9c', border: 'none' }} // Warpcast Purple
           onClick={() => {
             const text = encodeURIComponent('Create your Identity. with me 🟦');
-            const url = encodeURIComponent(window.location.href);
+            const url = encodeURIComponent(shareUrl || window.location.href);
             // Ideally this should link to the public profile, but current URL is a good fallback for now
             const warpcastUrl = `https://warpcast.com/~/compose?text=${text}&embeds[]=${url}`;
             window.open(warpcastUrl, '_blank');
