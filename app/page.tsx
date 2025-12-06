@@ -16,12 +16,14 @@ import {
 } from '@coinbase/onchainkit/identity';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAccount } from "wagmi";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const router = useRouter();
   const { context } = useMiniKit();
   const { address, isConnected: wagmiConnected } = useAccount();
   const [isConnected, setIsConnected] = useState(false);
