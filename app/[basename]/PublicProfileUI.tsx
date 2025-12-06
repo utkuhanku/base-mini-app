@@ -40,6 +40,16 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
         y.set(0);
     };
 
+    // Deterministic Variant Logic (Reused)
+    const getCardVariant = (seed: string) => {
+        if (!seed) return "variantClassic";
+        const sum = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const variants = ["variantClassic", "variantAurora", "variantMidnight", "variantDot", "variantBlue"];
+        return variants[sum % variants.length];
+    };
+
+    const cardVariant = getCardVariant(basename);
+
     return (
         <div className={styles.container}>
             {/* Header Title */}
@@ -56,7 +66,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className={styles.businessCard}>
+                <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
                     <div className={styles.cardAccent}></div>
                     <div className={styles.cardHeader}>
                         <div className={styles.chip}></div>

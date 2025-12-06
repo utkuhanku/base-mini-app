@@ -288,6 +288,17 @@ export default function ProfilePage() {
     );
   }
 
+  // Deterministic Variant Logic
+  const getCardVariant = (addr: string | undefined) => {
+    if (!addr) return "variantClassic";
+    // Simple hash: sum of char codes
+    const sum = addr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const variants = ["variantClassic", "variantAurora", "variantMidnight", "variantDot", "variantBlue"];
+    return variants[sum % variants.length];
+  };
+
+  const cardVariant = getCardVariant(address); // Assuming 'address' is available in scope
+
   return (
     <motion.div
       className={styles.container}
@@ -303,7 +314,7 @@ export default function ProfilePage() {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={styles.businessCard}>
+        <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
           <div className={styles.cardAccent}></div>
 
           <div className={styles.cardHeader}>

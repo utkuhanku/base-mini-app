@@ -38,6 +38,7 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  /* Default/Classic */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem;
@@ -49,7 +50,43 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: background 0.3s ease;
 }
+
+/* --- DETEMINISTIC VARIANTS --- */
+/* 1. Classic (Default) - Kept in base class or explicitly: */
+.variantClassic {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+}
+
+/* 2. Blue Aurora: Strong blue glow from top-right */
+.variantAurora {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(0, 82, 255, 0.5) 0%, transparent 50%),
+    linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+}
+
+/* 3. Midnight: Deep Royal Blue */
+.variantMidnight {
+  background: linear-gradient(180deg, #001040 0%, #000000 100%);
+  border-color: rgba(0, 82, 255, 0.2);
+}
+
+/* 4. Base Dot: A technical dotted pattern */
+.variantDot {
+  background-color: #0a0a0a;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 5. Blue Wash: A bolder, brighter blue card */
+.variantBlue {
+  background: linear-gradient(135deg, #0052FF 0%, #003399 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* For Blue variant, text needs to be white/distinct. Base styles handle white text well. */
+
 
 /* Base Blue Accent Curve */
 .cardAccent {
