@@ -89,7 +89,14 @@ export default function ProfilePage() {
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         try {
-          setProfile(JSON.parse(savedProfile));
+          const parsed = JSON.parse(savedProfile);
+          // FORCE contract truth: If we are here, we have no onchain card.
+          // So we treat local data as DRAFT only.
+          setProfile({
+            ...parsed,
+            isPublished: false,
+            txHash: undefined
+          });
         } catch (e) {
           console.error("Failed to parse profile from local storage", e);
           localStorage.removeItem("userProfile");
