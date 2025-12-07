@@ -182,46 +182,37 @@ export default function Home() {
           </motion.div>
         ) : (
           <div className={styles.menu}>
-            {/* All main menu items enabled when wallet is connected */}
+            {/* My Profile */}
             <Link href="/profile" style={{ textDecoration: 'none' }}>
               <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>👤</div>
+                <div className={styles.menuIcon}>🪪</div>
                 <div className={styles.menuText}>
-                  <h3>My Profile</h3>
-                  <p>Manage your onchain identity</p>
+                  <h3>My Identity</h3>
+                  <p>View & Share Card</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
             </Link>
 
-            <Link href="/explore" style={{ textDecoration: 'none' }}>
-              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>🔍</div>
-                <div className={styles.menuText}>
-                  <h3>Explore</h3>
-                  <p>Find others in the ecosystem</p>
-                </div>
-                <div className={styles.arrow}>→</div>
-              </motion.div>
-            </Link>
-
+            {/* Global Feed */}
             <Link href="/feed" style={{ textDecoration: 'none' }}>
               <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>🌍</div>
+                <div className={styles.menuIcon}>🌐</div>
                 <div className={styles.menuText}>
-                  <h3>Global Feed</h3>
-                  <p>Live activity & updates</p>
+                  <h3>Community Feed</h3>
+                  <p>Explore Global Profiles</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
             </Link>
 
+            {/* Connection Minting */}
             <Link href="/connect" style={{ textDecoration: 'none' }}>
               <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
                 <div className={styles.menuIcon}>🤝</div>
                 <div className={styles.menuText}>
                   <h3>Mint Connection</h3>
-                  <p>Create an immutable bond</p>
+                  <p>Bond with others</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>

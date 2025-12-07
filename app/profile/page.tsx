@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import MintButton from "./MintButton";
 import styles from "./profile.module.css";
+import { parseAbi } from "viem";
 
-// const CONTRACT_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-// const ABI = ...
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSBTAddress";
 
 interface Link {
   title: string;
@@ -43,6 +43,65 @@ export default function ProfilePage() {
   const [showPublishModal, setShowPublishModal] = useState(false); // New Modal state
   const [shareUrl, setShareUrl] = useState("");
 
+  // CHECK IF USER HAS A CARD
+  const { data: cardTokenId } = useReadContract({
+    address: CARD_SBT_ADDRESS as `0x${string}`,
+    abi: parseAbi(["function cardOf(address owner) view returns (uint256)"]),
+    functionName: 'cardOf',
+    args: [address!],
+    query: {
+      enabled: !!address,
+    }
+  });
+
+  const hasCard = cardTokenId && Number(cardTokenId) > 0;
+
+  // READ CARD PROFILE IF EXISTS
+  const { data: cardData } = useReadContract({
+    address: CARD_SBT_ADDRESS as `0x${string}`,
+    abi: parseAbi([
+      "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
+      "function profiles(uint256) view returns (Profile)"
+    ]),
+    functionName: 'profiles',
+    args: [cardTokenId!],
+    query: {
+      enabled: !!hasCard,
+    }
+  });
+
+  // Load from chain if available, else local
+  useEffect(() => {
+    if (hasCard && cardData) {
+      // Parse on-chain data
+      // For simplicity assuming direct mapping. Socials/Websites might need JSON parse if we packed them.
+      // But for now, let's just use what we have.
+      const p = cardData as any; // typed as Profile struct
+      setProfile(prev => ({
+        ...prev,
+        name: p.displayName,
+        bio: p.bio,
+        profilePicUrl: p.avatarUrl,
+        isPublished: true,
+        // Links parsing omitted for brevity in this step, easy to add
+      }));
+    } else {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          setProfile(JSON.parse(savedProfile));
+        } catch (e) {
+          console.error("Failed to parse profile from local storage", e);
+          localStorage.removeItem("userProfile");
+        }
+      } else if (context?.user?.displayName) {
+        setProfile(prev => ({ ...prev, name: context.user.displayName || "" }));
+        setIsEditing(true);
+      }
+    }
+  }, [context, hasCard, cardData]);
+
+
   // Construct dynamic share URL with embedded data (since we have no backend)
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -69,21 +128,6 @@ export default function ProfilePage() {
   const rotateX = useTransform(y, [-100, 100], [10, -10]);
   const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
-  useEffect(() => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        setProfile(JSON.parse(savedProfile));
-      } catch (e) {
-        console.error("Failed to parse profile from local storage", e);
-        // Fallback to default or clear invalid data
-        localStorage.removeItem("userProfile");
-      }
-    } else if (context?.user?.displayName) {
-      setProfile(prev => ({ ...prev, name: context.user.displayName || "" }));
-      setIsEditing(true);
-    }
-  }, [context]);
 
   const handleSave = () => {
     localStorage.setItem("userProfile", JSON.stringify(profile));
@@ -333,12 +377,12 @@ export default function ProfilePage() {
               </div>
 
               <h2 className={styles.shareTitle} style={{ fontSize: '1.8rem', letterSpacing: '-1px' }}>
-                {(profile.isPublished || profile.txHash) ? "UPDATE IDENTITY" : "VERIFY IDENTITY"}
+                {(hasCard) ? "UPDATE IDENTITY" : "VERIFY IDENTITY"}
               </h2>
 
               <p className={styles.shareText} style={{ marginBottom: '2rem', lineHeight: '1.5', opacity: 0.8 }}>
-                {(profile.isPublished || profile.txHash)
-                  ? "Your identity is already minted onchain. You can save changes to your profile for free."
+                {(hasCard)
+                  ? "Your identity is minted onchain. Save updates for a small fee."
                   : "Mint your profile to the Base Network. This is a one-time fee for lifetime proof and global visibility."
                 }
               </p>
@@ -346,18 +390,17 @@ export default function ProfilePage() {
               <div style={{ display: 'grid', gap: '16px' }}>
 
                 {/* 1. MINT / UPDATE BUTTON */}
-                {(profile.isPublished || profile.txHash) ? (
+                {(hasCard) ? (
+                  // UPDATE FLOW (TODO: UpdateButton similar to MintButton but for updates)
                   <button
                     className={styles.button}
                     onClick={() => {
-                      // Free Update
-                      localStorage.setItem("userProfile", JSON.stringify(profile));
-                      setIsEditing(false);
-                      setShowPublishModal(false);
-                      alert("Profile Updated Successfully! (No Gas Fee)");
+                      // Placeholder for update
+                      alert("Edit feature coming next. Using local save for now.");
+                      handleSave();
                     }}
                   >
-                    SAVE CHANGES (FREE)
+                    UPDATE CARD ($2.00)
                   </button>
                 ) : (
                   <div style={{ position: 'relative' }}>
@@ -379,7 +422,9 @@ export default function ProfilePage() {
                           txHash: txHash
                         };
                         setProfile(updatedProfile);
+                        // Optimistic update logic
                         localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+
                         setIsEditing(false);
                         setShowPublishModal(false);
                         alert("Success! You are now Verified on Base.");
@@ -472,9 +517,9 @@ export default function ProfilePage() {
               <div className={styles.chip}></div>
 
               {/* Base Logo (Clickable if Minted) */}
-              {profile.txHash ? (
+              {(hasCard || profile.txHash) ? (
                 <a
-                  href={`https://basescan.org/tx/${profile.txHash}`}
+                  href={`https://sepolia.basescan.org/tx/${profile.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.baseLogo}
@@ -482,7 +527,7 @@ export default function ProfilePage() {
                   title="View Transaction on Basescan"
                 >
                   <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
-                  Base <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>↗</span>
+                  Verified <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>↗</span>
                 </a>
               ) : (
                 <div className={styles.baseLogo}>
@@ -546,84 +591,14 @@ export default function ProfilePage() {
         </button>
 
         <button className={styles.button} onClick={() => setIsEditing(true)}>
-          EDIT IDENTITY
+          {hasCard ? "EDIT ONCHAIN CARD" : "EDIT IDENTITY"}
         </button>
 
         <button className={styles.secondaryButton} onClick={() => setShowShare(true)}>
           SHARE CARD
         </button>
 
-        <button
-          className={styles.nearbyButton}
-          onClick={() => alert("Coming Soon!")}
-        >
-          NEARBY EVENTS (Coming Soon)
-        </button>
       </div>
-
-      {/* 3. Minted SBTs (Gallery) */}
-      <div className={styles.sectionDivider} />
-      <div className={styles.galleryContainer}>
-        <h3 className={styles.galleryTitle}>MINTED CONNECTIONS</h3>
-        <div className={styles.emptyState}>
-          Minting is currently paused. Check back soon.
-        </div>
-      </div>
-
-      {/* 4. Attended Events */}
-      <div className={styles.sectionDivider} />
-      <div className={styles.galleryContainer}>
-        <h3 className={styles.galleryTitle}>ATTENDED EVENTS</h3>
-        <div className={styles.emptyState}>
-          No events attended yet.
-        </div>
-      </div>
-
-      {/* PUBLISH MODAL */}
-      {showPublishModal && (
-        <div className={styles.shareOverlay}>
-          <div className={styles.shareModal}>
-            <h2 className={styles.shareTitle}>PUBLISH IDENTITY</h2>
-            <p className={styles.shareText} style={{ marginBottom: '1.5rem', opacity: 0.8 }}>
-              How would you like to save your identity?
-            </p>
-
-            <div style={{ display: 'grid', gap: '12px' }}>
-              <button
-                className={styles.button}
-                style={{ background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)', color: 'black' }}
-                onClick={() => {
-                  // Simulate Onchain Mint
-                  const updatedProfile = { ...profile, isPublished: true };
-                  setProfile(updatedProfile);
-                  localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-                  setIsEditing(false);
-                  setShowPublishModal(false);
-                  alert("Success! Identity Minted & Published to Global Feed (Simulated).");
-                }}
-              >
-                <span style={{ display: 'block', fontWeight: 800 }}>MINT ONCHAIN (0.0002 ETH)</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Visible to everyone • Global Feed • Verified</span>
-              </button>
-
-              <button
-                className={styles.secondaryButton}
-                onClick={() => {
-                  // Local Save
-                  localStorage.setItem("userProfile", JSON.stringify(profile));
-                  setIsEditing(false);
-                  setShowPublishModal(false);
-                  alert("Saved locally. Only visible to you.");
-                }}
-              >
-                SAVE PRIVATELY (FREE)
-              </button>
-            </div>
-            <button style={{ marginTop: '1rem', background: 'transparent', border: 'none', color: '#666' }} onClick={() => setShowPublishModal(false)}>Cancel</button>
-
-          </div>
-        </div>
-      )}
 
     </motion.div>
   );
