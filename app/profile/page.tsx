@@ -601,10 +601,29 @@ export default function ProfilePage() {
 
       {/* 2. Share / Edit Actions / Nearby Events */}
       <div className={styles.actionButtons}>
-        {/* New: Share Post on Warpcast */}
+
+        {/* PRIMARY ACTION */}
+        {!hasCard ? (
+          <button
+            className={styles.button}
+            style={{
+              background: 'linear-gradient(90deg, #0052FF 0%, #4c2a9c 100%)',
+              fontWeight: 'bold',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}
+            onClick={() => setIsEditing(true)}
+          >
+            MINT ONCHAIN ID ➝
+          </button>
+        ) : (
+          <button className={styles.button} onClick={() => setIsEditing(true)}>
+            EDIT ONCHAIN CARD
+          </button>
+        )}
+
+        {/* Share Post on Warpcast */}
         <button
-          className={styles.button}
-          style={{ background: '#4c2a9c', border: 'none' }} // Warpcast Purple
+          className={styles.secondaryButton}
           onClick={() => {
             const text = encodeURIComponent(`Check out my Onchain Identity! 🟦 I am a ${profile.role.toUpperCase()} on Base.`);
             const url = encodeURIComponent(shareUrl || window.location.href);
@@ -612,15 +631,7 @@ export default function ProfilePage() {
             window.open(warpcastUrl, '_blank');
           }}
         >
-          POST IDENTITY
-        </button>
-
-        <button className={styles.button} onClick={() => setIsEditing(true)}>
-          {hasCard ? "EDIT ONCHAIN CARD" : "EDIT IDENTITY"}
-        </button>
-
-        <button className={styles.secondaryButton} onClick={() => setShowShare(true)}>
-          SHARE CARD
+          SHARE / POST
         </button>
 
       </div>
