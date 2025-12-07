@@ -156,26 +156,7 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.baseLogo {
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
 
-/* ... existing code ... */
-
-.roleOption:hover:not(.roleActive):not(.roleActiveGold) {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.textarea {
-  min-height: 100px;
-  resize: none;
-}
 
 .baseLogo {
   color: white;

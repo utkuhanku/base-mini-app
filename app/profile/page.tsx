@@ -311,50 +311,105 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* PUBLISH MODAL */}
+        {/* PULISHING / VERIFICATION MODAL */}
         {showPublishModal && (
           <div className={styles.shareOverlay}>
-            <div className={styles.shareModal}>
-              <h2 className={styles.shareTitle}>PUBLISH IDENTITY</h2>
-              <p className={styles.shareText} style={{ marginBottom: '1.5rem', opacity: 0.8 }}>
-                How would you like to save your identity?
+            <motion.div
+              className={styles.shareModal}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              {/* Header Icon */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <div style={{
+                  width: '60px', height: '60px',
+                  background: '#0052FF',
+                  borderRadius: '12px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 0 40px rgba(0, 82, 255, 0.4)'
+                }}>
+                  <Image src="/base-logo.svg" alt="Base" width={32} height={32} />
+                </div>
+              </div>
+
+              <h2 className={styles.shareTitle} style={{ fontSize: '1.8rem', letterSpacing: '-1px' }}>
+                {(profile.isPublished || profile.txHash) ? "UPDATE IDENTITY" : "VERIFY IDENTITY"}
+              </h2>
+
+              <p className={styles.shareText} style={{ marginBottom: '2rem', lineHeight: '1.5', opacity: 0.8 }}>
+                {(profile.isPublished || profile.txHash)
+                  ? "Your identity is already minted onchain. You can save changes to your profile for free."
+                  : "Mint your profile to the Base Network. This is a one-time fee for lifetime proof and global visibility."
+                }
               </p>
 
-              <div style={{ display: 'grid', gap: '12px' }}>
+              <div style={{ display: 'grid', gap: '16px' }}>
 
-                {/* REAL ONCHAIN PAYMENT */}
-                <MintButton
-                  onMintSuccess={(txHash) => {
-                    // Onchain Success Logic
-                    const updatedProfile = {
-                      ...profile,
-                      isPublished: true,
-                      txHash: txHash
-                    };
-                    setProfile(updatedProfile);
-                    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-                    setIsEditing(false);
-                    setShowPublishModal(false);
-                    alert(" Payment Received! Your Identity is now Minted & Live on the Global Feed.");
-                  }}
-                />
+                {/* 1. MINT / UPDATE BUTTON */}
+                {(profile.isPublished || profile.txHash) ? (
+                  <button
+                    className={styles.button}
+                    onClick={() => {
+                      // Free Update
+                      localStorage.setItem("userProfile", JSON.stringify(profile));
+                      setIsEditing(false);
+                      setShowPublishModal(false);
+                      alert("Profile Updated Successfully! (No Gas Fee)");
+                    }}
+                  >
+                    SAVE CHANGES (FREE)
+                  </button>
+                ) : (
+                  <div style={{ position: 'relative' }}>
+                    {/* One Time Badge */}
+                    <div style={{
+                      position: 'absolute', top: '-10px', right: '-5px',
+                      background: '#FFD700', color: 'black',
+                      fontSize: '0.6rem', fontWeight: 800,
+                      padding: '2px 6px', borderRadius: '4px',
+                      zIndex: 10, transform: 'rotate(5deg)'
+                    }}>
+                      ONE-TIME FEE
+                    </div>
+                    <MintButton
+                      onMintSuccess={(txHash) => {
+                        const updatedProfile = {
+                          ...profile,
+                          isPublished: true,
+                          txHash: txHash
+                        };
+                        setProfile(updatedProfile);
+                        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+                        setIsEditing(false);
+                        setShowPublishModal(false);
+                        alert("Success! You are now Verified on Base.");
+                      }}
+                    />
+                  </div>
+                )}
 
-                <button
-                  className={styles.secondaryButton}
-                  onClick={() => {
-                    // Local Save
-                    localStorage.setItem("userProfile", JSON.stringify(profile));
-                    setIsEditing(false);
-                    setShowPublishModal(false);
-                    alert("Saved locally. Only visible to you.");
-                  }}
-                >
-                  SAVE PRIVATELY (FREE)
-                </button>
+                {/* 2. SECONDARY ACTION */}
+                {!(profile.isPublished || profile.txHash) && (
+                  <button
+                    className={styles.secondaryButton}
+                    style={{ border: 'none', fontSize: '0.9rem', opacity: 0.6 }}
+                    onClick={() => {
+                      localStorage.setItem("userProfile", JSON.stringify(profile));
+                      setIsEditing(false);
+                      setShowPublishModal(false);
+                      alert("Saved locally. Only visible to you.");
+                    }}
+                  >
+                    Save as Draft (Private)
+                  </button>
+                )}
               </div>
-              <button style={{ marginTop: '1rem', background: 'transparent', border: 'none', color: '#666' }} onClick={() => setShowPublishModal(false)}>Cancel</button>
 
-            </div>
+              <button style={{ marginTop: '1.5rem', background: 'transparent', border: 'none', color: '#666', fontSize: '0.9rem' }} onClick={() => setShowPublishModal(false)}>
+                Cancel
+              </button>
+
+            </motion.div>
           </div>
         )}
 
