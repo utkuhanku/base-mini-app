@@ -360,15 +360,13 @@ export default function ProfilePage() {
 
           <div className={styles.cardFooter}>
             <div className={styles.cardQr}>
-              <div className={styles.cardQr}>
-                <QRCodeSVG
-                  value={deepLink || (typeof window !== "undefined" ? window.location.href : "https://base.org")}
-                  size={40}
-                  bgColor="#ffffff"
-                  fgColor="#000000"
-                  level="L"
-                />
-              </div>
+              <QRCodeSVG
+                value={deepLink || (typeof window !== "undefined" ? window.location.href : "https://base.org")}
+                size={40}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="L"
+              />
             </div>
             {profile.links.map((link, i) => (
               <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>

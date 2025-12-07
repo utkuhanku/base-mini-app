@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import styles from "./publicProfile.module.css";
@@ -53,6 +54,35 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     // Deterministic Score
     const score = (basename.length * 42) % 1000 + 100;
 
+    // Check Local Storage for self-viewing (Simulating persistence for the owner)
+    const [localProfile, setLocalProfile] = useState<{ name: string, bio: string, profilePicUrl: string, links: any[] } | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem("userProfile");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Standardize comparison: strict casing or insensitive?
+                    // User might search "Utkus" but saved as "utkus".
+                    if (parsed.name && parsed.name.toLowerCase() === basename.toLowerCase()) {
+                        setLocalProfile(parsed);
+                    }
+                } catch (e) {
+                    console.error("Error parsing local profile", e);
+                }
+            }
+        }
+    }, [basename]);
+
+    // Priority: URL Params (Shared) > Local Storage (Self) > Defaults
+    const displayProfile = {
+        name: sharedName || localProfile?.name || (basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename),
+        bio: sharedBio || localProfile?.bio || "Onchain Identity",
+        pic: localProfile?.profilePicUrl || "", // URL params typically don't carry full base64 images, so we only use local or empty
+        links: sharedLinks.length > 0 ? sharedLinks : (localProfile?.links || [])
+    };
+
     return (
         <div className={styles.container}>
             {/* Header Title */}
@@ -87,24 +117,27 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                         </div>
                     </div>
                     <div className={styles.cardBody}>
-                        {/* Placeholder for now since we can't fetch profile pic yet */}
-                        <div className={styles.cardProfilePlaceholder}>
-                            {(sharedName || basename).charAt(0).toUpperCase()}
-                        </div>
+                        {displayProfile.pic ? (
+                            <Image src={displayProfile.pic} alt="Profile" width={60} height={60} className={styles.cardProfilePic} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.2)' }} />
+                        ) : (
+                            <div className={styles.cardProfilePlaceholder}>
+                                {displayProfile.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+
                         <div className={styles.cardInfo}>
-                            {/* Use Shared Name if available, else fallback to formatted Address */}
                             <h2 className={styles.cardName}>
-                                {sharedName || (basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename)}
+                                {displayProfile.name}
                             </h2>
                             <p className={styles.cardBio}>
-                                {sharedBio || "Onchain Identity"}
+                                {displayProfile.bio}
                             </p>
                         </div>
                     </div>
                     <div className={styles.cardFooter}>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginRight: '50px' }}>
-                            {sharedLinks.length > 0 ? (
-                                sharedLinks.map((link, i) => (
+                            {displayProfile.links.length > 0 ? (
+                                displayProfile.links.map((link: any, i: number) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
                                         {link.title} ↗
                                     </a>
@@ -117,7 +150,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                         </div>
                         <div className={styles.cardQr}>
                             <QRCodeSVG
-                                value={`https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`}
+                                value={`https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                                 size={36}
                                 bgColor="#ffffff"
                                 fgColor="#000000"
