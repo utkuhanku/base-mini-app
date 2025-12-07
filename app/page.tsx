@@ -115,67 +115,53 @@ export default function Home() {
 
   if (isLoadingAuth) {
     return (
-      <div className={styles.container} style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <div className={styles.container} style={{ justifyContent: 'center' }}>
         <div className={styles.loader} />
-        <p>Verifying Identity...</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Verifying Identity...</p>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.marqueeContainer}>
-        <motion.div
-          className={styles.marquee}
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, ease: "linear", duration: 15 }}
-        >
-          <span>
-            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '12px' }} />
-            BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
-            BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
-            BASE IS FOR EVERYONE &nbsp;•&nbsp;
-            <Image src="/base-logo.svg" alt="Base" width={24} height={24} style={{ display: 'inline-block', verticalAlign: 'middle', margin: '0 12px' }} />
-            BASE IS FOR EVERYONE &nbsp;•&nbsp;
-          </span>
-        </motion.div>
-      </div>
-
       <motion.div
         className={styles.content}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants} style={{ marginBottom: '1rem', opacity: 0.6 }}>
-          <Image src="/base-logo.svg" alt="Base" width={48} height={48} />
-        </motion.div>
+        <div className={styles.heroHeader}>
+          <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ background: '#0052FF', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Image src="/base-logo.svg" alt="Base" width={20} height={20} style={{ filter: 'brightness(0) invert(1)' }} />
+            </div>
+            <span style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '1px', color: 'var(--base-blue)', textTransform: 'uppercase' }}>On Base</span>
+          </motion.div>
 
-        <motion.h1 className={styles.title} variants={itemVariants}>
-          IDENTITY<span className={styles.dot}>.</span>
-        </motion.h1>
+          <motion.h1 className={styles.title} variants={itemVariants}>
+            IDENTITY<span className={styles.dot}>.</span>
+          </motion.h1>
 
-        {isAuthenticated ? (
-          <motion.p className={styles.subtitle} variants={itemVariants}>
-            Welcome, FID: {fid}
-          </motion.p>
-        ) : (
-          <motion.p className={styles.subtitle} variants={itemVariants}>
-            Guest User
-          </motion.p>
-        )}
+          {isAuthenticated ? (
+            <motion.p className={styles.subtitle} variants={itemVariants}>
+              <span className={styles.highlight}>Authorized</span> • FID {fid}
+            </motion.p>
+          ) : (
+            <motion.p className={styles.subtitle} variants={itemVariants}>
+              Please authenticate to access your profile.
+            </motion.p>
+          )}
+        </div>
 
         {/* If auth error, show it */}
-        {authError && <p style={{ color: 'red', marginBottom: '1rem' }}>{authError}</p>}
+        {authError && <p style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{authError}</p>}
 
         {!isWalletConnected ? (
           <motion.div variants={itemVariants} className={styles.connectPrompt}>
-            <p style={{ marginBottom: '1rem' }}>Please connect your wallet to continue.</p>
+            <p>Connect your wallet to mint and explore.</p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Wallet>
-                <ConnectWallet>
+                <ConnectWallet className={styles.connectButtonOverride}>
                   <Avatar className="h-6 w-6" />
                   <Name />
                 </ConnectWallet>
@@ -198,64 +184,44 @@ export default function Home() {
           <div className={styles.menu}>
             {/* All main menu items enabled when wallet is connected */}
             <Link href="/profile" style={{ textDecoration: 'none' }}>
-              <motion.div
-                className={styles.menuItem}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
                 <div className={styles.menuIcon}>👤</div>
                 <div className={styles.menuText}>
                   <h3>My Profile</h3>
-                  <p>Manage your digital identity</p>
+                  <p>Manage your onchain identity</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
             </Link>
 
             <Link href="/explore" style={{ textDecoration: 'none' }}>
-              <motion.div
-                className={styles.menuItem}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
                 <div className={styles.menuIcon}>🔍</div>
                 <div className={styles.menuText}>
                   <h3>Explore</h3>
-                  <p>Find others on Base</p>
+                  <p>Find others in the ecosystem</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
             </Link>
 
             <Link href="/feed" style={{ textDecoration: 'none' }}>
-              <motion.div
-                className={styles.menuItem}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
                 <div className={styles.menuIcon}>🌍</div>
                 <div className={styles.menuText}>
                   <h3>Global Feed</h3>
-                  <p>Discover & Connect</p>
+                  <p>Live activity & updates</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
             </Link>
 
             <Link href="/connect" style={{ textDecoration: 'none' }}>
-              <motion.div
-                className={styles.menuItem}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
                 <div className={styles.menuIcon}>🤝</div>
                 <div className={styles.menuText}>
                   <h3>Mint Connection</h3>
-                  <p>Establish a new bond</p>
+                  <p>Create an immutable bond</p>
                 </div>
                 <div className={styles.arrow}>→</div>
               </motion.div>
@@ -263,6 +229,27 @@ export default function Home() {
           </div>
         )}
       </motion.div>
+
+      {/* Marquee at bottom for 'Financial Ticker' feel */}
+      <div className={styles.marqueeContainer}>
+        <motion.div
+          className={styles.marquee}
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+        >
+          <span>
+            BASE IS FOR EVERYONE &nbsp;//&nbsp;
+            BUILD ONCHAIN &nbsp;//&nbsp;
+            STAY BASED &nbsp;//&nbsp;
+            BASE IS FOR EVERYONE &nbsp;//&nbsp;
+            BUILD ONCHAIN &nbsp;//&nbsp;
+            STAY BASED &nbsp;//&nbsp;
+            BASE IS FOR EVERYONE &nbsp;//&nbsp;
+            BUILD ONCHAIN &nbsp;//&nbsp;
+            STAY BASED &nbsp;//&nbsp;
+          </span>
+        </motion.div>
+      </div>
     </div>
   );
 }

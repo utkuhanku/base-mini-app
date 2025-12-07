@@ -1,0 +1,49 @@
+.headerWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: var(--space-4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    width: 100%;
+    pointer-events: none;
+    /* Let clicks pass through empty space */
+}
+
+.headerContainer {
+    pointer-events: auto;
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    /* Tight padding like a pill */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Override OnchainKit Wallet styles if possible, or wrap them */
+/* Using generic class matching or specificity if OnchainKit allows className props */
+
+/* Since OnchainKit styles are internal, we mostly style the container. 
+   However, we can apply some resets or overrides if needed. */
+
+.connectButton {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    transition: background 0.2s var(--ease-apple);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.connectButton:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
