@@ -1,4 +1,5 @@
 "use client";
+import sdk from "@farcaster/miniapp-sdk";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import {
   ConnectWallet,
@@ -17,23 +18,77 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAccount } from "wagmi";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
-  const { context } = useMiniKit();
+  const { context } = useMiniKit(); // Keep for legacy/context access if needed
   const { address, isConnected: wagmiConnected } = useAccount();
-  const [isConnected, setIsConnected] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+
+  // Quick Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [fid, setFid] = useState<number | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // 1. Perform Quick Auth on Mount
+  useEffect(() => {
+    const authenticate = async () => {
+      setIsLoadingAuth(true);
+      setAuthError(null);
+      try {
+        // Ensure SDK is ready (optional but good practice)
+        // await sdk.actions.ready(); 
+
+        // Get nonce/token from Farcaster
+        const result = await sdk.quickAuth.getToken();
+        if (!result) {
+          // Not in a frame or failed to get token
+          setIsLoadingAuth(false);
+          return;
+        }
+
+        // Verify with our backend
+        // We use sdk.quickAuth.fetch to automatically include the token in headers if supported, 
+        // OR we manually attach it. 
+        // Docs say sdk.quickAuth.fetch wraps generic fetch but auto-adds auth? 
+        // Actually, if we already have the token, we can just use standard fetch with header 
+        // OR use the result.token. 
+        // Wait, standard pattern: use the token we just got.
+
+        // Let's use standard fetch with the token we got, to be safe and explicit.
+        const response = await fetch("/api/auth", {
+          headers: {
+            'Authorization': `Bearer ${result.token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to verify authentication");
+        }
+
+        const data = await response.json();
+        if (data.success && data.user?.fid) {
+          setFid(data.user.fid);
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.error("Quick Auth failed:", err);
+        setAuthError("Failed to authenticate with Farcaster.");
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+
+    authenticate();
+  }, []);
 
   useEffect(() => {
-    if (wagmiConnected && address) {
-      setIsConnected(true);
-    } else {
-      setIsConnected(false);
-    }
+    setIsWalletConnected(wagmiConnected && !!address);
   }, [wagmiConnected, address]);
 
   const containerVariants = {
@@ -57,6 +112,15 @@ export default function Home() {
       }
     }
   } as const;
+
+  if (isLoadingAuth) {
+    return (
+      <div className={styles.container} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className={styles.loader} />
+        <p>Verifying Identity...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -93,11 +157,20 @@ export default function Home() {
           IDENTITY<span className={styles.dot}>.</span>
         </motion.h1>
 
-        <motion.p className={styles.subtitle} variants={itemVariants}>
-          Welcome, {context?.user?.displayName || "Guest"}.
-        </motion.p>
+        {isAuthenticated ? (
+          <motion.p className={styles.subtitle} variants={itemVariants}>
+            Welcome, FID: {fid}
+          </motion.p>
+        ) : (
+          <motion.p className={styles.subtitle} variants={itemVariants}>
+            Guest User
+          </motion.p>
+        )}
 
-        {!isConnected ? (
+        {/* If auth error, show it */}
+        {authError && <p style={{ color: 'red', marginBottom: '1rem' }}>{authError}</p>}
+
+        {!isWalletConnected ? (
           <motion.div variants={itemVariants} className={styles.connectPrompt}>
             <p style={{ marginBottom: '1rem' }}>Please connect your wallet to continue.</p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -123,11 +196,12 @@ export default function Home() {
           </motion.div>
         ) : (
           <div className={styles.menu}>
+            {/* All main menu items enabled when wallet is connected */}
             <Link href="/profile" style={{ textDecoration: 'none' }}>
               <motion.div
                 className={styles.menuItem}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className={styles.menuIcon}>👤</div>
@@ -143,7 +217,7 @@ export default function Home() {
               <motion.div
                 className={styles.menuItem}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className={styles.menuIcon}>🔍</div>
@@ -159,7 +233,7 @@ export default function Home() {
               <motion.div
                 className={styles.menuItem}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className={styles.menuIcon}>🌍</div>
@@ -175,7 +249,7 @@ export default function Home() {
               <motion.div
                 className={styles.menuItem}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileHover={{ scale: 1.02, backgroundColor: "var(--accent-glow)" }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className={styles.menuIcon}>🤝</div>

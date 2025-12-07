@@ -2,27 +2,32 @@
 
 :root {
   /* Base Official Colors */
-  --base-blue: #1652F0;
-  --base-blue-dark: #0A2E9C;
-  --base-blue-light: #3D7BFF;
+  --base-blue: #0052FF;
+  --base-blue-dark: #0045D8;
+  --base-blue-light: #4c82ff;
 
   /* Background Colors */
-  --bg-anthracite: #0A0B0D;
-  --bg-card: #1A1B1F;
-  --bg-elevated: #252629;
+  --bg-anthracite: #FFFFFF;
+  /* Base apps are usually clean white */
+  --bg-card: #F5F5F5;
+  --bg-elevated: #FFFFFF;
 
   /* Text Colors */
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0A0A0;
-  --text-tertiary: #6B6B6B;
+  --text-primary: #0A0B0D;
+  --text-secondary: #5B616E;
+  --text-tertiary: #89909E;
 
   /* Border & Accent */
-  --border-color: #2A2B2F;
-  --accent-glow: rgba(22, 82, 240, 0.2);
+  --border-color: #E2E4EB;
+  --accent-glow: rgba(0, 82, 255, 0.1);
 
   /* Fonts - Base Sans (using Outfit as alternative) */
-  --font-base: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Roboto Mono', monospace;
+  --font-base: 'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  --font-mono: 'Roboto Mono',
+    monospace;
 }
 
 * {
@@ -74,4 +79,26 @@ button {
 ::selection {
   background: var(--base-blue-dark);
   color: white;
+}
+
+.loader {
+  border: 4px solid var(--bg-card);
+  /* Light grey */
+  border-top: 4px solid var(--base-blue);
+  /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
