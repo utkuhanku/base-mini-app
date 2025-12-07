@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
@@ -27,7 +27,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const { context } = useMiniKit();
+
   const { address } = useAccount(); // Get connected wallet address
   const [profile, setProfile] = useState<Profile>({
     name: "",
@@ -118,13 +118,9 @@ export default function ProfilePage() {
           console.error("Failed to parse profile from local storage", e);
           localStorage.removeItem("userProfile");
         }
-      } else if (context?.user?.displayName) {
-        // New User with Farcaster Name
-        setProfile(prev => ({ ...prev, name: context.user.displayName || "" }));
-        setIsEditing(true);
       }
     }
-  }, [context, hasCard, cardData, isCardLoading, isProfileLoading]);
+  }, [hasCard, cardData, isCardLoading, isProfileLoading]);
 
 
   // Construct dynamic share URL with embedded data (since we have no backend)

@@ -1,6 +1,6 @@
 "use client";
 import sdk from "@farcaster/miniapp-sdk";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+
 import {
   ConnectWallet,
   Wallet,
@@ -25,7 +25,7 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
-  const { context } = useMiniKit(); // Keep for legacy/context access if needed
+
   const { address, isConnected: wagmiConnected } = useAccount();
   const [isWalletConnected, setIsWalletConnected] = useState(false);
 
