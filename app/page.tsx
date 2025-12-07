@@ -155,6 +155,22 @@ export default function Home() {
               </motion.div>
             </Link>
 
+            <Link href="/feed" style={{ textDecoration: 'none' }}>
+              <motion.div
+                className={styles.menuItem}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 82, 255, 0.1)" }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={styles.menuIcon}>🌍</div>
+                <div className={styles.menuText}>
+                  <h3>Global Feed</h3>
+                  <p>Discover & Connect</p>
+                </div>
+                <div className={styles.arrow}>→</div>
+              </motion.div>
+            </Link>
+
             <Link href="/connect" style={{ textDecoration: 'none' }}>
               <motion.div
                 className={styles.menuItem}

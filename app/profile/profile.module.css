@@ -278,6 +278,81 @@
   font-size: 0.9rem;
 }
 
+/* --- ROLES & THEMES --- */
+
+.roleSwitcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.roleOption {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.roleActive {
+  background: #0052FF;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 82, 255, 0.3);
+}
+
+.roleActiveGold {
+  background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+  color: black;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+}
+
+/* Card Badge */
+.roleBadge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: auto;
+  /* Push to right if in flex */
+}
+
+.badgeTalent {
+  background: rgba(0, 82, 255, 0.2);
+  color: #4da6ff;
+  border: 1px solid rgba(0, 82, 255, 0.3);
+}
+
+.badgeHiring {
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+
+/* Gold Card Variant */
+.variantGold {
+  background: linear-gradient(135deg, #1C190F 0%, #000000 100%);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.variantGold .cardAccent {
+  background: linear-gradient(90deg, #FFD700, transparent);
+}
+
+.variantGold .pointsIcon {
+  color: #FFD700;
+  /* Gold Diamond */
+}
+
 /* Edit Form Styles (reused/adapted) */
 .form,
 .shareCard {

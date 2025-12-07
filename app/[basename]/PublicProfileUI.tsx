@@ -12,6 +12,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     const searchParams = useSearchParams();
     const sharedName = searchParams.get("name");
     const sharedBio = searchParams.get("bio");
+    const sharedRole = searchParams.get("role"); // Read Role
 
     let sharedLinks: { title: string; url: string }[] = [];
     try {
@@ -50,12 +51,8 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
         return variants[sum % variants.length];
     };
 
-    const cardVariant = getCardVariant(basename);
-    // Deterministic Score
-    const score = (basename.length * 42) % 1000 + 100;
-
     // Check Local Storage for self-viewing (Simulating persistence for the owner)
-    const [localProfile, setLocalProfile] = useState<{ name: string, bio: string, profilePicUrl: string, links: any[] } | null>(null);
+    const [localProfile, setLocalProfile] = useState<{ name: string, bio: string, role: string, profilePicUrl: string, links: any[] } | null>(null);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -79,8 +76,21 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     const displayProfile = {
         name: sharedName || localProfile?.name || (basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename),
         bio: sharedBio || localProfile?.bio || "Onchain Identity",
+        role: sharedRole || localProfile?.role || 'creator', // Default to creator
         pic: localProfile?.profilePicUrl || "", // URL params typically don't carry full base64 images, so we only use local or empty
         links: sharedLinks.length > 0 ? sharedLinks : (localProfile?.links || [])
+    };
+
+    // Logic: If BUSINESS, override variant to Gold. Else deterministic.
+    const baseVariant = getCardVariant(basename);
+    const finalVariant = displayProfile.role === 'business' ? "variantGold" : baseVariant;
+
+    // Placeholder for score, as it's used in JSX but not defined in the provided snippet
+    const score = 100; // You might want to replace this with actual score logic
+
+    const handleDM = () => {
+        // Deep link to Coinbase Wallet Messaging
+        window.location.href = `https://go.cb-w.com/messaging?address=${basename}`;
     };
 
     return (
@@ -99,10 +109,10 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
+                <div className={`${styles.businessCard} ${styles[finalVariant]}`}>
                     {/* Points Badge */}
                     <div className={styles.pointsBadge}>
-                        <span style={{ color: '#0052FF' }}>💎</span>
+                        <span style={{ color: displayProfile.role === 'business' ? '#FFD700' : '#0052FF' }}>💎</span>
                         {score}
                     </div>
 
@@ -113,6 +123,10 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                             <div className={styles.baseLogo}>
                                 <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
                                 Base
+                            </div>
+                            {/* Role Badge */}
+                            <div className={`${styles.roleBadge} ${displayProfile.role === 'business' ? styles.badgeHiring : styles.badgeTalent}`}>
+                                {displayProfile.role}
                             </div>
                         </div>
                     </div>
@@ -135,7 +149,29 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                         </div>
                     </div>
                     <div className={styles.cardFooter}>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginRight: '50px' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginRight: '40px', alignItems: 'center' }}>
+                            {/* DM BUTTON */}
+                            <button
+                                onClick={handleDM}
+                                style={{
+                                    background: 'rgba(255,255,255,0.2)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: 'white'
+                                }}
+                                title="Send DM"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+
                             {displayProfile.links.length > 0 ? (
                                 displayProfile.links.map((link: any, i: number) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>

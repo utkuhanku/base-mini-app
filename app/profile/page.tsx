@@ -18,8 +18,10 @@ interface Link {
 interface Profile {
   name: string;
   bio: string;
+  role: 'creator' | 'business';
   profilePicUrl: string;
   links: Link[];
+  isPublished?: boolean; // Track if onchain
 }
 
 export default function ProfilePage() {
@@ -28,11 +30,14 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>({
     name: "",
     bio: "",
+    role: "creator", // Default
     profilePicUrl: "",
     links: [],
+    isPublished: false
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false); // New Modal state
   const [shareUrl, setShareUrl] = useState("");
 
   // Construct dynamic share URL with embedded data (since we have no backend)
@@ -45,6 +50,7 @@ export default function ProfilePage() {
       const params = new URLSearchParams();
       if (profile.name) params.set("name", profile.name);
       if (profile.bio) params.set("bio", profile.bio);
+      if (profile.role) params.set("role", profile.role);
       if (profile.links && profile.links.length > 0) {
         params.set("links", JSON.stringify(profile.links));
       }
@@ -164,6 +170,22 @@ export default function ProfilePage() {
         <motion.h1 className={styles.title}>EDIT ID<span className={styles.dot}>.</span></motion.h1>
 
         <div className={styles.form}>
+          {/* Role Switcher */}
+          <div className={styles.roleSwitcher}>
+            <button
+              className={`${styles.roleOption} ${profile.role === 'creator' ? styles.roleActive : ''}`}
+              onClick={() => setProfile({ ...profile, role: 'creator' })}
+            >
+              CREATOR
+            </button>
+            <button
+              className={`${styles.roleOption} ${profile.role === 'business' ? styles.roleActiveGold : ''}`}
+              onClick={() => setProfile({ ...profile, role: 'business' })}
+            >
+              BUSINESS
+            </button>
+          </div>
+
           <div className={styles.inputGroup}>
             <label className={styles.label}>PROFILE PICTURE</label>
             {/* File Upload Logic */}
@@ -280,10 +302,57 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button className={styles.button} onClick={handleSave}>
-            SAVE CHANGES
+          <button className={styles.button} onClick={() => setShowPublishModal(true)}>
+            REVIEW & SAVE
           </button>
         </div>
+
+        {/* PUBLISH MODAL */}
+        {showPublishModal && (
+          <div className={styles.shareOverlay}>
+            <div className={styles.shareModal}>
+              <h2 className={styles.shareTitle}>PUBLISH IDENTITY</h2>
+              <p className={styles.shareText} style={{ marginBottom: '1.5rem', opacity: 0.8 }}>
+                How would you like to save your identity?
+              </p>
+
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <button
+                  className={styles.button}
+                  style={{ background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)', color: 'black' }}
+                  onClick={() => {
+                    // Simulate Onchain Mint
+                    const updatedProfile = { ...profile, isPublished: true };
+                    setProfile(updatedProfile);
+                    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+                    setIsEditing(false);
+                    setShowPublishModal(false);
+                    alert("Success! Identity Minted & Published to Global Feed (Simulated).");
+                  }}
+                >
+                  <span style={{ display: 'block', fontWeight: 800 }}>MINT ONCHAIN (0.0002 ETH)</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Visible to everyone • Global Feed • Verified</span>
+                </button>
+
+                <button
+                  className={styles.secondaryButton}
+                  onClick={() => {
+                    // Local Save
+                    localStorage.setItem("userProfile", JSON.stringify(profile));
+                    setIsEditing(false);
+                    setShowPublishModal(false);
+                    alert("Saved locally. Only visible to you.");
+                  }}
+                >
+                  SAVE PRIVATELY (FREE)
+                </button>
+              </div>
+              <button style={{ marginTop: '1rem', background: 'transparent', border: 'none', color: '#666' }} onClick={() => setShowPublishModal(false)}>Cancel</button>
+
+            </div>
+          </div>
+        )}
+
       </motion.div>
     );
   }
@@ -297,7 +366,9 @@ export default function ProfilePage() {
     return variants[sum % variants.length];
   };
 
-  const cardVariant = getCardVariant(address); // Assuming 'address' is available in scope
+  // Determine Variant: Gold for Business, else deterministic
+  const baseVariant = getCardVariant(address);
+  const finalVariant = profile.role === 'business' ? 'variantGold' : baseVariant;
 
   // Calculate Score (Deterministic based on address length/hash for now)
   const score = address ? (address.length * 12) + 350 : 100;
@@ -317,10 +388,10 @@ export default function ProfilePage() {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
+        <div className={`${styles.businessCard} ${styles[finalVariant]}`}>
           {/* Points Badge */}
           <div className={styles.pointsBadge}>
-            <span className={styles.pointsIcon}>💎</span>
+            <span style={{ color: profile.role === 'business' ? '#FFD700' : '#0052FF' }}>💎</span>
             {score}
           </div>
 
@@ -342,6 +413,10 @@ export default function ProfilePage() {
               <div className={styles.baseLogo}>
                 <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
                 Base
+              </div>
+              {/* Role Badge */}
+              <div className={`${styles.roleBadge} ${profile.role === 'business' ? styles.badgeHiring : styles.badgeTalent}`}>
+                {profile.role}
               </div>
             </div>
           </div>
@@ -384,9 +459,8 @@ export default function ProfilePage() {
           className={styles.button}
           style={{ background: '#4c2a9c', border: 'none' }} // Warpcast Purple
           onClick={() => {
-            const text = encodeURIComponent('Create your Identity. with me 🟦');
+            const text = encodeURIComponent(`Check out my Onchain Identity! 🟦 I am a ${profile.role.toUpperCase()} on Base.`);
             const url = encodeURIComponent(shareUrl || window.location.href);
-            // Ideally this should link to the public profile, but current URL is a good fallback for now
             const warpcastUrl = `https://warpcast.com/~/compose?text=${text}&embeds[]=${url}`;
             window.open(warpcastUrl, '_blank');
           }}
@@ -427,6 +501,52 @@ export default function ProfilePage() {
           No events attended yet.
         </div>
       </div>
+
+      {/* PUBLISH MODAL */}
+      {showPublishModal && (
+        <div className={styles.shareOverlay}>
+          <div className={styles.shareModal}>
+            <h2 className={styles.shareTitle}>PUBLISH IDENTITY</h2>
+            <p className={styles.shareText} style={{ marginBottom: '1.5rem', opacity: 0.8 }}>
+              How would you like to save your identity?
+            </p>
+
+            <div style={{ display: 'grid', gap: '12px' }}>
+              <button
+                className={styles.button}
+                style={{ background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)', color: 'black' }}
+                onClick={() => {
+                  // Simulate Onchain Mint
+                  const updatedProfile = { ...profile, isPublished: true };
+                  setProfile(updatedProfile);
+                  localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+                  setIsEditing(false);
+                  setShowPublishModal(false);
+                  alert("Success! Identity Minted & Published to Global Feed (Simulated).");
+                }}
+              >
+                <span style={{ display: 'block', fontWeight: 800 }}>MINT ONCHAIN (0.0002 ETH)</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Visible to everyone • Global Feed • Verified</span>
+              </button>
+
+              <button
+                className={styles.secondaryButton}
+                onClick={() => {
+                  // Local Save
+                  localStorage.setItem("userProfile", JSON.stringify(profile));
+                  setIsEditing(false);
+                  setShowPublishModal(false);
+                  alert("Saved locally. Only visible to you.");
+                }}
+              >
+                SAVE PRIVATELY (FREE)
+              </button>
+            </div>
+            <button style={{ marginTop: '1rem', background: 'transparent', border: 'none', color: '#666' }} onClick={() => setShowPublishModal(false)}>Cancel</button>
+
+          </div>
+        </div>
+      )}
 
     </motion.div>
   );
