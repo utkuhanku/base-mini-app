@@ -5,6 +5,7 @@ import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount } from "wagmi";
+import MintButton from "./MintButton";
 import styles from "./profile.module.css";
 
 // const CONTRACT_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
@@ -22,6 +23,7 @@ interface Profile {
   profilePicUrl: string;
   links: Link[];
   isPublished?: boolean; // Track if onchain
+  txHash?: string; // Transaction Hash of the Mint
 }
 
 export default function ProfilePage() {
@@ -33,7 +35,8 @@ export default function ProfilePage() {
     role: "creator", // Default
     profilePicUrl: "",
     links: [],
-    isPublished: false
+    isPublished: false,
+    txHash: ""
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -51,13 +54,14 @@ export default function ProfilePage() {
       if (profile.name) params.set("name", profile.name);
       if (profile.bio) params.set("bio", profile.bio);
       if (profile.role) params.set("role", profile.role);
+      if (profile.txHash) params.set("txHash", profile.txHash); // Persist Hash
       if (profile.links && profile.links.length > 0) {
         params.set("links", JSON.stringify(profile.links));
       }
 
       setShareUrl(`${baseUrl}?${params.toString()}`);
     }
-  }, [address, profile.name, profile.bio, profile.links]);
+  }, [address, profile.name, profile.bio, profile.links, profile.role, profile.txHash]);
 
   // 3D Tilt Logic
   const x = useMotionValue(0);
@@ -317,22 +321,23 @@ export default function ProfilePage() {
               </p>
 
               <div style={{ display: 'grid', gap: '12px' }}>
-                <button
-                  className={styles.button}
-                  style={{ background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)', color: 'black' }}
-                  onClick={() => {
-                    // Simulate Onchain Mint
-                    const updatedProfile = { ...profile, isPublished: true };
+
+                {/* REAL ONCHAIN PAYMENT */}
+                <MintButton
+                  onMintSuccess={(txHash) => {
+                    // Onchain Success Logic
+                    const updatedProfile = {
+                      ...profile,
+                      isPublished: true,
+                      txHash: txHash
+                    };
                     setProfile(updatedProfile);
                     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
                     setIsEditing(false);
                     setShowPublishModal(false);
-                    alert("Success! Identity Minted & Published to Global Feed (Simulated).");
+                    alert(" Payment Received! Your Identity is now Minted & Live on the Global Feed.");
                   }}
-                >
-                  <span style={{ display: 'block', fontWeight: 800 }}>MINT ONCHAIN (0.0002 ETH)</span>
-                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Visible to everyone • Global Feed • Verified</span>
-                </button>
+                />
 
                 <button
                   className={styles.secondaryButton}
@@ -410,10 +415,27 @@ export default function ProfilePage() {
             </button>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <div className={styles.chip}></div>
-              <div className={styles.baseLogo}>
-                <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
-                Base
-              </div>
+
+              {/* Base Logo (Clickable if Minted) */}
+              {profile.txHash ? (
+                <a
+                  href={`https://basescan.org/tx/${profile.txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.baseLogo}
+                  style={{ textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  title="View Transaction on Basescan"
+                >
+                  <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
+                  Base <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>↗</span>
+                </a>
+              ) : (
+                <div className={styles.baseLogo}>
+                  <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
+                  Base
+                </div>
+              )}
+
               {/* Role Badge */}
               <div className={`${styles.roleBadge} ${profile.role === 'business' ? styles.badgeHiring : styles.badgeTalent}`}>
                 {profile.role}

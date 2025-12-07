@@ -13,6 +13,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     const sharedName = searchParams.get("name");
     const sharedBio = searchParams.get("bio");
     const sharedRole = searchParams.get("role"); // Read Role
+    const sharedTxHash = searchParams.get("txHash"); // Read Tx Hash
 
     let sharedLinks: { title: string; url: string }[] = [];
     try {
@@ -52,7 +53,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     };
 
     // Check Local Storage for self-viewing (Simulating persistence for the owner)
-    const [localProfile, setLocalProfile] = useState<{ name: string, bio: string, role: string, profilePicUrl: string, links: any[] } | null>(null);
+    const [localProfile, setLocalProfile] = useState<{ name: string, bio: string, role: string, profilePicUrl: string, links: any[], txHash?: string } | null>(null);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -77,6 +78,7 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
         name: sharedName || localProfile?.name || (basename.length > 15 ? basename.slice(0, 6) + "..." + basename.slice(-4) : basename),
         bio: sharedBio || localProfile?.bio || "Onchain Identity",
         role: sharedRole || localProfile?.role || 'creator', // Default to creator
+        txHash: sharedTxHash || localProfile?.txHash || "",
         pic: localProfile?.profilePicUrl || "", // URL params typically don't carry full base64 images, so we only use local or empty
         links: sharedLinks.length > 0 ? sharedLinks : (localProfile?.links || [])
     };
@@ -120,10 +122,27 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                     <div className={styles.cardHeader}>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <div className={styles.chip}></div>
-                            <div className={styles.baseLogo}>
-                                <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
-                                Base
-                            </div>
+
+                            {/* Base Logo (Clickable if Minted) */}
+                            {displayProfile.txHash ? (
+                                <a
+                                    href={`https://basescan.org/tx/${displayProfile.txHash}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.baseLogo}
+                                    style={{ textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    title="View Transaction on Basescan"
+                                >
+                                    <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
+                                    Base <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>↗</span>
+                                </a>
+                            ) : (
+                                <div className={styles.baseLogo}>
+                                    <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
+                                    Base
+                                </div>
+                            )}
+
                             {/* Role Badge */}
                             <div className={`${styles.roleBadge} ${displayProfile.role === 'business' ? styles.badgeHiring : styles.badgeTalent}`}>
                                 {displayProfile.role}

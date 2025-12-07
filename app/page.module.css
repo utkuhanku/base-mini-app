@@ -15,7 +15,7 @@
 
 .marqueeContainer {
   position: absolute;
-  top: 2rem;
+  top: -10px;
   left: 0;
   width: 100%;
   background: linear-gradient(90deg, var(--base-blue) 0%, var(--base-blue-dark) 100%);
