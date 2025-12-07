@@ -235,6 +235,49 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* --- NEW FEATURES: QR & POINTS --- */
+
+.cardQr {
+  background: white;
+  padding: 4px;
+  border-radius: 8px;
+  /* Positioned bottom right */
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.pointsBadge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+  letter-spacing: 0.5px;
+}
+
+.pointsIcon {
+  color: var(--base-blue);
+  font-size: 0.9rem;
+}
+
 /* Edit Form Styles (reused/adapted) */
 .form,
 .shareCard {

@@ -299,6 +299,9 @@ export default function ProfilePage() {
 
   const cardVariant = getCardVariant(address); // Assuming 'address' is available in scope
 
+  // Calculate Score (Deterministic based on address length/hash for now)
+  const score = address ? (address.length * 12) + 350 : 100;
+
   return (
     <motion.div
       className={styles.container}
@@ -315,6 +318,12 @@ export default function ProfilePage() {
         onMouseLeave={handleMouseLeave}
       >
         <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
+          {/* Points Badge */}
+          <div className={styles.pointsBadge}>
+            <span className={styles.pointsIcon}>💎</span>
+            {score}
+          </div>
+
           <div className={styles.cardAccent}></div>
 
           <div className={styles.cardHeader}>
@@ -328,10 +337,12 @@ export default function ProfilePage() {
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </button>
-            <div className={styles.chip}></div>
-            <div className={styles.baseLogo}>
-              <Image src="/base-logo.svg" alt="Base" width={28} height={28} />
-              Base
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div className={styles.chip}></div>
+              <div className={styles.baseLogo}>
+                <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
+                Base
+              </div>
             </div>
           </div>
 
@@ -339,15 +350,24 @@ export default function ProfilePage() {
             {profile.profilePicUrl ? (
               <Image src={profile.profilePicUrl} alt="Profile" width={70} height={70} className={styles.cardProfilePic} />
             ) : (
-              <div className={styles.cardProfilePlaceholder}>{profile.name.charAt(0)}</div>
+              <div className={styles.cardProfilePlaceholder}>{profile.name ? profile.name.charAt(0).toUpperCase() : (address ? address.slice(0, 2) : "U")}</div>
             )}
             <div className={styles.cardInfo}>
-              <h2 className={styles.cardName}>{profile.name || "YOUR NAME"}</h2>
-              <p className={styles.cardBio}>{profile.bio || "Digital Identity on Base"}</p>
+              <h2 className={styles.cardName}>{profile.name || "Identity"}</h2>
+              <p className={styles.cardBio}>{profile.bio || "Building on Base"}</p>
             </div>
           </div>
 
           <div className={styles.cardFooter}>
+            <div className={styles.cardQr}>
+              <QRCodeSVG
+                value={deepLink || window.location.href}
+                size={40}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="L"
+              />
+            </div>
             {profile.links.map((link, i) => (
               <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
                 {link.title || "Link"} ↗

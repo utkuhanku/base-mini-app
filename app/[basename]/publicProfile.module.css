@@ -205,20 +205,6 @@
     border: none;
     font-weight: 700;
     font-size: 1rem;
-    cursor: pointer;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.secondaryButton {
-    width: 100%;
-    padding: 1.2rem;
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
     letter-spacing: 1px;
     text-transform: uppercase;
 }

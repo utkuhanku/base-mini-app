@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import styles from "./publicProfile.module.css";
+import { QRCodeSVG } from "qrcode.react";
 
 import { useSearchParams } from "next/navigation";
 
@@ -49,6 +50,8 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
     };
 
     const cardVariant = getCardVariant(basename);
+    // Deterministic Score
+    const score = (basename.length * 42) % 1000 + 100;
 
     return (
         <div className={styles.container}>
@@ -67,12 +70,20 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                 onMouseLeave={handleMouseLeave}
             >
                 <div className={`${styles.businessCard} ${styles[cardVariant]}`}>
+                    {/* Points Badge */}
+                    <div className={styles.pointsBadge}>
+                        <span style={{ color: '#0052FF' }}>💎</span>
+                        {score}
+                    </div>
+
                     <div className={styles.cardAccent}></div>
                     <div className={styles.cardHeader}>
-                        <div className={styles.chip}></div>
-                        <div className={styles.baseLogo}>
-                            <Image src="/base-logo.svg" alt="Base" width={28} height={28} />
-                            Base
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <div className={styles.chip}></div>
+                            <div className={styles.baseLogo}>
+                                <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
+                                Base
+                            </div>
                         </div>
                     </div>
                     <div className={styles.cardBody}>
@@ -91,17 +102,28 @@ export default function PublicProfileUI({ basename }: { basename: string }) {
                         </div>
                     </div>
                     <div className={styles.cardFooter}>
-                        {sharedLinks.length > 0 ? (
-                            sharedLinks.map((link, i) => (
-                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
-                                    {link.title} ↗
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginRight: '50px' }}>
+                            {sharedLinks.length > 0 ? (
+                                sharedLinks.map((link, i) => (
+                                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
+                                        {link.title} ↗
+                                    </a>
+                                ))
+                            ) : (
+                                <a href={`https://basescan.org/address/${basename}`} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
+                                    Basescan ↗
                                 </a>
-                            ))
-                        ) : (
-                            <a href={`https://basescan.org/address/${basename}`} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
-                                Basescan ↗
-                            </a>
-                        )}
+                            )}
+                        </div>
+                        <div className={styles.cardQr}>
+                            <QRCodeSVG
+                                value={`https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`}
+                                size={36}
+                                bgColor="#ffffff"
+                                fgColor="#000000"
+                                level="L"
+                            />
+                        </div>
                     </div>
                 </div>
             </motion.div>
