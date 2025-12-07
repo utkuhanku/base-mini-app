@@ -71,17 +71,7 @@ export default function FeedPage() {
                 <motion.h1 className={styles.title} style={{ margin: 0, fontSize: '1.8rem' }}>
                     GLOBAL FEED<span className={styles.dot}>.</span>
                 </motion.h1>
-                <Link href="/" style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '50%',
-                    width: '36px',
-                    height: '36px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    textDecoration: 'none'
-                }}>
+                <Link href="/" className={styles.closeButton}>
                     ✕
                 </Link>
             </header>

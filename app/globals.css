@@ -47,7 +47,29 @@ a {
   text-decoration: none;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
+cursor: pointer;
+}
+
+/* --- EXPERT POLISH: Scrollbar & Selection --- */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-anthracite);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--base-blue);
+}
+
+::selection {
+  background: var(--base-blue-dark);
+  color: white;
 }
