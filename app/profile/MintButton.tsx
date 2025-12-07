@@ -20,7 +20,7 @@ export default function MintButton({ className, onMintSuccess }: { className?: s
             value: parseEther('0.0002'), // ~ $0.60
             data: '0x' as `0x${string}`,
         },
-    ] as const;
+    ];
 
     const handleSuccess = (response: any) => {
         console.log("Transaction Status:", response);
