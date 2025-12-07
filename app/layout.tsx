@@ -6,6 +6,8 @@ import Header from "./components/Header";
 import { AddToFavorites } from "./components/AddToFavorites";
 import "./globals.css";
 
+export const runtime = "nodejs";
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Identity 🔵",
