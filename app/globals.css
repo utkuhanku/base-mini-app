@@ -47,7 +47,9 @@ a {
   text-decoration: none;
 }
 
-cursor: pointer;
+button {
+  font-family: inherit;
+  cursor: pointer;
 }
 
 /* --- EXPERT POLISH: Scrollbar & Selection --- */
