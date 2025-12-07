@@ -11,10 +11,16 @@ module.exports = {
             accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
             gasPrice: 1000000000,
         },
+        "base-mainnet": {
+            url: "https://mainnet.base.org",
+            accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+        }
     },
     etherscan: {
         apiKey: {
-            "base-sepolia": process.env.BASESCAN_API_KEY || "PLACEHOLDER_KEY"
+            "base-sepolia": process.env.BASESCAN_API_KEY || "PLACEHOLDER_KEY",
+            "base-mainnet": process.env.BASESCAN_API_KEY || "PLACEHOLDER_KEY",
+            "base": process.env.BASESCAN_API_KEY || "PLACEHOLDER_KEY"
         },
         customChains: [
             {
@@ -23,6 +29,14 @@ module.exports = {
                 urls: {
                     apiURL: "https://api-sepolia.basescan.org/api",
                     browserURL: "https://sepolia.basescan.org"
+                }
+            },
+            {
+                network: "base-mainnet",
+                chainId: 8453,
+                urls: {
+                    apiURL: "https://api.basescan.org/api",
+                    browserURL: "https://basescan.org"
                 }
             }
         ]

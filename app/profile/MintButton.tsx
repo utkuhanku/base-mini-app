@@ -1,10 +1,19 @@
 import { useCallback, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, parseAbi } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 
-const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Base Sepolia USDC
-const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSBTAddress"; // Update via Env
+// Configuration
+const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "84532"; // Default to Sepolia (84532)
+const IS_MAINNET = CHAIN_ID === "8453";
+const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
+
+// USDC Addresses
+const USDC_MAINNET = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const USDC_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+const USDC_ADDRESS = IS_MAINNET ? USDC_MAINNET : USDC_SEPOLIA;
+
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSBTAddress";
 const MINT_PRICE = parseUnits("1", 6); // $1 USDC
 
 export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: string) => void }) {
@@ -33,7 +42,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
                 abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
                 functionName: 'approve',
                 args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE],
-                chain: baseSepolia
+                chain: TARGET_CHAIN
             }, {
                 onSuccess: () => {
                     // In a real app, we'd wait for receipt here too, but for UI speed we can optimistic or wait manually
@@ -71,11 +80,11 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
             address: CARD_SBT_ADDRESS as `0x${string}`,
             abi: parseAbi([
                 "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
-                "function mintCard(Profile memory _profile) external"
+                "function mintCard(Profile memory _profile, uint8 _method) external"
             ]),
             functionName: 'mintCard',
-            args: [emptyProfile],
-            chain: baseSepolia
+            args: [emptyProfile, 0], // 0 = PaymentMethod.USDC
+            chain: TARGET_CHAIN
         }, {
             onSuccess: (data) => {
                 setIsMinting(false);
@@ -91,16 +100,29 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
     const hasAllowance = allowance ? allowance >= MINT_PRICE : false;
 
     if (isMinting || isApproving) {
-        return <button className="px-4 py-2 bg-gray-500 text-white rounded cursor-wait" disabled>Processing...</button>;
+        return (
+            <button
+                className="w-full py-4 rounded-2xl bg-zinc-800 text-white font-bold cursor-wait opacity-80"
+                style={{ borderRadius: '16px' }}
+                disabled
+            >
+                Processing...
+            </button>
+        );
     }
 
     if (!hasAllowance) {
         return (
             <button
                 onClick={handleApprove}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                className="w-full py-4 text-white font-bold text-lg transition-transform hover:scale-105 active:scale-95"
+                style={{
+                    borderRadius: '16px',
+                    background: '#0052FF',
+                    boxShadow: '0 4px 12px rgba(0, 82, 255, 0.4)'
+                }}
             >
-                Approve USDC ($1.00)
+                APPROVE USDC ($1.00)
             </button>
         );
     }
@@ -108,7 +130,13 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
     return (
         <button
             onClick={handleMint}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-bold"
+            className="w-full py-4 text-black font-extrabold text-lg transition-transform hover:scale-105 active:scale-95"
+            style={{
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
+                boxShadow: '0 4px 16px rgba(184, 134, 11, 0.4)',
+                border: '1px solid rgba(255,255,255,0.2)'
+            }}
         >
             MINT CARD ($1.00)
         </button>
