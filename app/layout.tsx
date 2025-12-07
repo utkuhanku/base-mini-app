@@ -42,16 +42,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RootProvider>
-      <html lang="en">
-        <body className={inter.className}>
+    <html lang="en" className={inter.variable}>
+      <body className={inter.className}>
+        <RootProvider>
           <Header />
           <AddToFavorites />
           <div style={{ paddingTop: '80px' }}>
             {children}
           </div>
-        </body>
-      </html>
-    </RootProvider>
+        </RootProvider>
+      </body>
+    </html>
   );
 }
