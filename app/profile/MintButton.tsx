@@ -19,7 +19,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
         address: USDC_ADDRESS,
         abi: parseAbi(["function allowance(address owner, address spender) view returns (uint256)"]),
         functionName: 'allowance',
-        args: [address!, CARD_SBT_ADDRESS],
+        args: [address!, CARD_SBT_ADDRESS as `0x${string}`],
         query: {
             enabled: !!address && !!CARD_SBT_ADDRESS,
         }
@@ -32,7 +32,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
                 address: USDC_ADDRESS,
                 abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
                 functionName: 'approve',
-                args: [CARD_SBT_ADDRESS, MINT_PRICE],
+                args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE],
                 chain: baseSepolia
             }, {
                 onSuccess: () => {
