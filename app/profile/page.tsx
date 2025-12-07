@@ -44,7 +44,7 @@ export default function ProfilePage() {
   const [shareUrl, setShareUrl] = useState("");
 
   // CHECK IF USER HAS A CARD
-  const { data: cardTokenId } = useReadContract({
+  const { data: cardTokenId, isLoading: isCardLoading } = useReadContract({
     address: CARD_SBT_ADDRESS as `0x${string}`,
     abi: parseAbi(["function cardOf(address owner) view returns (uint256)"]),
     functionName: 'cardOf',
@@ -57,7 +57,7 @@ export default function ProfilePage() {
   const hasCard = cardTokenId && Number(cardTokenId) > 0;
 
   // READ CARD PROFILE IF EXISTS
-  const { data: cardData } = useReadContract({
+  const { data: cardData, isLoading: isProfileLoading } = useReadContract({
     address: CARD_SBT_ADDRESS as `0x${string}`,
     abi: parseAbi([
       "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
@@ -72,10 +72,11 @@ export default function ProfilePage() {
 
   // Load from chain if available, else local
   useEffect(() => {
-    if (hasCard && cardData) {
-      // Parse on-chain data
-      // For simplicity assuming direct mapping. Socials/Websites might need JSON parse if we packed them.
-      // But for now, let's just use what we have.
+    // Wait for contract read to finish
+    if (isCardLoading) return;
+
+    if (hasCard && cardData && !isProfileLoading) {
+      // PROVEN ONCHAIN DATA -> USE IT
       const p = cardData as any; // typed as Profile struct
       setProfile(prev => ({
         ...prev,
@@ -83,30 +84,47 @@ export default function ProfilePage() {
         bio: p.bio,
         profilePicUrl: p.avatarUrl,
         isPublished: true,
-        // Links parsing omitted for brevity in this step, easy to add
+        // Links parsing omitted for brevity in this step
       }));
-    } else {
+    } else if (!hasCard) {
+      // NO ONCHAIN CARD -> CHECK LOCAL
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         try {
           const parsed = JSON.parse(savedProfile);
-          // FORCE contract truth: If we are here, we have no onchain card.
-          // So we treat local data as DRAFT only.
-          setProfile({
-            ...parsed,
-            isPublished: false,
-            txHash: undefined
-          });
+
+          // CRITICAL FIX: If local data claims to be "Published" but chain says NO,
+          // it is a legacy/fake card. The user wants to DESTROY it.
+          if (parsed.isPublished) {
+            console.log("Detected distinct legacy fake-minted card. Destroying...");
+            localStorage.removeItem("userProfile");
+            // Reset to empty
+            setProfile({
+              name: "",
+              bio: "",
+              role: "creator",
+              profilePicUrl: "",
+              links: [],
+              isPublished: false,
+              txHash: ""
+            });
+            return;
+          }
+
+          // Otherwise, it's just a draft (never clicked mint). Keep it.
+          setProfile(parsed);
+
         } catch (e) {
           console.error("Failed to parse profile from local storage", e);
           localStorage.removeItem("userProfile");
         }
       } else if (context?.user?.displayName) {
+        // New User with Farcaster Name
         setProfile(prev => ({ ...prev, name: context.user.displayName || "" }));
         setIsEditing(true);
       }
     }
-  }, [context, hasCard, cardData]);
+  }, [context, hasCard, cardData, isCardLoading, isProfileLoading]);
 
 
   // Construct dynamic share URL with embedded data (since we have no backend)
