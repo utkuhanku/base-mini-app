@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
 import { parseUnits, parseAbi } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 
@@ -17,7 +17,8 @@ const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSB
 const MINT_PRICE = parseUnits("1", 6); // $1 USDC
 
 export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: string) => void }) {
-    const { address } = useAccount();
+    const { address, chainId } = useAccount();
+    const { switchChainAsync } = useSwitchChain();
     const [isApproving, setIsApproving] = useState(false);
     const [isMinting, setIsMinting] = useState(false);
 
@@ -38,22 +39,39 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
     const handleApprove = async () => {
         setIsApproving(true);
         try {
-            await writeContractAsync({
+            // Force Switch Chain if needed
+            if (chainId !== TARGET_CHAIN.id) {
+                await switchChainAsync({ chainId: TARGET_CHAIN.id });
+            }
+
+            console.log("Approving USDC...", USDC_ADDRESS, MINT_PRICE);
+
+            const hash = await writeContractAsync({
                 address: USDC_ADDRESS,
                 abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
                 functionName: 'approve',
                 args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE],
-                chain: TARGET_CHAIN
+                chain: TARGET_CHAIN,
             });
-            // We rely on the refetchInterval to pick up the new allowance
-            // or we could wait for receipt here.
-            // For UX responsiveness we keep loading state for a bit
-            setTimeout(() => {
+            console.log("Approval Hash:", hash);
+
+            // Wait for receipt loop for better UX
+            // In a real app we use useWaitForTransactionReceipt on the hash, but here we just wait/poll allowance
+            let checks = 0;
+            const interval = setInterval(() => {
                 refetchAllowance();
+                checks++;
+                if (checks > 10) clearInterval(interval); // Stop after 20s
+            }, 2000);
+
+            // Optimistic finish
+            setTimeout(() => {
                 setIsApproving(false);
-            }, 5000);
+            }, 4000);
+
         } catch (e) {
             console.error("Approval failed:", e);
+            alert("Approval failed: " + (e as any).message);
             setIsApproving(false);
         }
     };
