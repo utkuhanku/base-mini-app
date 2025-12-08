@@ -37,6 +37,8 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
     });
 
     const handleApprove = async () => {
+        // Debug Alert
+        alert("Starting Approval Process...");
         setIsApproving(true);
         try {
             // Force Switch Chain if needed
