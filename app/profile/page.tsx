@@ -436,6 +436,7 @@ export default function ProfilePage() {
                       ONE-TIME FEE
                     </div>
                     <MintButton
+                      profile={profile}
                       onMintSuccess={(txHash) => {
                         const updatedProfile = {
                           ...profile,

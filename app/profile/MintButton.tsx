@@ -24,10 +24,20 @@ const USDC_MAINNET = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const USDC_ADDRESS = IS_MAINNET ? USDC_MAINNET : USDC_SEPOLIA;
 
-const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSBTAddress";
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS;
 const MINT_PRICE = parseUnits("1", 6); // $1 USDC
 
-export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: string) => void }) {
+interface MintButtonProps {
+    onMintSuccess: (hash: string) => void;
+    profile: {
+        name: string;
+        bio: string;
+        profilePicUrl: string;
+        links: any[]; // simplified for now
+    };
+}
+
+export default function MintButton({ onMintSuccess, profile }: MintButtonProps) {
     const { address } = useAccount();
 
     const handleOnStatus = useCallback((status: any) => {
@@ -36,6 +46,24 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
             onMintSuccess(status.transactionReceipts[0].transactionHash);
         }
     }, [onMintSuccess]);
+
+    const handleError = useCallback((err: any) => {
+        console.error("Transaction Error:", err);
+        // If specific error about address, alert user
+        if (err.message && err.message.includes("address")) {
+            alert("Contract address configuration missing. Please check .env settings.");
+        }
+    }, []);
+
+    // Validate Address Configuration
+    if (!CARD_SBT_ADDRESS || CARD_SBT_ADDRESS === "0xMyCardSBTAddress") {
+        console.error("Missing NEXT_PUBLIC_CARD_SBT_ADDRESS env var");
+        return (
+            <div className="w-full p-3 bg-red-100 text-red-700 rounded-xl text-center text-sm font-bold">
+                ⚠️ Contract Config Missing
+            </div>
+        );
+    }
 
     // Contracts for Batch Transaction (OnchainKit handles encoding)
     const calls = [
@@ -55,11 +83,11 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
             ]),
             functionName: "mintCard",
             args: [{
-                displayName: "User",
-                avatarUrl: "",
-                bio: "",
-                socials: "",
-                websites: ""
+                displayName: profile.name || "User",
+                avatarUrl: profile.profilePicUrl || "",
+                bio: profile.bio || "",
+                socials: JSON.stringify(profile.links || []), // Serialize links as JSON string for now
+                websites: "" // Could split links here if needed
             }, 0] // 0 = PaymentMethod.USDC
         }
     ];
@@ -71,6 +99,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
                 className="w-full"
                 chainId={TARGET_CHAIN.id}
                 onStatus={handleOnStatus}
+                onError={handleError}
             >
                 <TransactionButton
                     className="mt-0 mr-0 mb-0 ml-0 w-full rounded-xl bg-blue-600 py-3 px-4 font-bold text-white hover:bg-blue-700"
