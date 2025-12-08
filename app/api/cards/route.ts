@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createPublicClient, http, parseAbi } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 
 // Contract Config (Replace with deployed address later or use env)
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
@@ -11,7 +11,6 @@ const CONTRACT_ABI = parseAbi([
 ]);
 
 // Determine Chain based on address or env (Hardcoded fallback is on Mainnet 8453)
-import { base, baseSepolia } from 'viem/chains';
 const IS_MAINNET = process.env.NEXT_PUBLIC_CHAIN_ID === '8453' || CONTRACT_ADDRESS.startsWith("0x4003"); // 0x4003 is our mainnet deployment
 const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
 
