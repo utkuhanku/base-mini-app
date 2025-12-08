@@ -44,16 +44,13 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
                 await switchChainAsync({ chainId: TARGET_CHAIN.id });
             }
 
-            console.log("Approving USDC...", USDC_ADDRESS, MINT_PRICE);
-
-            const hash = await writeContractAsync({
+            await writeContractAsync({
                 address: USDC_ADDRESS,
                 abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
                 functionName: 'approve',
                 args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE],
                 chain: TARGET_CHAIN,
             });
-            console.log("Approval Hash:", hash);
 
             // Wait for receipt loop for better UX
             // In a real app we use useWaitForTransactionReceipt on the hash, but here we just wait/poll allowance
