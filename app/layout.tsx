@@ -1,5 +1,4 @@
-"use client";
-// Trigger Deploy: Vercel Check
+// Vercel deployment fix
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { minikitConfig } from "../minikit.config";

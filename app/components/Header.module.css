@@ -13,19 +13,18 @@
     /* Let clicks pass through empty space */
 }
 
-/* Global Overrides for OnchainKit Wallet to ensure visibility on Dark Background */
-:global(.ock-text-foreground) {
+/* CSS Modules require pure selectors (at least one local class) */
+.headerContainer :global(.ock-text-foreground) {
     color: white !important;
 }
 
-:global(.ock-bg-default) {
+.headerContainer :global(.ock-bg-default) {
     background-color: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Ensure the address/name in top left is visible */
-:global([data-testid="ockIdentityName"]),
-:global([data-testid="ockIdentityAddress"]) {
+.headerContainer :global([data-testid="ockIdentityName"]),
+.headerContainer :global([data-testid="ockIdentityAddress"]) {
     color: white !important;
 }
 
