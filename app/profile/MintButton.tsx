@@ -25,7 +25,7 @@ const USDC_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const USDC_ADDRESS = IS_MAINNET ? USDC_MAINNET : USDC_SEPOLIA;
 
 const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
-const MINT_PRICE = parseUnits("1", 6); // $1 USDC
+
 
 interface MintButtonProps {
     onMintSuccess: (hash: string) => void;
@@ -67,28 +67,22 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
 
     // Contracts for Batch Transaction (OnchainKit handles encoding)
     const calls = [
-        // 1. Approve USDC
-        {
-            address: USDC_ADDRESS as `0x${string}`,
-            abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
-            functionName: "approve",
-            args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE]
-        },
-        // 2. Mint Card
+        // 1. Mint Card with ETH
         {
             address: CARD_SBT_ADDRESS as `0x${string}`,
             abi: parseAbi([
                 "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
-                "function mintCard(Profile memory _profile, uint8 _method) external"
+                "function mintCard(Profile memory _profile, uint8 _method) external payable"
             ]),
             functionName: "mintCard",
             args: [{
                 displayName: profile.name || "User",
                 avatarUrl: profile.profilePicUrl || "",
                 bio: profile.bio || "",
-                socials: JSON.stringify(profile.links || []), // Serialize links as JSON string for now
-                websites: "" // Could split links here if needed
-            }, 0] // 0 = PaymentMethod.USDC
+                socials: JSON.stringify(profile.links || []),
+                websites: ""
+            }, 1], // 1 = PaymentMethod.ETH
+            value: parseUnits("0.0003", 18) // 0.0003 ETH (~$1)
         }
     ];
 
