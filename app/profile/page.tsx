@@ -9,7 +9,7 @@ import MintButton from "./MintButton";
 import styles from "./profile.module.css";
 import { parseAbi } from "viem";
 
-const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0xMyCardSBTAddress";
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
 
 interface Link {
   title: string;

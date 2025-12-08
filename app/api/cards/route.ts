@@ -3,25 +3,28 @@ import { createPublicClient, http, parseAbi } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
 // Contract Config (Replace with deployed address later or use env)
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x0000000000000000000000000000000000000000";
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
 const CONTRACT_ABI = parseAbi([
     "function totalSupply() view returns (uint256)",
     "function profiles(uint256) view returns (string displayName, string avatarUrl, string bio, string socials, string websites)",
     "function ownerOf(uint256) view returns (address)"
 ]);
 
+// Determine Chain based on address or env (Hardcoded fallback is on Mainnet 8453)
+import { base, baseSepolia } from 'viem/chains';
+const IS_MAINNET = process.env.NEXT_PUBLIC_CHAIN_ID === '8453' || CONTRACT_ADDRESS.startsWith("0x4003"); // 0x4003 is our mainnet deployment
+const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
+
 const client = createPublicClient({
-    chain: baseSepolia,
+    chain: TARGET_CHAIN,
     transport: http()
 });
 
 export const revalidate = 60; // Cache for 60 seconds
 
 export async function GET() {
-    if (!process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS) {
-        // Return dummy data if not deployed yet to prevent crash
-        return NextResponse.json([]);
-    }
+    // Fallback logic handled by constant above
+
 
     try {
         const totalSupply = await client.readContract({
