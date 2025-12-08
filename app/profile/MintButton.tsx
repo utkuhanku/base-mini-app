@@ -1,10 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, parseAbi } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 
 // Configuration
-const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "84532"; // Default to Sepolia (84532)
+const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "84532";
 const IS_MAINNET = CHAIN_ID === "8453";
 const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
 
@@ -21,7 +21,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
     const [isApproving, setIsApproving] = useState(false);
     const [isMinting, setIsMinting] = useState(false);
 
-    const { writeContract, data: hash, error: writeError } = useWriteContract();
+    const { writeContractAsync } = useWriteContract();
 
     // 1. Check Allowance
     const { data: allowance, refetch: refetchAllowance } = useReadContract({
@@ -31,113 +31,123 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: (hash: st
         args: [address!, CARD_SBT_ADDRESS as `0x${string}`],
         query: {
             enabled: !!address && !!CARD_SBT_ADDRESS,
+            refetchInterval: 2000,
         }
     });
 
     const handleApprove = async () => {
         setIsApproving(true);
         try {
-            writeContract({
+            await writeContractAsync({
                 address: USDC_ADDRESS,
                 abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]),
                 functionName: 'approve',
                 args: [CARD_SBT_ADDRESS as `0x${string}`, MINT_PRICE],
                 chain: TARGET_CHAIN
-            }, {
-                onSuccess: () => {
-                    // In a real app, we'd wait for receipt here too, but for UI speed we can optimistic or wait manually
-                    setTimeout(() => refetchAllowance(), 2000); // Hacky wait for testnet
-                    setIsApproving(false);
-                },
-                onError: () => setIsApproving(false)
             });
+            // We rely on the refetchInterval to pick up the new allowance
+            // or we could wait for receipt here.
+            // For UX responsiveness we keep loading state for a bit
+            setTimeout(() => {
+                refetchAllowance();
+                setIsApproving(false);
+            }, 5000);
         } catch (e) {
-            console.error(e);
+            console.error("Approval failed:", e);
             setIsApproving(false);
         }
     };
 
-    const handleMint = () => {
+    const handleMint = async () => {
         setIsMinting(true);
-        // Construct Profile Struct
-        // Note: In a real app we'd pass the actual profile data props here.
-        // For now we assume the parent component handles data saving to pure backend or local storage
-        // AND we just mint an "empty" placeholder on-chain or a pointer to offchain data.
-        // To strictly follow the plan: we should be passing the profile data to the contract.
-        // Let's assume we pass empty strings for now to save gas, or we need to update props to accept profile.
+        try {
+            const emptyProfile = {
+                displayName: "User",
+                avatarUrl: "",
+                bio: "",
+                socials: "",
+                websites: ""
+            };
 
-        // Simplification for this turn: Mint with empty profile, or use saved localstorage one?
-        // Let's just mint. The contract requires a Profile struct.
-        const emptyProfile = {
-            displayName: "User",
-            avatarUrl: "",
-            bio: "",
-            socials: "",
-            websites: ""
-        };
+            const hash = await writeContractAsync({
+                address: CARD_SBT_ADDRESS as `0x${string}`,
+                abi: parseAbi([
+                    "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
+                    "function mintCard(Profile memory _profile, uint8 _method) external"
+                ]),
+                functionName: 'mintCard',
+                args: [emptyProfile, 0], // 0 = PaymentMethod.USDC
+                chain: TARGET_CHAIN
+            });
 
-        writeContract({
-            address: CARD_SBT_ADDRESS as `0x${string}`,
-            abi: parseAbi([
-                "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
-                "function mintCard(Profile memory _profile, uint8 _method) external"
-            ]),
-            functionName: 'mintCard',
-            args: [emptyProfile, 0], // 0 = PaymentMethod.USDC
-            chain: TARGET_CHAIN
-        }, {
-            onSuccess: (data) => {
-                setIsMinting(false);
-                onMintSuccess(data);
-            },
-            onError: (e) => {
-                console.error(e);
-                setIsMinting(false);
-            }
-        });
+            onMintSuccess(hash);
+            setIsMinting(false);
+
+        } catch (e) {
+            console.error("Mint failed:", e);
+            setIsMinting(false);
+        }
     };
 
-    const hasAllowance = allowance ? allowance >= MINT_PRICE : false;
+    const hasAllowance = allowance && allowance >= MINT_PRICE;
+
+    // --- STYLES ---
+    const buttonStyle: React.CSSProperties = {
+        width: '100%',
+        padding: '1.2rem',
+        borderRadius: '16px',
+        fontWeight: 800,
+        fontSize: '1rem',
+        cursor: 'pointer',
+        letterSpacing: '0.5px',
+        textTransform: 'uppercase',
+        transition: 'all 0.2s ease',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '1rem', // Spacing
+    };
+
+    const primaryStyle: React.CSSProperties = {
+        ...buttonStyle,
+        background: 'linear-gradient(135deg, #0052FF 0%, #003399 100%)', // Blue logic
+        color: 'white',
+        boxShadow: '0 4px 12px rgba(0, 82, 255, 0.3)',
+    };
+
+    const actionStyle: React.CSSProperties = {
+        ...buttonStyle,
+        background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)', // Gold logic
+        color: 'black',
+        boxShadow: '0 4px 12px rgba(184, 134, 11, 0.4)',
+    };
+
+    const loadingStyle: React.CSSProperties = {
+        ...buttonStyle,
+        background: '#333',
+        color: '#888',
+        cursor: 'wait',
+    };
 
     if (isMinting || isApproving) {
         return (
-            <button
-                className="w-full py-4 rounded-2xl bg-zinc-800 text-white font-bold cursor-wait opacity-80"
-                style={{ borderRadius: '16px' }}
-                disabled
-            >
-                Processing...
+            <button style={loadingStyle} disabled>
+                {isApproving ? "APPROVING USDC..." : "MINTING ID..."}
             </button>
         );
     }
 
     if (!hasAllowance) {
         return (
-            <button
-                onClick={handleApprove}
-                className="w-full py-4 text-white font-bold text-lg transition-transform hover:scale-105 active:scale-95"
-                style={{
-                    borderRadius: '16px',
-                    background: '#0052FF',
-                    boxShadow: '0 4px 12px rgba(0, 82, 255, 0.4)'
-                }}
-            >
+            <button onClick={handleApprove} style={primaryStyle}>
                 APPROVE USDC ($1.00)
             </button>
         );
     }
 
     return (
-        <button
-            onClick={handleMint}
-            className="w-full py-4 text-black font-extrabold text-lg transition-transform hover:scale-105 active:scale-95"
-            style={{
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
-                boxShadow: '0 4px 16px rgba(184, 134, 11, 0.4)',
-                border: '1px solid rgba(255,255,255,0.2)'
-            }}
-        >
+        <button onClick={handleMint} style={actionStyle}>
             MINT CARD ($1.00)
         </button>
     );
