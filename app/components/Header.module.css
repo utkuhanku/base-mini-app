@@ -15,7 +15,17 @@
 
 /* CSS Modules require pure selectors (at least one local class) */
 /* CSS Modules require pure selectors */
-/* Overrides moved to globals.css to ensure specificity */
+.headerContainer :global(svg) {
+    color: white !important;
+}
+
+.headerContainer :global(path) {
+    fill: white !important;
+}
+
+.headerContainer :global(span) {
+    color: white !important;
+}
 
 .headerContainer {
     pointer-events: auto;
