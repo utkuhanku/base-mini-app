@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
           action: {
             type: "launch_frame",
             name: "Identity App",
-            url: "https://base-mini-app.vercel.app", // Ensure explicit URL if possible, or fallback
+            url: minikitConfig.miniapp.homeUrl,
             splashImageUrl: minikitConfig.miniapp.heroImageUrl,
             splashBackgroundColor: "#0F1115",
           },
