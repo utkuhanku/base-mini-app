@@ -6,6 +6,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import MintButton from "./MintButton";
+import EditButton from "./EditButton";
 import styles from "./profile.module.css";
 import { parseAbi } from "viem";
 
@@ -412,17 +413,22 @@ export default function ProfilePage() {
 
                 {/* 1. MINT / UPDATE BUTTON */}
                 {(hasCard) ? (
-                  // UPDATE FLOW (TODO: UpdateButton similar to MintButton but for updates)
-                  <button
-                    className={styles.button}
-                    onClick={() => {
-                      // Placeholder for update
-                      alert("Edit feature coming next. Using local save for now.");
-                      handleSave();
+                  // UPDATE FLOW
+                  <EditButton
+                    profile={profile}
+                    onUpdateSuccess={(txHash) => {
+                      const updatedProfile = {
+                        ...profile,
+                        txHash: txHash
+                      };
+                      setProfile(updatedProfile);
+                      // Optimistic update
+                      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+                      setIsEditing(false);
+                      setShowPublishModal(false);
+                      alert("Success! Your identity update is onchain.");
                     }}
-                  >
-                    UPDATE CARD ($2.00)
-                  </button>
+                  />
                 ) : (
                   <div style={{ position: 'relative' }}>
                     {/* One Time Badge */}
