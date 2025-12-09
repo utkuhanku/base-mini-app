@@ -54,6 +54,28 @@
   --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+[data-theme='light'] {
+  /* --- LIGHT MODE PALETTE --- */
+  --base-blue: #0052FF;
+  --base-blue-hover: #0045D8;
+  --base-blue-faint: rgba(0, 82, 255, 0.05);
+
+  --bg-app: #FFFFFF;
+  --bg-subtle: #F5F5F7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F2F2F2;
+  --bg-overlay: rgba(255, 255, 255, 0.8);
+
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-tertiary: #888888;
+  --text-inverse: #FFFFFF;
+
+  --border-subtle: #E5E5E5;
+  --border-strong: #D1D1D1;
+  --border-focus: #0052FF;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

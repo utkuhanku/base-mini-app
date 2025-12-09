@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { minikitConfig } from "../minikit.config";
 import { RootProvider } from "./rootProvider";
+import { ThemeProvider } from "./components/ThemeProvider";
 import Header from "./components/Header";
 import { AddToFavorites } from "./components/AddToFavorites";
 import "./globals.css";
@@ -47,13 +48,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className={inter.className}>
-        <RootProvider>
-          <Header />
-          <AddToFavorites />
-          <div style={{ paddingTop: '80px' }}>
-            {children}
-          </div>
-        </RootProvider>
+        <ThemeProvider>
+          <RootProvider>
+            <Header />
+            <AddToFavorites />
+            <div style={{ paddingTop: '80px' }}>
+              {children}
+            </div>
+          </RootProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

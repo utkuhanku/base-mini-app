@@ -14,6 +14,7 @@ import {
     EthBalance
 } from "@coinbase/onchainkit/identity";
 import styles from "./Header.module.css";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
     return (
@@ -24,6 +25,9 @@ export default function Header() {
                         <Avatar className="h-6 w-6" />
                         <Name />
                     </ConnectWallet>
+                    <div style={{ marginRight: '8px' }}>
+                        <ThemeToggle />
+                    </div>
 
                     {/* OnchainKit Dropdown Styling overrides needed via its specific props or global overrides if module fails to penetrate. 
                         For now, we keep it clean. OnchainKit usually handles its own dropdown visuals well enough for default dark mode. */}
