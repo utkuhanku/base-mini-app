@@ -25,18 +25,7 @@ export default function Header() {
                         <Avatar className="h-6 w-6" />
                         <Name />
                     </ConnectWallet>
-                    <div style={{
-                        marginRight: '12px',
-                        zIndex: 10001,
-                        position: 'relative',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        padding: '4px',
-                        borderRadius: '50%',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        backdropFilter: 'blur(4px)'
-                    }}>
-                        <ThemeToggle />
-                    </div>
+                    {/* ThemeToggle moved to Main Screen */}
 
                     {/* OnchainKit Dropdown Styling overrides needed via its specific props or global overrides if module fails to penetrate. 
                         For now, we keep it clean. OnchainKit usually handles its own dropdown visuals well enough for default dark mode. */}

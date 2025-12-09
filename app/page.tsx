@@ -21,6 +21,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAccount } from "wagmi";
+import ThemeToggle from "./components/ThemeToggle";
+import WelcomePopup from "./components/WelcomePopup";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -124,12 +126,28 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      <WelcomePopup />
       <motion.div
         className={styles.content}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
+        {/* Modern Absolute Theme Toggle */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 9999,
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '50%',
+          padding: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}>
+          <ThemeToggle />
+        </div>
+
         <div className={styles.heroHeader}>
           <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ background: '#0052FF', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

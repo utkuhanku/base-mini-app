@@ -547,7 +547,7 @@ export default function ProfilePage() {
               {/* Base Logo (Clickable if Minted) */}
               {(hasCard || profile.txHash) ? (
                 <a
-                  href={`https://sepolia.basescan.org/tx/${profile.txHash}`}
+                  href={`https://basescan.org/tx/${profile.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.baseLogo}

@@ -11,6 +11,7 @@ interface CardProfile {
     displayName: string;
     avatarUrl: string;
     bio: string;
+    socials: string;
 }
 
 export default function FeedPage() {
@@ -75,29 +76,44 @@ export default function FeedPage() {
                                         <h2 className={styles.cardName}>{card.displayName || "Unknown"}</h2>
                                         <p className={styles.cardBio}>{card.bio || "No bio"}</p>
                                     </div>
-                                </div>
-
-                                <div className={styles.cardFooter}>
-                                    <a href={`https://sepolia.basescan.org/owner/${card.owner}`} target="_blank" className="text-xs text-gray-400 hover:text-white transition">
-                                        {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
-                                    </a>
+                                    <div className="flex flex-wrap gap-2 mt-3 pl-4 pr-4">
+                                        {(() => {
+                                            try {
+                                                const links = JSON.parse(card.socials || "[]");
+                                                return links.map((link: any, i: number) => (
+                                                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                                                        className="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition text-blue-300">
+                                                        {link.title} ↗
+                                                    </a>
+                                                ));
+                                            } catch (e) { return null; }
+                                        })()}
+                                    </div>
                                 </div>
                             </div>
-                        </motion.div>
-                    ))}
 
-                    {cards.length === 0 && (
-                        <div className="text-center text-gray-600 py-12">
-                            No cards minted yet. Be the first!
-                            <div className="mt-4">
-                                <Link href="/profile" className={styles.button}>
-                                    MINT YOUR CARD
-                                </Link>
+                            <div className={styles.cardFooter}>
+                                <a href={`https://basescan.org/address/${card.owner}`} target="_blank" className="text-xs text-gray-400 hover:text-white transition">
+                                    {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
+                                </a>
                             </div>
                         </div>
-                    )}
+                        </motion.div>
+            ))}
+
+            {cards.length === 0 && (
+                <div className="text-center text-gray-600 py-12">
+                    No cards minted yet. Be the first!
+                    <div className="mt-4">
+                        <Link href="/profile" className={styles.button}>
+                            MINT YOUR CARD
+                        </Link>
+                    </div>
                 </div>
             )}
         </div>
+    )
+}
+        </div >
     );
 }
