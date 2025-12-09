@@ -36,14 +36,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.setAttribute("data-theme", newTheme);
     };
 
-    // Avoid rendering children with wrong theme during SSR
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            {children}
+            {/* Prevent hydration mismatch by only showing content when mounted, or show specific loader if needed. 
+                However, for SEO/SSG, we should render children. 
+                The issue was simply that context was missing. */}
+            <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
+                {children}
+            </div>
         </ThemeContext.Provider>
     );
 }
