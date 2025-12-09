@@ -94,10 +94,11 @@ export default function ProfilePage() {
         try {
           const parsed = JSON.parse(savedProfile);
 
-          // CRITICAL FIX: If local data claims to be "Published" but chain says NO,
-          // it is a legacy/fake card. The user wants to DESTROY it.
-          if (parsed.isPublished) {
-            console.log("Detected distinct legacy fake-minted card. Destroying...");
+          // CRITICAL FIX: If local data claims to be "Published" but chain says NO.
+          // We must distinguish between a "Pending Mint" (valid) and a "Legacy Fake" (invalid).
+          // If it has a txHash, we assume it's pending and KEEP IT.
+          if (parsed.isPublished && !parsed.txHash) {
+            console.log("Detected legacy fake-minted card without hash. Destroying...");
             localStorage.removeItem("userProfile");
             // Reset to empty
             setProfile({

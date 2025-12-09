@@ -7,10 +7,18 @@ export default function WelcomePopup() {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
-        // Auto-close after 2 seconds (plus 0.5s for initial delay)
+        // Check if already seen
+        const hasSeen = localStorage.getItem('hasSeenWelcome');
+        if (hasSeen) {
+            setIsVisible(false);
+            return;
+        }
+
+        // Auto-close after 3.5 seconds
         const timer = setTimeout(() => {
             setIsVisible(false);
-        }, 2500);
+            localStorage.setItem('hasSeenWelcome', 'true');
+        }, 3500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -56,14 +64,14 @@ export default function WelcomePopup() {
                         </h2>
 
                         <p style={{ color: '#888', fontSize: '0.9rem', maxWidth: '240px', lineHeight: '1.5' }}>
-                            Send your feedback to <span style={{ color: '#fff', fontWeight: 'bold' }}>utkus</span> on Warpcast.
+                            Send your feedback to <span style={{ color: '#fff', fontWeight: 'bold' }}>utkus</span> on Base App.
                         </p>
 
                         <motion.div
                             style={{ height: '3px', background: '#0052FF', borderRadius: '4px', marginTop: '1.5rem', width: '100%' }}
                             initial={{ width: 0 }}
                             animate={{ width: '100%' }}
-                            transition={{ duration: 2.5, ease: "linear" }}
+                            transition={{ duration: 3.5, ease: "linear" }}
                         />
                     </motion.div>
                 </motion.div>
