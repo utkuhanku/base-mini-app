@@ -15,11 +15,13 @@ import {
 } from '@coinbase/onchainkit/transaction';
 
 // Configuration
-const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || "84532";
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
+// Check if address matches our known mainnet deployment
+const IS_KNOWN_MAINNET = CARD_SBT_ADDRESS.toLowerCase() === "0x4003055676749a0433EA698A8B70E45d398FC87f".toLowerCase();
+// Force Mainnet if we are using the mainnet contract, otherwise fallback to env or Sepolia
+const CHAIN_ID = IS_KNOWN_MAINNET ? "8453" : (process.env.NEXT_PUBLIC_CHAIN_ID || "84532");
 const IS_MAINNET = CHAIN_ID === "8453";
 const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
-
-const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
 
 interface EditButtonProps {
     onUpdateSuccess: (hash: string) => void;

@@ -7,6 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import MintButton from "./MintButton";
 import EditButton from "./EditButton";
+import ThemeToggle from "../components/ThemeToggle";
 import styles from "./profile.module.css";
 import { parseAbi } from "viem";
 
@@ -513,6 +514,10 @@ export default function ProfilePage() {
       animate={{ opacity: 1 }}
     >
       <motion.h1 className={styles.title}>MY IDENTITY<span className={styles.dot}>.</span></motion.h1>
+
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10000 }}>
+        <ThemeToggle />
+      </div>
 
       {/* 1. Identity Card */}
       <motion.div
