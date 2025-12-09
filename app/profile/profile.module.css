@@ -1,7 +1,7 @@
 /* Base Brand Kit & Premium Design 2.0 */
 
-/* --- TOKENS --- */
-:root {
+/* --- TOKENS (Scoped to Container) --- */
+.container {
   --base-blue: #0052FF;
   --base-black: #000000;
   --base-white: #FFFFFF;
@@ -11,9 +11,7 @@
   --text-secondary: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.05);
-}
 
-.container {
   display: flex;
   flex-direction: column;
   align-items: center;
