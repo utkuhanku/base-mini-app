@@ -513,6 +513,17 @@ export default function ProfilePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
+      <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'flex-start', marginBottom: '-2rem', zIndex: 10 }}>
+        <button
+          className={styles.backButton}
+          onClick={() => window.history.back()}
+          aria-label="Go Back"
+          style={{ position: 'static', color: 'rgba(255,255,255,0.6)', transform: 'scale(1.2)' }}
+        >
+          ←
+        </button>
+      </div>
+
       <motion.h1 className={styles.title}>MY IDENTITY<span className={styles.dot}>.</span></motion.h1>
 
       {/* 1. Identity Card */}
@@ -532,16 +543,6 @@ export default function ProfilePage() {
           <div className={styles.cardAccent}></div>
 
           <div className={styles.cardHeader}>
-            {/* Back Button */}
-            <button
-              className={styles.backButton}
-              onClick={() => window.history.back()}
-              aria-label="Go Back"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <div className={styles.chip}></div>
 

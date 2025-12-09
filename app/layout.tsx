@@ -21,13 +21,16 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     other: {
       "fc:frame": JSON.stringify({
-        version: minikitConfig.miniapp.version,
+        version: "next",
         imageUrl: minikitConfig.miniapp.heroImageUrl,
         button: {
-          title: "Identity",
+          title: "Open App",
           action: {
-            name: "Open Identity",
             type: "launch_frame",
+            name: "Identity App",
+            url: "https://base-mini-app.vercel.app", // Ensure explicit URL if possible, or fallback
+            splashImageUrl: minikitConfig.miniapp.heroImageUrl,
+            splashBackgroundColor: "#0F1115",
           },
         },
       }),
