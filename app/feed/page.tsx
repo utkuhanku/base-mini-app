@@ -33,13 +33,25 @@ export default function FeedPage() {
 
     return (
         <div className="min-h-screen bg-black text-white p-4 pb-24">
-            <motion.h1
-                className={styles.title}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
-                GLOBAL FEED<span className={styles.dot}>.</span>
-            </motion.h1>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                <Link href="/" style={{
+                    position: 'absolute',
+                    left: 0,
+                    color: 'rgba(255,255,255,0.6)',
+                    textDecoration: 'none',
+                    fontSize: '24px'
+                }}>
+                    ←
+                </Link>
+                <motion.h1
+                    className={styles.title}
+                    style={{ fontWeight: 800, letterSpacing: '-1px', fontSize: '2rem', margin: '0 auto' }} // Center title override
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    GLOBAL FEED<span className={styles.dot}>.</span>
+                </motion.h1>
+            </div>
 
             <p className="text-center text-gray-500 mb-8">Discover everyone building on Base.</p>
 
@@ -90,30 +102,28 @@ export default function FeedPage() {
                                         })()}
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className={styles.cardFooter}>
-                                <a href={`https://basescan.org/address/${card.owner}`} target="_blank" className="text-xs text-gray-400 hover:text-white transition">
-                                    {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
-                                </a>
+                                <div className={styles.cardFooter}>
+                                    <a href={`https://basescan.org/address/${card.owner}`} target="_blank" className="text-xs text-gray-400 hover:text-white transition">
+                                        {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
+                                    </a>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+
+                    {cards.length === 0 && (
+                        <div className="text-center text-gray-600 py-12">
+                            No cards minted yet. Be the first!
+                            <div className="mt-4">
+                                <Link href="/profile" className={styles.button}>
+                                    MINT YOUR CARD
+                                </Link>
                             </div>
                         </div>
-                        </motion.div>
-            ))}
-
-            {cards.length === 0 && (
-                <div className="text-center text-gray-600 py-12">
-                    No cards minted yet. Be the first!
-                    <div className="mt-4">
-                        <Link href="/profile" className={styles.button}>
-                            MINT YOUR CARD
-                        </Link>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
-    )
-}
-        </div >
     );
 }
