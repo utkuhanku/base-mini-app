@@ -20,13 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [minikitConfig.frame.imageUrl],
     },
     other: {
-      other: {
-        "fc:frame": JSON.stringify({
-          version: "next",
-          imageUrl: minikitConfig.frame.imageUrl,
-          button: minikitConfig.frame.button,
-        }),
-      },
+      "fc:frame": JSON.stringify({
+        version: "next",
+        imageUrl: minikitConfig.frame.imageUrl,
+        button: minikitConfig.frame.button,
+      }),
     },
   };
 }
