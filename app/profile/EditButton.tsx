@@ -29,9 +29,9 @@ interface EditButtonProps {
         name: string;
         bio: string;
         profilePicUrl: string;
-        roleTitle: string;
-        twitter: string;
-        website: string;
+        roleTitle?: string;
+        twitter?: string;
+        website?: string;
         links: any[];
     };
 }
