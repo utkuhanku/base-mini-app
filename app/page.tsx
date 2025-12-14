@@ -289,7 +289,7 @@ export default function Home() {
           }} onClick={() => setActiveHelp(null)}>
             <div style={{
               background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '32px',
-              maxWidth: '360px', width: '100%', baseShadow: '0 20px 50px rgba(0,0,0,0.5)'
+              maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
             }} onClick={e => e.stopPropagation()}>
 
               {activeHelp === 'identity' && (
