@@ -16,24 +16,34 @@ export const minikitConfig = {
   baseBuilder: {
     ownerAddress: "0x6edd22E9792132614dD487aC6434dec3709b79A8",
   },
-  miniapp: {
+  frame: {
     version: "1",
     name: "Identity",
     subtitle: "Your onchain identity.",
     description: "Onchain Identity and Event History",
-    screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
     iconUrl: `${ROOT_URL}/blue-icon.png`,
     splashImageUrl: `${ROOT_URL}/blue-hero.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
-    primaryCategory: "social",
-    tags: ["marketing", "ads", "quickstart", "waitlist"],
-    heroImageUrl: `${ROOT_URL}/api/og?name=Identity`,
-    tagline: "Your onchain identity.",
-    ogTitle: "Identity 🔵",
-    ogDescription: "Onchain Identity and Event History",
-    ogImageUrl: `${ROOT_URL}/api/og?name=Identity`,
+    // screenshotUrls etc? No, standard frame object usually doesn't strictly include screenshots in the manifest itself for v2? 
+    // Actually the doc says "App Metadata".
+    // But let's keep extra props if minikit sdk uses them, just under 'frame' if that's what's expected?
+    // Wait, strictly speaking, spec says:
+    // { accountAssociation: ..., frame: { version, name, iconUrl, homeUrl, imageUrl, button: {...} } }
+    // But let's assume the provided config structure was CLOSE but key name was wrong.
+    // We will trust the fields but fix the key.
+    imageUrl: `${ROOT_URL}/api/og?name=Identity`,
+    button: {
+      title: "Open App",
+      action: {
+        type: "launch_frame",
+        name: "Identity App",
+        url: ROOT_URL,
+        splashImageUrl: `${ROOT_URL}/blue-hero.png`,
+        splashBackgroundColor: "#000000",
+      },
+    }
   },
 } as const;
 

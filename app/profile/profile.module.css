@@ -22,6 +22,8 @@
   perspective: 1200px;
   font-family: 'Inter', sans-serif;
   /* Ensure global font matches if possible */
+  padding-bottom: 60px;
+  /* Space for content at bottom */
 }
 
 /* Typography */
@@ -32,6 +34,7 @@
   margin-bottom: 2.5rem;
   text-align: center;
   background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.7) 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -260,6 +263,7 @@
   opacity: 0.8;
   max-width: 220px;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -313,58 +317,220 @@
   gap: 16px;
 }
 
-.button {
+/* --- MINIMAL BUTTONS --- */
+.commonButton {
   width: 100%;
-  padding: 18px;
-  border-radius: 100px;
-  /* Pill Shape */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Space for arrow */
+  padding: 16px 8px;
+  background: transparent;
   border: none;
-  font-weight: 800;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  color: var(--base-white);
+  font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: var(--base-blue);
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 82, 255, 0.4);
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.commonButton:hover {
+  padding-left: 20px;
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Arrow for Hover Effect */
+.btnArrow {
+  opacity: 0.5;
+  transition: transform 0.2s, opacity 0.2s;
+  font-family: var(--font-base);
+  /* Ensure safe font for -> */
+}
+
+.commonButton:hover .btnArrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+/* Primary Button (Mint/Edit) - Updated to minimal style manually to avoid 'composes' lint */
+.button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  color: var(--base-white);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
 }
 
 .button:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 82, 255, 0.6);
+  padding-left: 20px;
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.02);
 }
 
+.button:hover .btnArrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+/* Secondary Button (Share/Close) */
 .secondaryButton {
   width: 100%;
-  padding: 16px;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  color: var(--base-white);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  text-align: left;
 }
 
 .secondaryButton:hover {
-  background: rgba(255, 255, 255, 0.15);
+  padding-left: 20px;
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.secondaryButton:hover .btnArrow {
+  opacity: 1;
+  transform: translateX(4px);
 }
 
 /* Edit Form */
-.form {
+/* --- PRO FORM STYLES --- */
+.proFormContainer {
   width: 100%;
   max-width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
 }
 
-.roleSwitcher {
+.formSection {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px;
-  border-radius: 14px;
+  flex-direction: column;
+  gap: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.formSectionTitle {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formSectionTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-left: 2px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--base-blue);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(0, 82, 255, 0.2);
+}
+
+/* Base Post Section */
+.basePostSection {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.basePostButton {
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 100px;
+  padding: 16px 32px;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.3);
+  transition: transform 0.2s;
+}
+
+.basePostButton:hover {
+  transform: scale(1.05);
 }
 
 .roleOption {
@@ -544,4 +710,1003 @@
   opacity: 0.5;
   pointer-events: none;
   mix-blend-mode: overlay;
+}
+
+/* --- NEW SECTIONS (Memories & Events) --- */
+.sectionContainer {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.sectionHeader {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Memories */
+.memoriesScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.memoriesScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.memoryCard {
+  min-width: 100px;
+  height: 100px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.memoryCard:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.memoryIcon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.memoryText {
+  font-size: 11px;
+  color: var(--base-white);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Events */
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eventItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--glass-bg);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+}
+
+.eventDate {
+  font-size: 11px;
+  color: var(--base-blue);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.eventTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+}
+
+.eventStatus {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.eventStatusConfirmed {
+  color: var(--base-blue);
+  background: rgba(0, 82, 255, 0.15);
+}
+
+/* --- SCORE VIEW HUD STYLES (RE-APPLIED & EXTENDED) --- */
+.scoreOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.scoreCloseButton {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 100;
+}
+
+.scoreCloseButton:hover {
+  background: white;
+  color: black;
+}
+
+.scoreCard {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 32px;
+  padding: 32px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+.scoreLabel {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.scoreOrbContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 40px;
+  height: 160px;
+}
+
+.scoreOrb {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  filter: blur(14px);
+  transition: all 1s ease;
+  opacity: 0.8;
+}
+
+.scoreValue {
+  position: absolute;
+  font-family: monospace;
+  font-size: 48px;
+  font-weight: 800;
+  color: white;
+  mix-blend-mode: overlay;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  letter-spacing: -2px;
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.scoreStatBox {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: background 0.2s;
+  height: 100%;
+}
+
+.scoreStatBox:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.statIcon {
+  margin-bottom: 8px;
+  opacity: 0.7;
+  color: white;
+}
+
+.statLabel {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.storyButton {
+  width: 100%;
+  background: linear-gradient(90deg, #111, #222);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  color: white;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.storyButton:hover {
+  border-color: white;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Content Styles */
+.storyModal {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  z-index: 50;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+}
+
+/* Zora Warning Box */
+.zoraWarning {
+  background: rgba(255, 20, 20, 0.15);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zoraWarningText {
+  color: #ffcccc;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.zoraConnectBtn {
+  background: rgba(255, 50, 50, 0.2);
+  border: 1px solid rgba(255, 50, 50, 0.4);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zoraConnectBtn:hover {
+  background: rgba(255, 50, 50, 0.4);
+}
+
+/* --- INLINE SCORE VIEW STYLES (V4) --- */
+.scoreInlineContainer {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 10;
+}
+
+.scoreInlineCard {
+  background: black;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 32px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Accent Glow for the Inline Card */
+.scoreInlineCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 82, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scoreInlineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.scoreCollapseBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-family: monospace;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.scoreCollapseBtn:hover {
+  color: white;
+}
+
+/* Adjustments for Inline Context */
+.scoreOrbContainerInline {
+  height: 140px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.scoreValueInline {
+  font-size: 56px;
+  /* Bigger impact */
+  font-family: monospace;
+  font-weight: 800;
+  color: white;
+  z-index: 2;
+  text-shadow: 0 0 40px rgba(0, 82, 255, 0.6);
+}
+
+.scoreOrbInline {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  filter: blur(24px);
+  opacity: 0.6;
+}
+
+/* --- BUTTON POLISH (ROUNDED PILL) --- */
+.basePostButton {
+  background: white;
+  color: black;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 100px;
+  /* Pill shape */
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.basePostButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.25);
+}
+
+/* Ensure Score View doesn't jump */
+.scoreInlineContainer {
+  min-height: 520px;
+  /* Reserve space to prevent layout shift */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: min-height 0.3s ease;
+}
+
+/* --- DEVREL INTRO STYLES --- */
+.introBanner {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Left align */
+  padding-left: 4px;
+  /* Slight offset */
+}
+
+.introTitle {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  color: white;
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif;
+  /* Ensure strong font */
+}
+
+.introSubtitle {
+  font-family: 'Inter', monospace;
+  /* Mixed feel */
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #0052FF;
+  /* Base Blue Accent */
+  text-transform: uppercase;
+  margin-left: 2px;
+}
+
+.introSubtitleRow {
+  gap: 8px;
+}
+
+@keyframes iconPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.4);
+    transform: scale(1);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(0, 82, 255, 0);
+    transform: scale(1.05);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
+    transform: scale(1);
+  }
+}
+
+.helpIconBtn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 82, 255, 0.4);
+  /* Stronger Blue Border */
+  background: rgba(0, 82, 255, 0.15);
+  /* Stronger Tint */
+  color: #0052FF;
+  font-size: 10px;
+  font-weight: 800;
+  /* Extra Bold */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: iconPulse 2s infinite;
+  /* Permanent Pulse */
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.helpIconBtn:hover {
+  background: #0052FF;
+  color: white;
+  border-color: #0052FF;
+  animation: none;
+  /* Stop pulse on hover */
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(0, 82, 255, 0.8);
+  /* Intense Glow */
+}
+
+/* HELP MODAL */
+.helpModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.helpModalContent {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.helpModalHeader {
+  font-size: 18px;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.helpModalText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+
+
+/* --- MAIN CARD STYLES (Blue Gradient V2) --- */
+.identityCard {
+  width: 100%;
+  max-width: 380px;
+  /* Reference width */
+  aspect-ratio: 1.586;
+  /* Credit card ratio */
+  background: linear-gradient(135deg, #0052FF 0%, #0042D9 40%, #002699 100%);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 82, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  color: white;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.identityCard:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 82, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Card Header: Chip + Verified + Points */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: auto;
+  /* Pushes content down */
+}
+
+.cardChip {
+  width: 48px;
+  height: 34px;
+  background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Simulate chip lines */
+.cardChip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg,
+      transparent 0px,
+      transparent 10px,
+      rgba(0, 0, 0, 0.1) 10px,
+      rgba(0, 0, 0, 0.1) 11px);
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+  position: absolute;
+  left: 84px;
+  /* Positioned relative to chip */
+  top: 30px;
+}
+
+.verifiedDot {
+  width: 8px;
+  height: 8px;
+  background: #00C853;
+  /* Success Green */
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00C853;
+}
+
+.pointsPill {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card Body: Avatar + Name */
+.cardBody {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cardAvatarContainer {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardName {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.cardBio {
+  font-size: 11px;
+  opacity: 0.7;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* Card Footer: Social Pills */
+.cardFooter {
+  display: flex;
+  gap: 8px;
+}
+
+.socialPill {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s;
+}
+
+.socialPill:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.qrCodeMini {
+  position: absolute;
+  bottom: 24px;
+  left: 310px;
+  /* Positioned right */
+  background: white;
+  padding: 4px;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- CARD VARIANTS --- */
+
+/* BUSINESS (Gold/White or Sleek Monochrome) */
+.identityCardBusiness {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1.586;
+  background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.3);
+  /* Gold border hint */
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  color: white;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.identityCardBusiness::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.identityCardBusiness:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.5);
+}
+
+/* MANIFEST OVERLAY */
+.manifestOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.1;
+  overflow: hidden;
+}
+
+.manifestText {
+  font-size: 40px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: white;
+  text-align: center;
+  line-height: 1;
+  transform: rotate(-10deg);
+  white-space: nowrap;
+  letter-spacing: 4px;
+  font-family: 'Inter', sans-serif;
+  mix-blend-mode: overlay;
+}
+
+/* TOGGLE SWITCH for Card Type */
+.cardToggleContainer {
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  /* Darker background */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 100px;
+  padding: 4px;
+  /* Minimal padding around pills */
+  margin-bottom: 24px;
+  width: fit-content;
+  align-items: center;
+  gap: 4px;
+  /* Space between buttons */
+}
+
+.cardToggleBtn {
+  padding: 10px 20px;
+  /* More horizontal breathing room */
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  /* Smaller, sleeker font */
+  font-weight: 800;
+  /* Extra bold */
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  /* Very wide spacing */
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+  /* Prevent wrapping */
+  display: flex;
+  /* Ensure centering */
+  align-items: center;
+  justify-content: center;
+}
+
+.cardToggleBtn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cardToggleBtnActive {
+  padding: 10px 24px;
+  /* Slightly wider active state */
+  border-radius: 100px;
+  border: none;
+  background: white;
+  color: black;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  display: flex;
+  /* Ensure centering */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+
+/* --- CARD VARIANTS --- */
+
+/* BUSINESS (Gold/White or Sleek Monochrome) */
+.identityCardBusiness {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1.586;
+  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.3);
+  /* Gold border hint */
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  color: white;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.identityCardBusiness::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.identityCardBusiness:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.5);
+}
+
+/* MANIFEST OVERLAY */
+.manifestOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.1;
+  overflow: hidden;
+}
+
+.manifestText {
+  font-size: 40px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: white;
+  text-align: center;
+  line-height: 1;
+  transform: rotate(-10deg);
+  white-space: nowrap;
+  letter-spacing: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* TOGGLE SWITCH for Card Type */
+.cardToggleContainer {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  padding: 4px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.cardToggleBtn {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cardToggleBtnActive {
+  background: white;
+  color: black;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

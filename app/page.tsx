@@ -36,6 +36,7 @@ export default function Home() {
   const [fid, setFid] = useState<number | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [activeHelp, setActiveHelp] = useState<string | null>(null);
 
   // 1. Perform Quick Auth on Mount
   useEffect(() => {
@@ -200,44 +201,137 @@ export default function Home() {
           </motion.div>
         ) : (
           <div className={styles.menu}>
-            {/* My Profile */}
-            <Link href="/profile" style={{ textDecoration: 'none' }}>
-              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>🪪</div>
-                <div className={styles.menuText}>
-                  <h3>My Identity</h3>
-                  <p>View & Share Card</p>
-                </div>
-                <div className={styles.arrow}>→</div>
-              </motion.div>
-            </Link>
+            <div style={{ position: 'relative' }}>
+              <Link href="/profile" style={{ textDecoration: 'none', flex: 1 }}>
+                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.menuText}>
+                    <h3>MY IDENTITY</h3>
+                    <p>View & Share Card</p>
+                  </div>
+                  <div className={styles.arrow}>→</div>
+                </motion.div>
+              </Link>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('identity'); }}
+                style={{
+                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
+                  width: '20px', height: '20px', borderRadius: '50%',
+                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
+                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
+                }}
+              >
+                ?
+              </button>
+            </div>
 
             {/* Global Feed */}
-            <Link href="/feed" style={{ textDecoration: 'none' }}>
-              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>🌐</div>
-                <div className={styles.menuText}>
-                  <h3>Community Feed</h3>
-                  <p>Explore Global Profiles</p>
-                </div>
-                <div className={styles.arrow}>→</div>
-              </motion.div>
-            </Link>
+            <div style={{ position: 'relative' }}>
+              <Link href="/feed" style={{ textDecoration: 'none', flex: 1 }}>
+                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.menuText}>
+                    <h3>COMMUNITY FEED</h3>
+                    <p>Explore Global Profiles</p>
+                  </div>
+                  <div className={styles.arrow}>→</div>
+                </motion.div>
+              </Link>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('feed'); }}
+                style={{
+                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
+                  width: '20px', height: '20px', borderRadius: '50%',
+                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
+                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
+                }}
+              >
+                ?
+              </button>
+            </div>
 
             {/* Connection Minting */}
-            <Link href="/connect" style={{ textDecoration: 'none' }}>
-              <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
-                <div className={styles.menuIcon}>🤝</div>
-                <div className={styles.menuText}>
-                  <h3>Mint Connection</h3>
-                  <p>Bond with others</p>
-                </div>
-                <div className={styles.arrow}>→</div>
-              </motion.div>
-            </Link>
+            <div style={{ position: 'relative' }}>
+              <Link href="/connect" style={{ textDecoration: 'none', flex: 1 }}>
+                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                  <div className={styles.menuText}>
+                    <h3>MINT CONNECTION</h3>
+                    <p>Bond with others</p>
+                  </div>
+                  <div className={styles.arrow}>→</div>
+                </motion.div>
+              </Link>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('connect'); }}
+                style={{
+                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
+                  width: '20px', height: '20px', borderRadius: '50%',
+                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
+                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
+                }}
+              >
+                ?
+              </button>
+            </div>
           </div>
-        )}
-      </motion.div>
+        )
+        }
+      </motion.div >
+
+      {/* HELP MODAL OVERLAY */}
+      {/* We use inline styles here for simplicity to avoid creating new CSS module classes right now, reusing the aesthetic */}
+      {
+        activeHelp && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+          }} onClick={() => setActiveHelp(null)}>
+            <div style={{
+              background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', padding: '32px',
+              maxWidth: '360px', width: '100%', baseShadow: '0 20px 50px rgba(0,0,0,0.5)'
+            }} onClick={e => e.stopPropagation()}>
+
+              {activeHelp === 'identity' && (
+                <>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '12px', letterSpacing: '-0.5px' }}>BASE IDENTITY</div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
+                    Your onchain passport. Manage your appearance, track your social score, and view your verified credentials.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>This is step 1: Establishing who you are.</span>
+                  </div>
+                </>
+              )}
+
+              {activeHelp === 'feed' && (
+                <>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '12px', letterSpacing: '-0.5px' }}>COMMUNITY FEED</div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
+                    See who is building on Base. Discover other identities and verify their reputation signals.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>This is step 2: Finding your network.</span>
+                  </div>
+                </>
+              )}
+
+              {activeHelp === 'connect' && (
+                <>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '12px', letterSpacing: '-0.5px' }}>MINT CONNECTION</div>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
+                    The core of the social graph. Meet someone IRL, take a photo, and mint a permanent bond onchain.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>This is step 3: Solidifying trust.</span>
+                  </div>
+                </>
+              )}
+
+              <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '11px', opacity: 0.5, cursor: 'pointer' }} onClick={() => setActiveHelp(null)}>
+                TAP ANYWHERE TO CLOSE
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       {/* Marquee at bottom for 'Financial Ticker' feel */}
       <div className={styles.marqueeContainer}>
@@ -259,6 +353,6 @@ export default function Home() {
           </span>
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 }

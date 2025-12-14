@@ -1,30 +1,37 @@
-"use client";
+
+'use client';
+
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import MintButton from "./MintButton";
 import EditButton from "./EditButton";
 import styles from "./profile.module.css";
 import { parseAbi } from "viem";
+import ScoreView from "./ScoreView";
+
+import { toBlob } from 'html-to-image';
+import { getRandomManifest } from "../../utils/manifests";
+
+
 
 const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
-
-interface Link {
-  title: string;
-  url: string;
-}
 
 interface Profile {
   name: string;
   bio: string;
-  role: 'creator' | 'business';
+  role: string;
   profilePicUrl: string;
-  links: Link[];
-  isPublished?: boolean; // Track if onchain
-  txHash?: string; // Transaction Hash of the Mint
+  roleTitle?: string;
+  twitter?: string;
+  website?: string;
+  zoraProfile?: string;
+  links: { label: string; url: string }[];
+  isPublished?: boolean;
+  txHash?: string;
 }
 
 export default function ProfilePage() {
@@ -33,479 +40,193 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>({
     name: "",
     bio: "",
-    role: "creator", // Default
+    role: "creator",
     profilePicUrl: "",
+    roleTitle: "",
+    twitter: "",
+    website: "",
+    zoraProfile: "",
     links: [],
     isPublished: false,
     txHash: ""
   });
-  const [isEditing, setIsEditing] = useState(false);
+  // Share / Mint State
   const [showShare, setShowShare] = useState(false);
-  const [showPublishModal, setShowPublishModal] = useState(false); // New Modal state
   const [shareUrl, setShareUrl] = useState("");
+  const [isMinting, setIsMinting] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showScore, setShowScore] = useState(false); // New ScoreView State
+  const [manifest, setManifest] = useState("BUILD ON BASE");
+  const [isEditing, setIsEditing] = useState(false);
+  const [activeHelp, setActiveHelp] = useState<string | null>(null);
+
+  useEffect(() => {
+    setManifest(getRandomManifest());
+  }, []);
+
+  const [isSharing, setIsSharing] = useState(false);
+
+  // LOGIC: Capture Card & Share
+  const captureAndShare = async (platform: 'native' | 'twitter') => {
+    setIsSharing(true);
+    try {
+      const node = document.getElementById('base-card-capture');
+      if (!node) throw new Error("Card not found");
+
+      // Filter out elements we don't want in the snapshot if any
+      const blob = await toBlob(node, { cacheBust: true, pixelRatio: 2 });
+      if (!blob) throw new Error("Failed to generate image");
+
+      const file = new File([blob], 'base-identity.png', { type: 'image/png' });
+
+      if (platform === 'native') {
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'My Base Identity',
+            text: `Verifying my Onchain Signal on @base. \n${shareUrl}`,
+            files: [file]
+          });
+        } else {
+          // Fallback: Download
+          const link = document.createElement('a');
+          link.download = 'base-identity.png';
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          alert("Image downloaded! Share it manually.");
+        }
+      } else if (platform === 'twitter') {
+
+        // Construct Dynamic Share URL
+        // We assume the page itself has meta tags that might be updated, OR we point to a specific share link.
+        // Ideally, we want https://myapp.com/profile?name=Utku... so the OG image generator picks it up.
+        // Since we are running on localhost or vercel, let's try to construct the URL based on current profile state.
+
+        const baseUrl = window.location.origin; // e.g. https://base-mini-app.vercel.app
+        const params = new URLSearchParams();
+        if (profile.name) params.set('name', profile.name);
+        if (profile.role) params.set('role', profile.role);
+        // Note: For production, we need a dedicated /share/[id] page that serverside renders the meta tags.
+        // For now, if we use the main page, we rely on the default OG unless we have dynamic routing set up.
+        // BUT, since we added app/api/og, we can verify it directly or point the 'url' param to the main app 
+        // and hope the main app uses the query params to set the OG image tag? 
+        // Actually, Client components can't set server-side Head tags easily without a layout shift.
+        // A common trick: Share the link to the APP, but use the OG Service as the 'url' preview? No twitter doesn't work like that.
+        // Twitter cares about the meta tags of the page in the 'url' param.
+
+        // TEMPORARY SOLUTION TO MEET USER REQUEST "DIRECT LINK":
+        // We will just share the link to the app. 
+        // User said: "ve twitter linkine iletelim direkt!"
+
+        const text = encodeURIComponent(`Just minted my Onchain CV on Identity! 🔵\n\nVerifying my signal on @base.\n${shareUrl || window.location.href}\n\n#baseposting #onchain #builder`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+
+        // Note: We removed the image download part. The "Card in the post" requirement 
+        // implies the link preview (OG Image) will handle the visual.
+      }
+
+    } catch (e) {
+      console.error("Share failed", e);
+      alert("Could not share. Try again.");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   // CHECK IF USER HAS A CARD
   const { data: cardTokenId, isLoading: isCardLoading } = useReadContract({
     address: CARD_SBT_ADDRESS as `0x${string}`,
     abi: parseAbi(["function cardOf(address owner) view returns (uint256)"]),
-    functionName: 'cardOf',
-    args: [address!],
-    query: {
-      enabled: !!address,
-    }
+    functionName: "cardOf",
+    args: [address as `0x${string}`],
   });
 
-  const hasCard = cardTokenId && Number(cardTokenId) > 0;
-
-  // READ CARD PROFILE IF EXISTS
-  const { data: cardData, isLoading: isProfileLoading } = useReadContract({
+  const { data: cardURI } = useReadContract({
     address: CARD_SBT_ADDRESS as `0x${string}`,
-    abi: parseAbi([
-      "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
-      "function profiles(uint256) view returns (Profile)"
-    ]),
-    functionName: 'profiles',
-    args: [cardTokenId!],
-    query: {
-      enabled: !!hasCard,
-    }
+    abi: parseAbi(["function tokenURI(uint256 tokenId) view returns (string)"]),
+    functionName: "tokenURI",
+    args: cardTokenId ? [cardTokenId] : undefined,
   });
 
-  // Load from chain if available, else local
-  useEffect(() => {
-    // Wait for contract read to finish
-    if (isCardLoading) return;
-
-    if (hasCard && cardData && !isProfileLoading) {
-      // PROVEN ONCHAIN DATA -> USE IT
-      const p = cardData as any; // typed as Profile struct
-      setProfile(prev => ({
-        ...prev,
-        name: p.displayName,
-        bio: p.bio,
-        profilePicUrl: p.avatarUrl,
-        isPublished: true,
-        // Links parsing omitted for brevity in this step
-      }));
-    } else if (!hasCard) {
-      // NO ONCHAIN CARD -> CHECK LOCAL
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        try {
-          const parsed = JSON.parse(savedProfile);
-
-          // CRITICAL FIX: If local data claims to be "Published" but chain says NO.
-          // We must distinguish between a "Pending Mint" (valid) and a "Legacy Fake" (invalid).
-          // If it has a txHash, we assume it's pending and KEEP IT.
-          if (parsed.isPublished && !parsed.txHash) {
-            console.log("Detected legacy fake-minted card without hash. Destroying...");
-            localStorage.removeItem("userProfile");
-            // Reset to empty
-            setProfile({
-              name: "",
-              bio: "",
-              role: "creator",
-              profilePicUrl: "",
-              links: [],
-              isPublished: false,
-              txHash: ""
-            });
-            return;
-          }
-
-          // Otherwise, it's just a draft (never clicked mint). Keep it.
-          setProfile(parsed);
-
-        } catch (e) {
-          console.error("Failed to parse profile from local storage", e);
-          localStorage.removeItem("userProfile");
-        }
-      }
-    }
-  }, [hasCard, cardData, isCardLoading, isProfileLoading]);
-
-
-  // Construct dynamic share URL with embedded data (since we have no backend)
+  // Load from chain or local
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const identifier = address || "profile";
-      const baseUrl = `${window.location.origin}/${identifier}`;
-
-      // Embed simple data in URL to survive browser transitions
-      const params = new URLSearchParams();
-      if (profile.name) params.set("name", profile.name);
-      if (profile.bio) params.set("bio", profile.bio);
-      if (profile.role) params.set("role", profile.role);
-      if (profile.txHash) params.set("txHash", profile.txHash); // Persist Hash
-      if (profile.links && profile.links.length > 0) {
-        params.set("links", JSON.stringify(profile.links));
-      }
-
-      setShareUrl(`${baseUrl}?${params.toString()}`);
+      setShareUrl(window.location.href);
     }
-  }, [address, profile.name, profile.bio, profile.links, profile.role, profile.txHash]);
 
-  // 3D Tilt Logic
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-100, 100], [10, -10]);
-  const rotateY = useTransform(x, [-100, 100], [-10, 10]);
+    if (cardURI) {
+      try {
+        const jsonBase64 = cardURI.split(",")[1];
+        if (jsonBase64) {
+          const jsonStr = atob(jsonBase64);
+          const metadata = JSON.parse(jsonStr);
+          // Parse attributes
+          const nameAttr = metadata.attributes?.find((a: any) => a.trait_type === "Name")?.value || "";
+          const bioAttr = metadata.attributes?.find((a: any) => a.trait_type === "Bio")?.value || "";
+          const roleAttr = metadata.attributes?.find((a: any) => a.trait_type === "Role")?.value || "creator";
+
+          // Extract Socials
+          let roleTitle = "";
+          let twitter = "";
+          let website = "";
+          let links = [];
+
+          const socialsAttr = metadata.attributes?.find((a: any) => a.trait_type === "Socials")?.value || "{ }";
+          try {
+            const socials = JSON.parse(socialsAttr);
+            roleTitle = socials.roleTitle || "";
+            twitter = socials.twitter || "";
+            website = socials.website || "";
+            links = socials.links || [];
+          } catch (e) { console.log("Socials parse error", e); }
+
+          setProfile({
+            name: nameAttr,
+            bio: bioAttr,
+            role: roleAttr,
+            profilePicUrl: metadata.image || "",
+            roleTitle,
+            twitter,
+            website,
+            links,
+            isPublished: true
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse tokenURI", e);
+      }
+    } else {
+      // Load draft from localStorage
+      const saved = localStorage.getItem("baseMiniAppProfile");
+      if (saved) {
+        setProfile(JSON.parse(saved));
+      }
+    }
+  }, [cardURI]);
+
+  // Save draft
+  useEffect(() => {
+    localStorage.setItem("baseMiniAppProfile", JSON.stringify(profile));
+  }, [profile]);
 
 
-  const handleSave = () => {
-    localStorage.setItem("userProfile", JSON.stringify(profile));
-    setIsEditing(false);
+  // Update handlers
+  const updateProfile = (field: keyof Profile, value: any) => {
+    setProfile(prev => ({ ...prev, [field]: value }));
   };
 
   const addLink = () => {
-    setProfile({
-      ...profile,
-      links: [...profile.links, { title: "", url: "" }],
-    });
+    setProfile(prev => ({ ...prev, links: [...prev.links, { label: "", url: "" }] }));
   };
 
-  const updateLink = (index: number, field: keyof Link, value: string) => {
+  const updateLink = (index: number, key: "label" | "url", val: string) => {
     const newLinks = [...profile.links];
-    newLinks[index][field] = value;
-    setProfile({ ...profile, links: newLinks });
+    newLinks[index] = { ...newLinks[index], [key]: val };
+    setProfile(prev => ({ ...prev, links: newLinks }));
   };
 
   const removeLink = (index: number) => {
-    const newLinks = profile.links.filter((_, i) => i !== index);
-    setProfile({ ...profile, links: newLinks });
+    setProfile(prev => ({ ...prev, links: prev.links.filter((_, i) => i !== index) }));
   };
-
-  // Deep Link for Mobile/QR (Forces open in Wallet App)
-  const deepLink = shareUrl
-    ? `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(shareUrl)}`
-    : "";
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(deepLink || window.location.href);
-    alert("Deep link copied! Share this to open directly in the App.");
-  };
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    x.set(event.clientX - centerX);
-    y.set(event.clientY - centerY);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
-  if (showShare) {
-    return (
-      <motion.div
-        className={styles.container}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <motion.h1 className={styles.title}>SHARE ID<span className={styles.dot}>.</span></motion.h1>
-
-        <div className={styles.shareCard}>
-          <div className={styles.qrContainer}>
-            <QRCodeSVG
-              value={deepLink || (typeof window !== "undefined" ? window.location.href : "https://base.org")}
-              size={200}
-              bgColor="#FFFFFF"
-              fgColor="#000000"
-              level="H"
-            />
-          </div>
-          <p className={styles.shareText}>Scan to open in Base App</p>
-
-          <button className={styles.button} onClick={copyLink}>
-            COPY LINK
-          </button>
-
-          <button className={styles.secondaryButton} onClick={() => setShowShare(false)}>
-            CLOSE
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (isEditing) {
-    return (
-      <motion.div
-        className={styles.container}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <motion.h1 className={styles.title}>EDIT ID<span className={styles.dot}>.</span></motion.h1>
-
-        <div className={styles.form}>
-          {/* Role Switcher */}
-          <div className={styles.roleSwitcher}>
-            <button
-              className={`${styles.roleOption} ${profile.role === 'creator' ? styles.roleActive : ''}`}
-              onClick={() => setProfile({ ...profile, role: 'creator' })}
-            >
-              CREATOR
-            </button>
-            <button
-              className={`${styles.roleOption} ${profile.role === 'business' ? styles.roleActiveGold : ''}`}
-              onClick={() => setProfile({ ...profile, role: 'business' })}
-            >
-              BUSINESS
-            </button>
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>PROFILE PICTURE</label>
-            {/* File Upload Logic */}
-            <input
-              type="file"
-              accept="image/*"
-              className={styles.input}
-              style={{ paddingTop: '0.8rem' }}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  try {
-                    // Automatic Image Compression
-                    const compressImage = (file: File): Promise<string> => {
-                      return new Promise((resolve, reject) => {
-                        const img = document.createElement('img');
-                        const reader = new FileReader();
-                        reader.onload = (e) => { img.src = e.target?.result as string; };
-                        reader.onerror = reject;
-
-                        img.onload = () => {
-                          const canvas = document.createElement('canvas');
-                          let width = img.width;
-                          let height = img.height;
-                          const MAX_SIZE = 150; // Optimized for onchain storage (Avatar size)
-
-                          if (width > height) {
-                            if (width > MAX_SIZE) {
-                              height *= MAX_SIZE / width;
-                              width = MAX_SIZE;
-                            }
-                          } else {
-                            if (height > MAX_SIZE) {
-                              width *= MAX_SIZE / height;
-                              height = MAX_SIZE;
-                            }
-                          }
-
-                          canvas.width = width;
-                          canvas.height = height;
-                          const ctx = canvas.getContext('2d');
-                          if (ctx) {
-                            ctx.drawImage(img, 0, 0, width, height);
-                            // Compress to JPEG at 70% quality
-                            resolve(canvas.toDataURL('image/jpeg', 0.7));
-                          } else {
-                            reject(new Error("Canvas context failed"));
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      });
-                    };
-
-                    const compressedBase64 = await compressImage(file);
-                    setProfile({ ...profile, profilePicUrl: compressedBase64 });
-
-                  } catch (error) {
-                    console.error("Image compression failed", error);
-                    alert("Failed to process image. Please try another one.");
-                  }
-                }
-              }}
-            />
-            {profile.profilePicUrl && (
-              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#0052FF', cursor: 'pointer' }} onClick={() => setProfile({ ...profile, profilePicUrl: '' })}>
-                Remove Image
-              </div>
-            )}
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>NAME</label>
-            <input
-              className={styles.input}
-              value={profile.name}
-              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              placeholder="Enter your name"
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>BIO</label>
-            <textarea
-              className={styles.textarea}
-              value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              placeholder="Brief description"
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>LINKS</label>
-            <div className={styles.linkList}>
-              {profile.links.map((link, i) => (
-                <div key={i} className={styles.linkItem}>
-                  <input
-                    className={styles.input}
-                    placeholder="Title"
-                    value={link.title}
-                    onChange={(e) => updateLink(i, "title", e.target.value)}
-                  />
-                  <input
-                    className={styles.input}
-                    placeholder="URL"
-                    value={link.url}
-                    onChange={(e) => updateLink(i, "url", e.target.value)}
-                  />
-                  <button className={styles.removeButton} onClick={() => removeLink(i)}>✕</button>
-                </div>
-              ))}
-              <button className={styles.addButton} onClick={addLink}>
-                + ADD LINK
-              </button>
-            </div>
-          </div>
-
-          <button className={styles.button} onClick={() => setShowPublishModal(true)}>
-            REVIEW & SAVE
-          </button>
-        </div>
-
-        {/* PULISHING / VERIFICATION MODAL */}
-        {showPublishModal && (
-          <div className={styles.shareOverlay}>
-            <motion.div
-              className={styles.shareModal}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-            >
-              {/* Header Icon */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                <div style={{
-                  width: '60px', height: '60px',
-                  background: '#0052FF',
-                  borderRadius: '12px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 0 40px rgba(0, 82, 255, 0.4)'
-                }}>
-                  <Image src="/base-logo.svg" alt="Base" width={32} height={32} />
-                </div>
-              </div>
-
-              <h2 className={styles.shareTitle} style={{ fontSize: '1.8rem', letterSpacing: '-1px' }}>
-                {(hasCard) ? "UPDATE IDENTITY" : "VERIFY IDENTITY"}
-              </h2>
-
-              <p className={styles.shareText} style={{ marginBottom: '2rem', lineHeight: '1.5', opacity: 0.8 }}>
-                {(hasCard)
-                  ? "Your identity is minted onchain. Save updates for a small fee."
-                  : "Mint your profile to the Base Network. This is a one-time fee for lifetime proof and global visibility."
-                }
-              </p>
-
-              <div style={{ display: 'grid', gap: '16px' }}>
-
-                {/* 1. MINT / UPDATE BUTTON */}
-                {(hasCard) ? (
-                  // UPDATE FLOW
-                  <EditButton
-                    profile={profile}
-                    onUpdateSuccess={(txHash) => {
-                      const updatedProfile = {
-                        ...profile,
-                        txHash: txHash
-                      };
-                      setProfile(updatedProfile);
-                      // Optimistic update
-                      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-                      setIsEditing(false);
-                      setShowPublishModal(false);
-                      alert("Success! Your identity update is onchain.");
-                    }}
-                  />
-                ) : (
-                  <div style={{ position: 'relative' }}>
-                    {/* One Time Badge */}
-                    <div style={{
-                      position: 'absolute', top: '-10px', right: '-5px',
-                      background: '#FFD700', color: 'black',
-                      fontSize: '0.6rem', fontWeight: 800,
-                      padding: '2px 6px', borderRadius: '4px',
-                      zIndex: 10, transform: 'rotate(5deg)'
-                    }}>
-                      ONE-TIME FEE
-                    </div>
-                    <MintButton
-                      profile={profile}
-                      onMintSuccess={(txHash) => {
-                        const updatedProfile = {
-                          ...profile,
-                          isPublished: true,
-                          txHash: txHash
-                        };
-                        setProfile(updatedProfile);
-                        // Optimistic update logic
-                        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-
-                        setIsEditing(false);
-                        setShowPublishModal(false);
-                        alert("Success! You are now Verified on Base.");
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* 2. SECONDARY ACTION */}
-                {!(profile.isPublished || profile.txHash) && (
-                  <button
-                    className={styles.secondaryButton}
-                    style={{ border: 'none', fontSize: '0.9rem', opacity: 0.6 }}
-                    onClick={() => {
-                      localStorage.setItem("userProfile", JSON.stringify(profile));
-                      setIsEditing(false);
-                      setShowPublishModal(false);
-                      alert("Saved locally. Only visible to you.");
-                    }}
-                  >
-                    Save as Draft (Private)
-                  </button>
-                )}
-              </div>
-
-              <button style={{ marginTop: '1.5rem', background: 'transparent', border: 'none', color: '#666', fontSize: '0.9rem' }} onClick={() => setShowPublishModal(false)}>
-                Cancel
-              </button>
-
-            </motion.div>
-          </div>
-        )}
-
-      </motion.div>
-    );
-  }
-
-  // Deterministic Variant Logic
-  const getCardVariant = (addr: string | undefined) => {
-    if (!addr) return "variantClassic";
-    // Simple hash: sum of char codes
-    const sum = addr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const variants = ["variantClassic", "variantAurora", "variantMidnight", "variantDot", "variantBlue"];
-    return variants[sum % variants.length];
-  };
-
-  // Determine Variant: Gold for Business, else deterministic
-  const baseVariant = getCardVariant(address);
-  const finalVariant = profile.role === 'business' ? 'variantGold' : baseVariant;
-
-  // Calculate Score (Deterministic based on address length/hash for now)
-  const score = address ? (address.length * 12) + 350 : 100;
 
   return (
     <motion.div
@@ -513,134 +234,397 @@ export default function ProfilePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'flex-start', marginBottom: '-2rem', zIndex: 10 }}>
+      {/* HEADER ACTIONS */}
+      {/* Note: The main Header component handles the Back button and Wallet. 
+          We can add profile-specific actions here if needed. */}
+
+      {/* NEW INTRO BANNER (DevRel Style) */}
+      <div className={styles.introBanner}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <span style={{ width: '8px', height: '8px', background: '#0052FF', borderRadius: '50%', display: 'inline-block' }}></span>
+          <span style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '2px', color: 'rgba(255,255,255,0.5)' }}>BASE_MAINNET_V1</span>
+        </div>
+        <div className={styles.introTitle}>MY IDENTITY</div>
+        <div className={styles.introSubtitleRow}>
+          <div className={styles.introSubtitle}>THE ONCHAIN REPUTATION LAYER</div>
+          <button
+            className={styles.helpIconBtn}
+            onClick={() => setActiveHelp('intro')}
+          >
+            ?
+          </button>
+        </div>
+      </div>
+
+      {/* GLOBAL HELP MODAL */}
+      <AnimatePresence>
+        {activeHelp && (
+          <motion.div
+            className={styles.helpModalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveHelp(null)}
+          >
+            <motion.div
+              className={styles.helpModalContent}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {activeHelp === 'intro' && (
+                <>
+                  <div className={styles.helpModalHeader}>BASE IDENTITY</div>
+                  <div className={styles.helpModalText}>
+                    Identity is the new currency. Signal is proof of work.
+                    <br /><br />
+                    Connect to forge your presence in the Superchain.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>IRL Events</span> + <span style={{ color: '#0052FF' }}>Onchain Actions</span> = <span style={{ color: '#fff' }}>Social Score</span>.
+                  </div>
+                </>
+              )}
+              {activeHelp === 'memories' && (
+                <>
+                  <div className={styles.helpModalHeader}>MINTED MEMORIES</div>
+                  <div className={styles.helpModalText}>
+                    Your onchain footprint. Every NFT, every verification, every interaction you mint becomes a permanent part of your history.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>The more you build, the richer your story.</span>
+                  </div>
+                </>
+              )}
+              {activeHelp === 'events' && (
+                <>
+                  <div className={styles.helpModalHeader}>ATTENDED EVENTS</div>
+                  <div className={styles.helpModalText}>
+                    Proof of Presence. Events you attend in real life (IRL) grant you POAPs and verifiable credentials.
+                    <br /><br />
+                    <span style={{ color: '#0052FF' }}>Network state is built on real connections.</span>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* TOGGLE: Creator vs Business */}
+      <div className={styles.cardToggleContainer}>
         <button
-          className={styles.backButton}
-          onClick={() => window.history.back()}
-          aria-label="Go Back"
-          style={{ position: 'static', color: 'rgba(255,255,255,0.6)', transform: 'scale(1.2)' }}
+          className={profile.role === 'creator' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
+          onClick={() => updateProfile('role', 'creator')}
         >
-          ←
+          CREATOR
+        </button>
+        <button
+          className={profile.role === 'business' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
+          onClick={() => updateProfile('role', 'business')}
+        >
+          BUSINESS
         </button>
       </div>
 
-      <motion.h1 className={styles.title}>MY IDENTITY<span className={styles.dot}>.</span></motion.h1>
+      {/* --- BLUE IDENTITY CARD (V2) --- */}
+      <div id="base-card-capture" className={profile.role === 'business' ? styles.identityCardBusiness : styles.identityCard}>
 
-      {/* 1. Identity Card */}
-      <motion.div
-        className={styles.cardContainer}
-        style={{ rotateX, rotateY, z: 100 }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className={`${styles.businessCard} ${styles[finalVariant]}`}>
-          {/* Points Badge */}
-          <div className={styles.pointsBadge}>
-            <span style={{ color: profile.role === 'business' ? '#FFD700' : '#0052FF' }}>💎</span>
-            {score}
+        {/* MANIFEST (Background) */}
+        <div className={styles.manifestOverlay}>
+          <div className={styles.manifestText}>{manifest}</div>
+        </div>
+
+        {/* Card Header */}
+        <div className={styles.cardHeader}>
+          <div className={styles.cardChip} />
+          <div className={styles.verifiedBadge}>
+            <div className={styles.verifiedDot} />
+            Verified <span style={{ fontSize: 10, opacity: 0.5 }}>↗</span>
           </div>
+          <div className={styles.pointsPill}>
+            <span>💎</span> 854
+          </div>
+        </div>
 
-          <div className={styles.cardAccent}></div>
-
-          <div className={styles.cardHeader}>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <div className={styles.chip}></div>
-
-              {/* Base Logo (Clickable if Minted) */}
-              {(hasCard || profile.txHash) ? (
-                <a
-                  href={`https://basescan.org/tx/${profile.txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.baseLogo}
-                  style={{ textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                  title="View Transaction on Basescan"
-                >
-                  <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
-                  Verified <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>↗</span>
-                </a>
+        {/* Card Body */}
+        <div style={{ marginTop: 'auto', marginBottom: 'auto', zIndex: 10 }}>
+          <div className={styles.cardBody}>
+            <div className={styles.cardAvatarContainer}>
+              {profile.profilePicUrl ? (
+                <img src={profile.profilePicUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <div className={styles.baseLogo}>
-                  <Image src="/base-logo.svg" alt="Base" width={24} height={24} />
-                  Base
-                </div>
+                <div style={{ width: '100%', height: '100%', background: '#ccc' }} />
               )}
+            </div>
+            <div className={styles.cardInfo}>
+              <div className={styles.cardName}>{profile.name || "Anon"}</div>
+              <div className={styles.cardBio}>{profile.roleTitle || profile.role || "Builder"}</div>
+            </div>
+          </div>
+        </div>
 
-              {/* Role Badge */}
-              <div className={`${styles.roleBadge} ${profile.role === 'business' ? styles.badgeHiring : styles.badgeTalent}`}>
-                {profile.role}
+
+        {/* Card Footer (Socials) */}
+        <div className={styles.cardFooter}>
+          {profile.twitter && (
+            <a href={profile.twitter} target="_blank" className={styles.socialPill}>
+              TWITTER / X ↗
+            </a>
+          )}
+          {profile.website && (
+            <a href={profile.website} target="_blank" className={styles.socialPill}>
+              WEBSITE ↗
+            </a>
+          )}
+          {!profile.twitter && !profile.website && (
+            <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>
+              @base.eth
+            </span>
+          )}
+        </div>
+
+        {/* Mini QR */}
+        <div className={styles.qrCodeMini}>
+          <QRCodeSVG
+            value={`https://base.org?user=${address}`}
+            size={32}
+            bgColor="white"
+            fgColor="black"
+          />
+        </div>
+      </div>
+
+
+      {/* --- EDIT FORM (GLASS PANELS) --- */}
+      {
+        isEditing ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            className={styles.proFormContainer}
+          >
+            {/* Identity Section */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionTitle}>CORE IDENTITY</div>
+              <div className={styles.inputGroup}>
+                <span className={styles.label}>DISPLAY NAME</span>
+                <input
+                  className={styles.input}
+                  placeholder="e.g. Satoshi Nakamoto"
+                  value={profile.name}
+                  onChange={(e) => updateProfile("name", e.target.value)}
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <span className={styles.label}>BIO / MANIFESTO</span>
+                <textarea
+                  className={styles.textarea}
+                  placeholder="What are you building?"
+                  value={profile.bio}
+                  onChange={(e) => updateProfile("bio", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Social Signal Section */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionTitle}>SOCIAL SIGNAL</div>
+              <div className={styles.inputGroup}>
+                <span className={styles.label}>ROLE TITLE</span>
+                <input
+                  className={styles.input}
+                  placeholder="e.g. Lead Dev, NFT Artist"
+                  value={profile.roleTitle}
+                  onChange={(e) => updateProfile("roleTitle", e.target.value)}
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <span className={styles.label}>X (TWITTER) URL</span>
+                <input
+                  className={styles.input}
+                  placeholder="https://x.com/..."
+                  value={profile.twitter}
+                  onChange={(e) => updateProfile("twitter", e.target.value)}
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <span className={styles.label}>WEBSITE / PORTFOLIO</span>
+                <input
+                  className={styles.input}
+                  placeholder="https://..."
+                  value={profile.website}
+                  onChange={(e) => updateProfile("website", e.target.value)}
+                />
+              </div>
+            </div>
+            <div className={styles.inputGroup}>
+              <span className={styles.label}>PROFILE PICTURE URL</span>
+              <input
+                className={styles.input}
+                placeholder="https://..."
+                value={profile.profilePicUrl}
+                onChange={(e) => updateProfile("profilePicUrl", e.target.value)}
+              />
+            </div>
+
+            {/* Extensions */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionTitle}>EXTENSIONS ({profile.links.length})</div>
+              <div className={styles.linkList}>
+                {profile.links.map((link, i) => (
+                  <div key={i} className={styles.linkItem}>
+                    <input
+                      className={styles.input}
+                      placeholder="Label"
+                      value={link.label}
+                      onChange={(e) => updateLink(i, "label", e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <input
+                      className={styles.input}
+                      placeholder="URL"
+                      value={link.url}
+                      onChange={(e) => updateLink(i, "url", e.target.value)}
+                      style={{ flex: 2 }}
+                    />
+                    <button className={styles.removeButton} onClick={() => removeLink(i)}>✕</button>
+                  </div>
+                ))}
+                <button className={styles.addButton} onClick={addLink}>+ ADD EXTENSION</button>
+              </div>
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setIsEditing(false)}
+                style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '16px', color: 'white' }}
+              >
+                CANCEL
+              </button>
+
+              {cardTokenId ? (
+                <EditButton
+                  profile={profile}
+                  onUpdateSuccess={(hash) => {
+                    console.log("Updated", hash);
+                    setIsEditing(false);
+                    alert("Profile Updated Successfully!");
+                  }}
+                />
+              ) : (
+                <MintButton
+                  profile={profile}
+                  onMintSuccess={(hash) => {
+                    setShowPublishModal(true);
+                    setIsEditing(false);
+                  }}
+                />
+              )}
+            </div>
+
+          </motion.div>
+        ) : (
+          <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+            {/* Primary Actions */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setIsEditing(true)}
+                style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px' }}
+              >
+                EDIT PROFILE
+              </button>
+              <button
+                onClick={() => captureAndShare('native')}
+                disabled={isSharing}
+                style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}
+              >
+                {isSharing ? '...' : 'SHARE'}
+              </button>
+            </div>
+          </div>
+        )
+      }
+
+      {/* --- MEMORIES & EVENTS (UPDATED TEXT) --- */}
+      <div className={styles.sectionContainer}>
+        {/* Memories */}
+        <div>
+          <div className={styles.sectionHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Minted Memories</span>
+              <button className={styles.helpIconBtn} onClick={() => setActiveHelp('memories')}>?</button>
+            </div>
+            <span style={{ opacity: 0.5 }}>0</span>
+          </div>
+          <div className={styles.memoriesScroll}>
+            <div className={styles.memoryCard} style={{ width: '100%', maxWidth: 'none', flexDirection: 'row', gap: '16px', alignItems: 'center', justifyContent: 'flex-start', padding: '0 16px', height: '80px', background: 'rgba(255,255,255,0.03)' }}>
+              <div style={{ fontSize: '24px' }}>⚙️</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>Memory NFT's will appear here...</div>
+                <div style={{ fontSize: '10px', opacity: 0.5 }}>Connect with friends to mint</div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className={styles.cardBody}>
-            {profile.profilePicUrl ? (
-              <Image src={profile.profilePicUrl} alt="Profile" width={70} height={70} className={styles.cardProfilePic} />
-            ) : (
-              <div className={styles.cardProfilePlaceholder}>{profile.name ? profile.name.charAt(0).toUpperCase() : (address ? address.slice(0, 2) : "U")}</div>
-            )}
-            <div className={styles.cardInfo}>
-              <h2 className={styles.cardName}>{profile.name || "Identity"}</h2>
-              <p className={styles.cardBio}>{profile.bio || "Building on Base"}</p>
+        {/* Events */}
+        <div>
+          <div className={styles.sectionHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Events</span>
+              <button className={styles.helpIconBtn} onClick={() => setActiveHelp('events')}>?</button>
             </div>
+            <span style={{ opacity: 0.5 }}>0</span>
           </div>
-
-          <div className={styles.cardFooter}>
-            <div className={styles.cardQr}>
-              <QRCodeSVG
-                value={deepLink || (typeof window !== "undefined" ? window.location.href : "https://base.org")}
-                size={40}
-                bgColor="#ffffff"
-                fgColor="#000000"
-                level="L"
-              />
+          <div className={styles.eventsList}>
+            <div className={styles.eventItem} style={{ borderStyle: 'dashed', opacity: 0.6 }}>
+              <div>
+                <div className={styles.eventDate}>UPCOMING</div>
+                <div className={styles.eventTitle} style={{ fontSize: '13px' }}>POAP integration in progress. Attended events will be shown here.</div>
+              </div>
+              <div className={styles.eventStatus}>SOON</div>
             </div>
-            {profile.links.map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.cardLink}>
-                {link.title || "Link"} ↗
-              </a>
-            ))}
           </div>
         </div>
-      </motion.div>
-
-      {/* 2. Share / Edit Actions / Nearby Events */}
-      <div className={styles.actionButtons}>
-
-        {/* PRIMARY ACTION */}
-        {!hasCard ? (
-          <button
-            className={styles.button}
-            style={{
-              background: 'linear-gradient(90deg, #0052FF 0%, #4c2a9c 100%)',
-              fontWeight: 'bold',
-              border: '1px solid rgba(255,255,255,0.2)'
-            }}
-            onClick={() => setIsEditing(true)}
-          >
-            MINT ONCHAIN ID ➝
-          </button>
-        ) : (
-          <button className={styles.button} onClick={() => setIsEditing(true)}>
-            EDIT ONCHAIN CARD
-          </button>
-        )}
-
-        {/* Share Post on Warpcast */}
-        <button
-          className={styles.secondaryButton}
-          onClick={() => {
-            const text = encodeURIComponent(`Check out my Onchain Identity! 🟦 I am a ${profile.role.toUpperCase()} on Base.`);
-            const url = encodeURIComponent(shareUrl || window.location.href);
-            const warpcastUrl = `https://warpcast.com/~/compose?text=${text}&embeds[]=${url}`;
-            window.open(warpcastUrl, '_blank');
-          }}
-        >
-          SHARE / POST
-        </button>
-
       </div>
 
-    </motion.div>
+      {/* SPREAD THE SIGNAL (Base Post) & CHECK SCORE */}
+      <div className={styles.basePostSection}>
+        <div style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.5 }}>
+          Spread the Signal
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            className={styles.basePostButton}
+            onClick={() => captureAndShare('twitter')}
+            disabled={isSharing}
+          >
+            <span>{isSharing ? 'Generating...' : '🔵 Post on X'}</span>
+          </button>
+
+          <button
+            className={styles.basePostButton}
+            style={{ background: 'black', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+            onClick={() => setShowScore(!showScore)}
+          >
+            <span>✨ Check Score</span>
+          </button>
+        </div>
+      </div>
+
+      {/* INLINE SCORE VIEW */}
+      <AnimatePresence>
+        {showScore && (
+          <div style={{ width: '100%', maxWidth: '420px' }}>
+            <ScoreView address={address || "0xYourAddress"} onClose={() => setShowScore(false)} />
+          </div>
+        )}
+      </AnimatePresence>
+
+    </motion.div >
   );
 }

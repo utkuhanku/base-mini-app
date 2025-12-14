@@ -37,7 +37,10 @@ interface MintButtonProps {
         name: string;
         bio: string;
         profilePicUrl: string;
-        links: any[]; // simplified for now
+        roleTitle: string;
+        twitter: string;
+        website: string;
+        links: any[];
     };
 }
 
@@ -83,7 +86,12 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
                 displayName: profile.name || "User",
                 avatarUrl: profile.profilePicUrl || "",
                 bio: profile.bio || "",
-                socials: JSON.stringify(profile.links || []),
+                socials: JSON.stringify({
+                    roleTitle: profile.roleTitle,
+                    twitter: profile.twitter,
+                    website: profile.website,
+                    links: profile.links || []
+                }),
                 websites: ""
             }, 1], // 1 = PaymentMethod.ETH
             value: parseUnits("0.0003", 18) // 0.0003 ETH (~$1)
@@ -100,7 +108,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
                 onError={handleError}
             >
                 <TransactionButton
-                    className="mt-0 mr-0 mb-0 ml-0 w-full rounded-xl bg-blue-600 py-3 px-4 font-bold text-white hover:bg-blue-700"
+                    className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
                     text="MINT IDENTITY ($1.00)"
                 />
 

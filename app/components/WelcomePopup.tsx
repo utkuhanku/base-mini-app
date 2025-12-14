@@ -1,26 +1,25 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 export default function WelcomePopup() {
-    const [isVisible, setIsVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Check if already seen
-        const hasSeen = localStorage.getItem('hasSeenWelcome');
-        if (hasSeen) {
-            setIsVisible(false);
-            return;
+        // Check if user has seen this version of the welcome popup
+        const hasSeen = localStorage.getItem("hasSeenWelcomePopup_v1");
+        if (!hasSeen) {
+            // Delay slightly for effect
+            const timer = setTimeout(() => setIsVisible(true), 1000);
+            return () => clearTimeout(timer);
         }
-
-        // Auto-close after 3.5 seconds
-        const timer = setTimeout(() => {
-            setIsVisible(false);
-            localStorage.setItem('hasSeenWelcome', 'true');
-        }, 3500);
-        return () => clearTimeout(timer);
     }, []);
+
+    const handleClose = () => {
+        setIsVisible(false);
+        localStorage.setItem("hasSeenWelcomePopup_v1", "true");
+    };
 
     return (
         <AnimatePresence>
@@ -30,49 +29,67 @@ export default function WelcomePopup() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     style={{
-                        position: 'fixed',
-                        inset: 0,
-                        zIndex: 99999,
-                        background: 'rgba(0,0,0,0.85)',
-                        backdropFilter: 'blur(10px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        gap: '20px'
+                        position: 'fixed', inset: 0, zIndex: 10000,
+                        background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '24px'
                     }}
+                    onClick={handleClose}
                 >
                     <motion.div
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", damping: 12 }}
+                        initial={{ scale: 0.9, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        exit={{ scale: 0.9, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
                         style={{
-                            background: '#111',
-                            padding: '2rem',
+                            background: '#0a0a0a',
+                            border: '1px solid #333',
                             borderRadius: '24px',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '32px',
+                            maxWidth: '360px',
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
                             textAlign: 'center',
-                            boxShadow: '0 0 50px rgba(0, 82, 255, 0.3)'
+                            gap: '24px',
+                            boxShadow: '0 20px 50px -10px rgba(0, 82, 255, 0.3)'
                         }}
                     >
-                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                            <Image src="/base-logo.svg" alt="Base" width={48} height={48} />
+                        {/* Base Logo */}
+                        <div style={{
+                            width: '64px', height: '64px', borderRadius: '50%',
+                            background: '#0052FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 20px rgba(0, 82, 255, 0.5)'
+                        }}>
+                            <Image src="/base-logo.svg" alt="Base" width={32} height={32} style={{ filter: 'brightness(0) invert(1)' }} />
                         </div>
 
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.5px', marginBottom: '8px' }}>
-                            My First Mini App
-                        </h2>
+                        {/* English Text */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'white' }}>
+                                HELLO BASED 🔵
+                            </h2>
+                            <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#ccc', margin: 0 }}>
+                                My first MiniApp is evolving with your valuable feedback. Every comment you make contributes to our progress.
+                                <br /><br />
+                                <span style={{ color: '#0052FF', fontWeight: 700, whiteSpace: 'nowrap' }}>Build on BASE 🟦</span>
+                            </p>
+                        </div>
 
-                        <p style={{ color: '#888', fontSize: '0.9rem', maxWidth: '240px', lineHeight: '1.5' }}>
-                            Send your feedback to <span style={{ color: '#fff', fontWeight: 'bold' }}>utkus</span> on Base App.
-                        </p>
+                        {/* Action Button */}
+                        <button
+                            onClick={handleClose}
+                            style={{
+                                background: 'white', color: 'black', border: 'none',
+                                padding: '16px 32px', borderRadius: '16px',
+                                fontSize: '14px', fontWeight: 800, width: '100%',
+                                cursor: 'pointer', letterSpacing: '0.5px'
+                            }}
+                        >
+                            LET'S GO
+                        </button>
 
-                        <motion.div
-                            style={{ height: '3px', background: '#0052FF', borderRadius: '4px', marginTop: '1.5rem', width: '100%' }}
-                            initial={{ width: 0 }}
-                            animate={{ width: '100%' }}
-                            transition={{ duration: 3.5, ease: "linear" }}
-                        />
                     </motion.div>
                 </motion.div>
             )}

@@ -1,69 +1,80 @@
 .headerWrapper {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: var(--space-4);
+    /* Existing styles if any... */
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 9999;
-    /* Changed from 50 */
     width: 100%;
+    z-index: 50;
+    /* ensure it's on top */
+    padding: 16px 24px;
+    background: transparent;
     pointer-events: none;
     /* Let clicks pass through empty space */
 }
 
-/* CSS Modules require pure selectors (at least one local class) */
-/* CSS Modules require pure selectors */
-.headerContainer :global(svg) {
-    color: white !important;
-}
-
-.headerContainer :global(path) {
-    fill: white !important;
-}
-
-.headerContainer :global(span) {
-    color: white !important;
-}
-
 .headerContainer {
+    display: flex;
+    justify-content: flex-start;
+    /* Align left for back button */
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
     pointer-events: auto;
-    background: rgba(0, 0, 0, 0.5);
-    /* Semi-transparent backing for contrast */
-    backdrop-filter: blur(10px);
-    /* Changed from blur(16px) */
-    -webkit-backdrop-filter: blur(16px);
-    /* Kept as it was not explicitly removed */
-    border-radius: 50px;
-    /* Changed from var(--radius-lg) */
-    padding: 4px;
-    /* Tight padding like a pill */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    /* Changed from rgba(255, 255, 255, 0.08) */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    /* Enable clicks on buttons */
+    width: 100%;
 }
-
-/* Override OnchainKit Wallet styles if possible, or wrap them */
-/* Using generic class matching or specificity if OnchainKit allows className props */
-
-/* Since OnchainKit styles are internal, we mostly style the container. 
-   However, we can apply some resets or overrides if needed. */
 
 .connectButton {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    transition: background 0.2s var(--ease-apple);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    cursor: pointer;
+    /* Override OnchainKit if needed */
 }
 
-.connectButton:hover {
-    background: rgba(255, 255, 255, 0.08);
+.themeToggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.themeToggle:hover {
+    transform: scale(1.1);
+}
+
+.logoCircle {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* NEW BACK BUTTON STYLE */
+.backButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    margin-right: auto;
+    /* Push wallet to right */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+
+.backButton:hover {
+    background: white;
+    color: black;
+    transform: translateX(-4px);
+    /* Slide left slightly */
 }

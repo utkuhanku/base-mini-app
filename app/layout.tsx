@@ -17,23 +17,16 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Identity 🔵",
       description: "Your onchain identity and event history.",
-      images: [minikitConfig.miniapp.heroImageUrl],
+      images: [minikitConfig.frame.imageUrl],
     },
     other: {
-      "fc:frame": JSON.stringify({
-        version: "next",
-        imageUrl: minikitConfig.miniapp.heroImageUrl,
-        button: {
-          title: "Open App",
-          action: {
-            type: "launch_frame",
-            name: "Identity App",
-            url: minikitConfig.miniapp.homeUrl,
-            splashImageUrl: minikitConfig.miniapp.heroImageUrl,
-            splashBackgroundColor: "#0F1115",
-          },
-        },
-      }),
+      other: {
+        "fc:frame": JSON.stringify({
+          version: "next",
+          imageUrl: minikitConfig.frame.imageUrl,
+          button: minikitConfig.frame.button,
+        }),
+      },
     },
   };
 }
