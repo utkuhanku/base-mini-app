@@ -25,6 +25,13 @@ import ThemeToggle from "./components/ThemeToggle";
 import WelcomePopup from "./components/WelcomePopup";
 import styles from "./page.module.css";
 
+import { useReadContract } from "wagmi";
+import { parseAbi } from "viem";
+import StrictOnboardingModal from "./components/StrictOnboardingModal";
+
+// Constants
+const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
+
 export default function Home() {
   const router = useRouter();
 
@@ -37,6 +44,9 @@ export default function Home() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [activeHelp, setActiveHelp] = useState<string | null>(null);
+
+  // Strict Onboarding State
+  const [showStrictModal, setShowStrictModal] = useState(false);
 
   // 1. Perform Quick Auth on Mount
   useEffect(() => {
@@ -56,14 +66,6 @@ export default function Home() {
         }
 
         // Verify with our backend
-        // We use sdk.quickAuth.fetch to automatically include the token in headers if supported, 
-        // OR we manually attach it. 
-        // Docs say sdk.quickAuth.fetch wraps generic fetch but auto-adds auth? 
-        // Actually, if we already have the token, we can just use standard fetch with header 
-        // OR use the result.token. 
-        // Wait, standard pattern: use the token we just got.
-
-        // Let's use standard fetch with the token we got, to be safe and explicit.
         const response = await fetch("/api/auth", {
           headers: {
             'Authorization': `Bearer ${result.token}`
@@ -93,6 +95,32 @@ export default function Home() {
   useEffect(() => {
     setIsWalletConnected(wagmiConnected && !!address);
   }, [wagmiConnected, address]);
+
+
+  // 2. CHECK FOR CARD (STRICT MODE)
+  const { data: cardTokenId, isLoading: isCardLoading } = useReadContract({
+    address: CARD_SBT_ADDRESS as `0x${string}`,
+    abi: parseAbi(["function cardOf(address owner) view returns (uint256)"]),
+    functionName: "cardOf",
+    args: address ? [address as `0x${string}`] : undefined,
+    query: {
+      enabled: !!address, // Only run if address is available
+    }
+  });
+
+  useEffect(() => {
+    if (address && !isCardLoading) {
+      if (!cardTokenId || Number(cardTokenId) === 0) {
+        const timer = setTimeout(() => {
+          setShowStrictModal(true);
+        }, 2000); // 2 second delay
+        return () => clearTimeout(timer);
+      } else {
+        setShowStrictModal(false);
+      }
+    }
+  }, [address, cardTokenId, isCardLoading]);
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -127,6 +155,7 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      {showStrictModal && <StrictOnboardingModal />}
       <WelcomePopup />
       <motion.div
         className={styles.content}

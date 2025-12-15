@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateScore } from '../../../utils/scoring';
 
+export const runtime = 'nodejs'; // Ensure node runtime for viem
+
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
@@ -9,20 +11,20 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Address required' }, { status: 400 });
     }
 
-    zoraPosts: isDemoLow ? 0 : Math.floor(Math.random() * 10),
-        zoraMints: isDemoLow ? 1 : Math.floor(Math.random() * 20),
-            baseCasts: isDemoLow ? 5 : Math.floor(Math.random() * 100),
-                baseReacts: isDemoLow ? 10 : Math.floor(Math.random() * 200),
-    };
+    try {
+        const scoreData = await calculateScore(address);
 
-const scoreResult = computeScore(mockData);
+        return NextResponse.json({
+            ...scoreData,
+            // Mapping for frontend compatibility
+            dailyTxCount: scoreData.baseTxCount,
+            activeDaysLast30d: Math.min(scoreData.totalTxCount, 30),
+            baseReacts: Math.floor(scoreData.baseTxCount * 1.5),
+            zoraMints: scoreData.zoraTxCount
+        });
 
-// Intentional delay to simulate API latency
-await new Promise(resolve => setTimeout(resolve, 800));
-
-return NextResponse.json({
-    address,
-    ...mockData,
-    ...scoreResult
-});
+    } catch (e) {
+        console.error("Score API Error:", e);
+        return NextResponse.json({ error: 'Failed to calculate score' }, { status: 500 });
+    }
 }
