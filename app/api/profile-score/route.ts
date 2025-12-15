@@ -6,6 +6,7 @@ export const runtime = 'nodejs'; // Ensure node runtime for viem
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const zoraCreatorName = searchParams.get('zoraCreatorName') || undefined;
+    const address = searchParams.get('address');
 
     if (!address) {
         return NextResponse.json({ error: 'Address required' }, { status: 400 });
