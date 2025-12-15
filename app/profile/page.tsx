@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract } from "wagmi";
@@ -34,7 +33,7 @@ export default function ProfilePage() {
   const initialProfileState: Profile = {
     name: "",
     bio: "",
-    role: "creator",
+    role: "creator", // Default role
     profilePicUrl: "",
     roleTitle: "",
     twitter: "",
@@ -84,22 +83,6 @@ export default function ProfilePage() {
     localStorage.setItem("userProfile", JSON.stringify(newProfile));
   };
 
-  const addLink = () => {
-    const newLinks = [...profile.links, { label: "", url: "" }];
-    updateProfile("links", newLinks);
-  };
-
-  const updateLink = (index: number, field: "label" | "url", value: string) => {
-    const newLinks = [...profile.links];
-    newLinks[index][field] = value;
-    updateProfile("links", newLinks);
-  };
-
-  const removeLink = (index: number) => {
-    const newLinks = profile.links.filter((_, i) => i !== index);
-    updateProfile("links", newLinks);
-  };
-
   // Image Upload
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -127,7 +110,6 @@ export default function ProfilePage() {
   const captureAndShare = async (platform: 'native' | 'twitter') => {
     if (platform === 'twitter') {
       const baseUrl = window.location.origin;
-      // Construct Dynamic URL
       const params = new URLSearchParams();
       if (profile.name) params.set('name', profile.name);
       if (profile.role) params.set('role', profile.role);
@@ -171,23 +153,25 @@ export default function ProfilePage() {
       {showScore && address && <ScoreView address={address} onClose={() => setShowScore(false)} />}
 
       {!showScore && (
-        <div className={styles.topActions}>
+        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'center' }}>
           <button
             onClick={() => setShowScore(true)}
-            className={styles.scoreButton}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '100px', padding: '8px 16px', color: 'white', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <div className={styles.scoreDot} />
+            <div style={{ width: 8, height: 8, background: '#0052FF', borderRadius: '50%', boxShadow: '0 0 8px #0052FF' }} />
             CHECK SCORE
           </button>
           <button
-            className={styles.helpButton}
+            className={styles.helpButton} // Reusing helpButton style for consistent look if available, else inline
+            style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}
             onClick={() => address ? captureAndShare('twitter') : alert("Connect Wallet")}
           >
-            SHARE
+            SHARE ↗
           </button>
         </div>
       )}
 
+      {/* TOGGLE: Creator vs Business */}
       <div className={styles.cardToggleContainer}>
         <button
           className={profile.role === 'creator' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
@@ -203,9 +187,10 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* CARD */}
+      {/* --- BLUE IDENTITY CARD (V2) --- */}
       <div id="base-card-capture" className={profile.role === 'business' ? styles.identityCardBusiness : styles.identityCard}>
         <div className={styles.manifestOverlay}><div className={styles.manifestText}>{manifest}</div></div>
+
         <div className={styles.cardHeader}>
           <div className={styles.cardChip} />
           <div className={styles.verifiedBadge}><div className={styles.verifiedDot} />Verified ↗</div>
@@ -238,12 +223,13 @@ export default function ProfilePage() {
           {profile.website && <a href={profile.website} target="_blank" className={styles.socialPill}>WEBSITE ↗</a>}
           {!profile.twitter && !profile.website && <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>@base.eth</span>}
         </div>
+
         <div className={styles.qrCodeMini}>
           <QRCodeSVG value={`https://base.org?user=${address}`} size={32} bgColor="white" fgColor="black" />
         </div>
       </div>
 
-      {/* FORM */}
+      {/* --- EDIT FORM --- */}
       {isEditing ? (
         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className={styles.proFormContainer}>
           <div className={styles.formSection}>
@@ -274,10 +260,14 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button onClick={() => fileInputRef.current?.click()} className={styles.uploadBtn}>Tap to Change Photo</button>
+          <button onClick={() => fileInputRef.current?.click()} className={styles.uploadBtn} style={{ width: '100%', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed #444', color: '#888', borderRadius: '12px', cursor: 'pointer' }}>
+            Tap to Change Photo
+          </button>
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-            <button className={styles.cancelButton} onClick={handleCancelEdit}>CANCEL</button>
+            <button className={styles.cancelButton} onClick={handleCancelEdit} style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '16px', color: 'white' }}>
+              CANCEL
+            </button>
             {cardTokenId ? (
               <EditButton profile={profile} onUpdateSuccess={handleSaveSuccess} />
             ) : (
@@ -286,12 +276,78 @@ export default function ProfilePage() {
           </div>
         </motion.div>
       ) : (
-        <div className={styles.actionsContainer}>
-          <button onClick={() => setIsEditing(true)} className={styles.editButton}>EDIT PROFILE</button>
-          <button onClick={() => captureAndShare('twitter')} className={styles.shareButton}>POST ON X</button>
+        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={() => setIsEditing(true)} style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px' }}>
+              EDIT PROFILE
+            </button>
+            <button onClick={() => captureAndShare('twitter')} style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}>
+              POST ON X
+            </button>
+          </div>
         </div>
       )
       }
+
+      {/* --- MEMORIES & EVENTS (RESTORED) --- */}
+      <div className={styles.sectionContainer}>
+        {/* Memories */}
+        <div>
+          <div className={styles.sectionHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Minted Memories</span>
+              <button className={styles.helpIconBtn} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }} onClick={() => setActiveHelp('memories')}>?</button>
+            </div>
+            <span style={{ opacity: 0.5 }}>0</span>
+          </div>
+          <div className={styles.memoriesScroll}>
+            <div className={styles.memoryCard} style={{ width: '100%', maxWidth: 'none', flexDirection: 'row', gap: '16px', alignItems: 'center', justifyContent: 'flex-start', padding: '0 16px', height: '80px', background: 'rgba(255,255,255,0.03)' }}>
+              <div style={{ fontSize: '24px' }}>⚙️</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>Memory NFT's will appear here...</div>
+                <div style={{ fontSize: '10px', opacity: 0.5 }}>Connect with friends to mint</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Events */}
+        <div>
+          <div className={styles.sectionHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Events</span>
+              <button className={styles.helpIconBtn} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }} onClick={() => setActiveHelp('events')}>?</button>
+            </div>
+            <span style={{ opacity: 0.5 }}>0</span>
+          </div>
+          <div className={styles.eventsList}>
+            <div className={styles.eventItem} style={{ borderStyle: 'dashed', opacity: 0.6 }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#888', fontWeight: 700, marginBottom: '4px' }}>UPCOMING</div>
+                <div style={{ fontSize: '13px', fontWeight: 600 }}>POAP integration in progress. Attended events will be shown here.</div>
+              </div>
+              <div style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '4px' }}>SOON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SPREAD THE SIGNAL */}
+      <div className={styles.basePostSection}>
+        <div style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.5 }}>
+          Spread the Signal
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            onClick={() => captureAndShare('twitter')}
+            className={styles.basePostButton}
+          >
+            <span>POST ON X</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
