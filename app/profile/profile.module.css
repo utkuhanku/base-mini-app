@@ -713,14 +713,15 @@
 }
 
 /* --- NEW SECTIONS (Memories & Events) --- */
-width: 100%;
-max-width: 420px;
-display: flex;
-flex-direction: column;
-gap: 24px;
-margin-top: 32px;
-position: relative;
-z-index: 20;
+.sectionContainer {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 32px;
+  position: relative;
+  z-index: 20;
 }
 
 .sectionHeader {
