@@ -115,8 +115,9 @@ export default function ProfilePage() {
       if (profile.role) params.set('role', profile.role);
 
       const appUrl = `${baseUrl}?${params.toString()}`;
-      const text = encodeURIComponent(`Verifying my onchain identity on @base.\n\n${appUrl}`);
-      window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+      const text = encodeURIComponent(`Verifying my onchain identity on @base\n\n${appUrl}`);
+      // Using x.com ensures better handling on mobile devices and avoids lagacy redirects
+      window.open(`https://x.com/intent/tweet?text=${text}`, '_blank');
     }
   };
 
