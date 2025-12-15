@@ -284,7 +284,24 @@ export default function ProfilePage() {
           <div className={styles.sectionHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Minted Memories</span>
-              <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px' }} onClick={() => setActiveHelp('memories')}>?</button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#666',
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  padding: '4px 8px',
+                  zIndex: 50,
+                  position: 'relative'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveHelp('memories');
+                }}
+              >
+                ?
+              </button>
             </div>
             <span style={{ opacity: 0.5, fontSize: '12px' }}>0</span>
           </div>
@@ -304,7 +321,24 @@ export default function ProfilePage() {
           <div className={styles.sectionHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Events</span>
-              <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px' }} onClick={() => setActiveHelp('events')}>?</button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#666',
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  padding: '4px 8px',
+                  zIndex: 50,
+                  position: 'relative'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveHelp('events');
+                }}
+              >
+                ?
+              </button>
             </div>
             <span style={{ opacity: 0.5, fontSize: '12px' }}>0</span>
           </div>

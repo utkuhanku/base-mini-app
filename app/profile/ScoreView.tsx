@@ -30,9 +30,11 @@ export default function ScoreView({ address, onClose }: { address: string, onClo
 
     useEffect(() => {
         setLoading(true);
-        fetch(`/api/profile-score?address=${address}`)
-            .then(res => res.json())
-            .then(d => {
+        const fetchData = fetch(`/api/profile-score?address=${address}`).then(res => res.json());
+        const delay = new Promise(resolve => setTimeout(resolve, 2000)); // Minimum 2s "analysis" feel
+
+        Promise.all([fetchData, delay])
+            .then(([d]) => {
                 setData(d);
                 setZoraConnected(d.zoraMints > 0);
                 setLoading(false);
