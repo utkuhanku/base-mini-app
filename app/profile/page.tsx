@@ -150,26 +150,8 @@ export default function ProfilePage() {
         style={{ display: 'none' }}
       />
 
-      {showScore && address && <ScoreView address={address} onClose={() => setShowScore(false)} />}
-
-      {!showScore && (
-        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'center' }}>
-          <button
-            onClick={() => setShowScore(true)}
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '100px', padding: '8px 16px', color: 'white', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <div style={{ width: 8, height: 8, background: '#0052FF', borderRadius: '50%', boxShadow: '0 0 8px #0052FF' }} />
-            CHECK SCORE
-          </button>
-          <button
-            className={styles.helpButton} // Reusing helpButton style for consistent look if available, else inline
-            style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}
-            onClick={() => address ? captureAndShare('twitter') : alert("Connect Wallet")}
-          >
-            SHARE ↗
-          </button>
-        </div>
-      )}
+      {/* --- HEADER ACTIONS (Minimal) --- */}
+      {/* Moved generic actions to flow naturally. Top should be identity focus. */}
 
       {/* TOGGLE: Creator vs Business */}
       <div className={styles.cardToggleContainer}>
@@ -229,11 +211,11 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* --- EDIT FORM --- */}
+      {/* --- ACTION AREA (Edit / Share) --- */}
       {isEditing ? (
         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className={styles.proFormContainer}>
           <div className={styles.formSection}>
-            <div className={styles.sectionTitle}>CORE IDENTITY</div>
+            <div className={styles.formSectionTitle}>CORE IDENTITY</div>
             <div className={styles.inputGroup}>
               <span className={styles.label}>DISPLAY NAME</span>
               <input className={styles.input} placeholder="e.g. Satoshi" value={profile.name} onChange={(e) => updateProfile("name", e.target.value)} />
@@ -245,7 +227,7 @@ export default function ProfilePage() {
           </div>
 
           <div className={styles.formSection}>
-            <div className={styles.sectionTitle}>SOCIAL SIGNAL</div>
+            <div className={styles.formSectionTitle}>SOCIAL SIGNAL</div>
             <div className={styles.inputGroup}>
               <span className={styles.label}>ROLE TITLE</span>
               <input className={styles.input} placeholder="e.g. Designer" value={profile.roleTitle || ''} onChange={(e) => updateProfile("roleTitle", e.target.value)} />
@@ -260,12 +242,12 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button onClick={() => fileInputRef.current?.click()} className={styles.uploadBtn} style={{ width: '100%', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed #444', color: '#888', borderRadius: '12px', cursor: 'pointer' }}>
+          <button onClick={() => fileInputRef.current?.click()} className={styles.uploadBtn} style={{ width: '100%', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed #444', color: '#888', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Tap to Change Photo
           </button>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-            <button className={styles.cancelButton} onClick={handleCancelEdit} style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '16px', color: 'white' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+            <button className={styles.cancelButton} onClick={handleCancelEdit} style={{ flex: 1, padding: '16px', background: 'rgba(255,59,48,0.15)', border: 'none', borderRadius: '16px', color: '#ff3b30', fontWeight: 700 }}>
               CANCEL
             </button>
             {cardTokenId ? (
@@ -276,36 +258,42 @@ export default function ProfilePage() {
           </div>
         </motion.div>
       ) : (
-        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={() => setIsEditing(true)} style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px' }}>
-              EDIT PROFILE
+            <button
+              onClick={() => setIsEditing(true)}
+              style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
+            >
+              Edit Profile
             </button>
-            <button onClick={() => captureAndShare('twitter')} style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}>
-              POST ON X
+            <button
+              onClick={() => captureAndShare('twitter')}
+              style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', color: 'white', fontWeight: 700, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
+            >
+              Post on X
             </button>
           </div>
         </div>
       )
       }
 
-      {/* --- MEMORIES & EVENTS (RESTORED) --- */}
+      {/* --- MEMORIES & EVENTS --- */}
       <div className={styles.sectionContainer}>
         {/* Memories */}
         <div>
           <div className={styles.sectionHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Minted Memories</span>
-              <button className={styles.helpIconBtn} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }} onClick={() => setActiveHelp('memories')}>?</button>
+              <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px' }} onClick={() => setActiveHelp('memories')}>?</button>
             </div>
-            <span style={{ opacity: 0.5 }}>0</span>
+            <span style={{ opacity: 0.5, fontSize: '12px' }}>0</span>
           </div>
           <div className={styles.memoriesScroll}>
             <div className={styles.memoryCard} style={{ width: '100%', maxWidth: 'none', flexDirection: 'row', gap: '16px', alignItems: 'center', justifyContent: 'flex-start', padding: '0 16px', height: '80px', background: 'rgba(255,255,255,0.03)' }}>
               <div style={{ fontSize: '24px' }}>⚙️</div>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>Memory NFT's will appear here...</div>
-                <div style={{ fontSize: '10px', opacity: 0.5 }}>Connect with friends to mint</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>Memory NFT's</div>
+                <div style={{ fontSize: '10px', opacity: 0.5 }}>Connect with friends</div>
               </div>
             </div>
           </div>
@@ -316,15 +304,15 @@ export default function ProfilePage() {
           <div className={styles.sectionHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Events</span>
-              <button className={styles.helpIconBtn} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }} onClick={() => setActiveHelp('events')}>?</button>
+              <button style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px' }} onClick={() => setActiveHelp('events')}>?</button>
             </div>
-            <span style={{ opacity: 0.5 }}>0</span>
+            <span style={{ opacity: 0.5, fontSize: '12px' }}>0</span>
           </div>
           <div className={styles.eventsList}>
             <div className={styles.eventItem} style={{ borderStyle: 'dashed', opacity: 0.6 }}>
               <div>
                 <div style={{ fontSize: '10px', color: '#888', fontWeight: 700, marginBottom: '4px' }}>UPCOMING</div>
-                <div style={{ fontSize: '13px', fontWeight: 600 }}>POAP integration in progress. Attended events will be shown here.</div>
+                <div style={{ fontSize: '13px', fontWeight: 600 }}>POAP Integration</div>
               </div>
               <div style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '4px' }}>SOON</div>
             </div>
@@ -332,20 +320,46 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* SPREAD THE SIGNAL */}
-      <div className={styles.basePostSection}>
-        <div style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.5 }}>
-          Spread the Signal
-        </div>
+      {/* --- ANALYTICS (CHECK SCORE) --- */}
+      <div className={styles.basePostSection} style={{ borderTop: 'none', marginTop: '40px', paddingTop: '0' }}>
+        <div style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)', marginBottom: '32px' }} />
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button
-            onClick={() => captureAndShare('twitter')}
-            className={styles.basePostButton}
-          >
-            <span>POST ON X</span>
-          </button>
-        </div>
+        {showScore && address ? (
+          <ScoreView address={address} onClose={() => setShowScore(false)} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '2px', color: '#666' }}>
+              Onchain Analytics
+            </div>
+            <button
+              onClick={() => setShowScore(true)}
+              style={{
+                background: 'linear-gradient(145deg, #111 0%, #000 100%)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                padding: '24px',
+                width: '100%',
+                maxWidth: '420px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #0052FF 0%, #001040 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+                  📊
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ color: 'white', fontWeight: 800, fontSize: '14px', letterSpacing: '0.5px' }}>CHECK SCORE</div>
+                  <div style={{ color: '#666', fontSize: '11px' }}>Analyze wallet activity & reputation</div>
+                </div>
+              </div>
+              <div style={{ color: '#444' }}>→</div>
+            </button>
+          </div>
+        )}
       </div>
 
     </div>
