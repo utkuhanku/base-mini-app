@@ -2,15 +2,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ScoreResult, ScoreData } from '../../utils/scoring';
+import { ScoreData } from '../../utils/scoring';
 import { generateStory, StoryPrototype } from '../../utils/storyEngine';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './profile.module.css';
 
-type FullProfileData = ScoreData & ScoreResult & { address: string };
+// Extended ScoreData with frontend-specific props if needed, but for now ScoreData covers basics. 
+// The API returns mixed fields (dailyTxCount, etc) which are not in strict ScoreData.
+// Let's define the expected frontend shape here or extend ScoreData.
+
+interface FrontendScoreData extends ScoreData {
+    dailyTxCount: number;
+    activeDaysLast30d: number;
+    baseReacts: number;
+    zoraMints: number;
+}
 
 export default function ScoreView({ address, onClose }: { address: string, onClose: () => void }) {
-    const [data, setData] = useState<FullProfileData | null>(null);
+    const [data, setData] = useState<FrontendScoreData | null>(null);
     const [loading, setLoading] = useState(true);
     const [story, setStory] = useState<StoryPrototype | null>(null);
     const [showStory, setShowStory] = useState(false);
