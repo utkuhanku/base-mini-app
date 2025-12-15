@@ -1,54 +1,88 @@
+import { createPublicClient, http, formatEther } from 'viem';
+import { base, zora } from 'viem/chains';
 
 export interface ScoreData {
-    dailyTxCount: number;
-    activeDaysLast30d: number;
-    zoraPosts: number;
-    zoraMints: number;
-    baseCasts: number;
-    baseReacts: number;
-}
-
-export interface ScoreResult {
-    rawScore: number;
+    address: string;
+    baseTxCount: number;
+    zoraTxCount: number;
+    baseBalance: string;
+    zoraBalance: string;
+    totalTxCount: number;
     normalizedScore: number;
     color: string;
 }
 
-export function calculateColor(normalizedScore: number): string {
-    // 0 -> deep red (#FF3B30) -> rgb(255, 59, 48)
-    // 1 -> Base blue (#0052FF) -> rgb(0, 82, 255)
-    const red = { r: 255, g: 59, b: 48 };
-    const blue = { r: 0, g: 82, b: 255 };
+const baseClient = createPublicClient({
+    chain: base,
+    transport: http()
+});
 
-    const t = Math.max(0, Math.min(1, normalizedScore)); // Clamp 0-1
+const zoraClient = createPublicClient({
+    chain: zora,
+    transport: http()
+});
 
-    const r = Math.round(red.r + (blue.r - red.r) * t);
-    const g = Math.round(red.g + (blue.g - red.g) * t);
-    const b = Math.round(red.b + (blue.b - red.b) * t);
+export const calculateScore = async (address: string): Promise<ScoreData> => {
+    try {
+        const [baseCount, zoraCount, baseBal, zoraBal] = await Promise.all([
+            baseClient.getTransactionCount({ address: address as `0x${string}` }),
+            zoraClient.getTransactionCount({ address: address as `0x${string}` }),
+            baseClient.getBalance({ address: address as `0x${string}` }),
+            zoraClient.getBalance({ address: address as `0x${string}` })
+        ]);
 
-    return `rgb(${r}, ${g}, ${b})`;
-}
+        const totalTx = baseCount + zoraCount;
 
-export function computeScore(data: ScoreData): ScoreResult {
-    // 2.1 On-chain activity
-    // onchainScore = min(dailyTxCount, 10) * 2 + activeDaysLast30d
-    const onchainScore = (Math.min(data.dailyTxCount, 10) * 2) + data.activeDaysLast30d;
+        // Simple Scoring Algorithm
+        // 0-10 tx = Low
+        // 10-50 tx = Medium
+        // 50+ tx = High
+        // + Bonus for Zora activity
 
-    // 2.2 Zora activity
-    // zoraScore = (zoraPosts * 1) + (zoraMints * 1.5)
-    const zoraScore = (data.zoraPosts * 1) + (data.zoraMints * 1.5);
+        let score = 0;
 
-    // 2.3 Farcaster/Base activity
-    // baseAppScore = (baseCasts * 0.5) + (baseReacts * 0.2)
-    const baseAppScore = (data.baseCasts * 0.5) + (data.baseReacts * 0.2);
+        // Base Activity (60% weight)
+        if (baseCount > 0) score += 0.1;
+        if (baseCount > 10) score += 0.2;
+        if (baseCount > 50) score += 0.2;
+        if (baseCount > 100) score += 0.1;
 
-    // 2.4 Normalization
-    const rawScore = onchainScore + zoraScore + baseAppScore;
-    const normalizedScore = Math.min(Math.max(rawScore / 100, 0), 1);
+        // Zora Activity (40% weight)
+        if (zoraCount > 0) score += 0.1;
+        if (zoraCount > 5) score += 0.2;
+        if (zoraCount > 20) score += 0.1;
 
-    return {
-        rawScore,
-        normalizedScore,
-        color: calculateColor(normalizedScore)
-    };
-}
+        // Cap at 0.99
+        const normalizedScore = Math.min(score, 0.99);
+
+        // Determine Color based on score
+        let color = "#666666"; // Gray (New)
+        if (normalizedScore > 0.3) color = "#0052FF"; // Base Blue
+        if (normalizedScore > 0.6) color = "#FFD700"; // Gold
+        if (normalizedScore > 0.85) color = "#00FFFF"; // Cyan/Diamond
+
+        return {
+            address,
+            baseTxCount: baseCount,
+            zoraTxCount: zoraCount,
+            baseBalance: formatEther(baseBal),
+            zoraBalance: formatEther(zoraBal),
+            totalTxCount: totalTx,
+            normalizedScore,
+            color
+        };
+
+    } catch (error) {
+        console.error("Error calculating score:", error);
+        return {
+            address,
+            baseTxCount: 0,
+            zoraTxCount: 0,
+            baseBalance: "0",
+            zoraBalance: "0",
+            totalTxCount: 0,
+            normalizedScore: 0.1,
+            color: "#666666"
+        };
+    }
+};
