@@ -8,7 +8,7 @@ export default function Success() {
   // const { composeCastAsync } = useComposeCast();
 
   const handleShare = () => {
-    const text = `Yay! I just joined the waitlist for ${minikitConfig.miniapp.name.toUpperCase()}! `;
+    const text = `Yay! I just joined the waitlist for ${minikitConfig.frame.name.toUpperCase()}! `;
     const url = process.env.NEXT_PUBLIC_URL || "";
     const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(url)}`;
     window.open(warpcastUrl, '_blank');
@@ -29,7 +29,7 @@ export default function Success() {
             </div>
           </div>
 
-          <h1 className={styles.title}>Welcome to the {minikitConfig.miniapp.name.toUpperCase()}!</h1>
+          <h1 className={styles.title}>Welcome to the {minikitConfig.frame.name.toUpperCase()}!</h1>
 
           <p className={styles.subtitle}>
             You&apos;re in! We&apos;ll notify you as soon as we launch.<br />
