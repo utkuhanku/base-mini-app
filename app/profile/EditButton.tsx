@@ -40,7 +40,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     const { address } = useAccount();
 
     // 1. DYNAMIC PRICE FETCHING
-    const { data: editPriceWei } = useReadContract({
+    const { data: editPriceWei, isLoading, isError } = useReadContract({
         address: CARD_SBT_ADDRESS as `0x${string}`,
         abi: parseAbi(["function editPriceETH() view returns (uint256)"]),
         functionName: "editPriceETH",
@@ -53,6 +53,8 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
 
     // Format for display (e.g. "0.0003")
     const displayPrice = editPriceWei ? formatEther(editPriceWei as bigint) : "...";
+
+    const isReady = !isLoading && !isError && !!editPriceWei;
 
     const handleOnStatus = useCallback((status: any) => {
         console.log('Transaction status:', status);
@@ -114,8 +116,9 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
                 onError={handleError}
             >
                 <TransactionButton
-                    className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
-                    text={`UPDATE CARD (${displayPrice} ETH)`}
+                    className={`mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold transition-all hover:bg-white/5 hover:pl-5 ${!isReady ? 'opacity-50 cursor-not-allowed' : 'text-white'}`}
+                    text={isLoading ? "LOADING PRICE..." : `UPDATE CARD (${displayPrice} ETH)`}
+                    disabled={!isReady}
                 />
 
                 <TransactionStatus>

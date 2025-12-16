@@ -111,6 +111,12 @@ export default function ProfilePage() {
 
   // Sharing
   const captureAndShare = async (platform: 'native' | 'twitter') => {
+    // Check if user has a card
+    if (!cardTokenId || cardTokenId === BigInt(0)) {
+      setShowPublishModal(true); // Reusing this existing state which seems to function as a "Mint Prompt"
+      return;
+    }
+
     if (platform === 'twitter') {
       const baseUrl = window.location.origin;
       const params = new URLSearchParams();
@@ -400,6 +406,96 @@ export default function ProfilePage() {
               </div>
               <div style={{ color: '#444' }}>→</div>
             </button>
+            {/* --- MODALS --- */}
+            <AnimatePresence>
+              {/* Help Modal */}
+              {activeHelp && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    position: 'fixed', inset: 0, zIndex: 9999,
+                    background: 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+                  }}
+                  onClick={() => setActiveHelp(null)}
+                >
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0.9 }}
+                    style={{
+                      background: '#111', border: '1px solid #333', borderRadius: '16px', padding: '24px', maxWidth: '320px', width: '100%', textAlign: 'center'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ fontSize: '32px', marginBottom: '16px' }}>
+                      {activeHelp === 'memories' ? '🧩' : '🎫'}
+                    </div>
+                    <h3 style={{ color: 'white', margin: '0 0 8px 0' }}>
+                      {activeHelp === 'memories' ? 'Minted Memories' : 'Events'}
+                    </h3>
+                    <p style={{ color: '#888', fontSize: '14px', lineHeight: '1.5' }}>
+                      {activeHelp === 'memories'
+                        ? "Collect on-chain memories with people you meet in real life. Scan their code to mint a 'Handshake' NFT."
+                        : "Your history of attendance at Base events, hackathons, and gatherings. Proof of showing up."}
+                    </p>
+                    <button
+                      onClick={() => setActiveHelp(null)}
+                      style={{ marginTop: '20px', padding: '12px 24px', background: '#333', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Got it
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* Mint Required Prompt (showPublishModal) */}
+              {showPublishModal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    position: 'fixed', inset: 0, zIndex: 10000,
+                    background: 'rgba(0,0,0,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+                  }}
+                >
+                  <div style={{
+                    background: '#0F1115', border: '1px solid #333', borderRadius: '24px', padding: '32px', maxWidth: '360px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px'
+                  }}>
+                    <div style={{ fontSize: '40px' }}>🔐</div>
+                    <h2 style={{ color: 'white', margin: 0 }}>Mint Required</h2>
+                    <p style={{ color: '#888', fontSize: '14px', lineHeight: '1.5' }}>
+                      You must mint your Identity Card to share it on X.
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                      <button
+                        onClick={() => setShowPublishModal(false)}
+                        style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid #333', borderRadius: '12px', color: '#888', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowPublishModal(false);
+                          setIsEditing(true); // Open edit/mint mode
+                          // Scroll to top if needed, or simply let them click Mint
+                        }}
+                        style={{ flex: 1, padding: '14px', background: '#0052FF', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        MINT NOW
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
           </div>
         )}
       </div>
