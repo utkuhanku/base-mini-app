@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useAccount } from 'wagmi';
-import { parseUnits, parseAbi } from 'viem';
+import { useAccount, useReadContract } from 'wagmi'; // Added useReadContract
+import { parseUnits, parseAbi, formatEther } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import {
     Transaction,
@@ -39,6 +39,21 @@ interface EditButtonProps {
 export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps) {
     const { address } = useAccount();
 
+    // 1. DYNAMIC PRICE FETCHING
+    const { data: editPriceWei } = useReadContract({
+        address: CARD_SBT_ADDRESS as `0x${string}`,
+        abi: parseAbi(["function editPriceETH() view returns (uint256)"]),
+        functionName: "editPriceETH",
+        chainId: TARGET_CHAIN.id,
+    });
+
+    // Fallback if read fails (safe default to avoid crash, but read should work)
+    // Default 0.0006 ETH if fetch pending/failed
+    const currentPrice = editPriceWei ? BigInt(editPriceWei.toString()) : parseUnits("0.0006", 18);
+
+    // Format for display (e.g. "0.0003")
+    const displayPrice = editPriceWei ? formatEther(editPriceWei as bigint) : "...";
+
     const handleOnStatus = useCallback((status: any) => {
         console.log('Transaction status:', status);
         if (status.statusName === 'success') {
@@ -49,12 +64,13 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     const handleError = useCallback((err: any) => {
         console.error("Transaction Error:", err);
         if (err.message && err.message.includes("address")) {
-            alert("Contract address configuration missing. Please check .env settings.");
+            console.error("Contract address configuration missing. Please check .env settings.");
         }
     }, []);
 
     // Validate Address Configuration
     if (!CARD_SBT_ADDRESS || CARD_SBT_ADDRESS === "0xMyCardSBTAddress") {
+        console.error("Missing NEXT_PUBLIC_CARD_SBT_ADDRESS env var");
         return (
             <div className="w-full p-3 bg-red-100 text-red-700 rounded-xl text-center text-sm font-bold">
                 ⚠️ Contract Config Missing
@@ -84,7 +100,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
                 }),
                 websites: ""
             }, 1], // 1 = PaymentMethod.ETH
-            value: parseUnits("0.00021", 18) // 0.00021 ETH (~$0.80)
+            value: currentPrice // DYNAMIC VALUE
         }
     ];
 
@@ -99,7 +115,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
             >
                 <TransactionButton
                     className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
-                    text="UPDATE CARD ($0.80)"
+                    text={`UPDATE CARD (${displayPrice} ETH)`}
                 />
 
                 <TransactionStatus>

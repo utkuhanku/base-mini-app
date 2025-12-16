@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useAccount } from 'wagmi';
-import { parseUnits, encodeFunctionData, parseAbi } from 'viem';
+import { useAccount, useReadContract } from 'wagmi'; // Added useReadContract
+import { parseUnits, encodeFunctionData, parseAbi, formatEther } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import {
     Transaction,
@@ -23,14 +23,6 @@ const CHAIN_ID = IS_KNOWN_MAINNET ? "8453" : (process.env.NEXT_PUBLIC_CHAIN_ID |
 const IS_MAINNET = CHAIN_ID === "8453";
 const TARGET_CHAIN = IS_MAINNET ? base : baseSepolia;
 
-// USDC Addresses
-const USDC_MAINNET = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const USDC_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-const USDC_ADDRESS = IS_MAINNET ? USDC_MAINNET : USDC_SEPOLIA;
-
-
-
-
 interface MintButtonProps {
     onMintSuccess: (hash: string) => void;
     profile: {
@@ -47,6 +39,21 @@ interface MintButtonProps {
 export default function MintButton({ onMintSuccess, profile }: MintButtonProps) {
     const { address } = useAccount();
 
+    // 1. DYNAMIC PRICE FETCHING
+    const { data: mintPriceWei } = useReadContract({
+        address: CARD_SBT_ADDRESS as `0x${string}`,
+        abi: parseAbi(["function mintPriceETH() view returns (uint256)"]),
+        functionName: "mintPriceETH",
+        chainId: TARGET_CHAIN.id,
+    });
+
+    // Fallback if read fails (safe default to avoid crash, but read should work)
+    // Default 0.0003 ETH if fetch pending/failed
+    const currentPrice = mintPriceWei ? BigInt(mintPriceWei.toString()) : parseUnits("0.0003", 18);
+
+    // Format for display (e.g. "0.0003")
+    const displayPrice = mintPriceWei ? formatEther(mintPriceWei as bigint) : "...";
+
     const handleOnStatus = useCallback((status: any) => {
         console.log('Transaction status:', status);
         if (status.statusName === 'success') {
@@ -56,7 +63,6 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
 
     const handleError = useCallback((err: any) => {
         console.error("Transaction Error:", err);
-        // If specific error about address, alert user
         if (err.message && err.message.includes("address")) {
             alert("Contract address configuration missing. Please check .env settings.");
         }
@@ -94,7 +100,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
                 }),
                 websites: ""
             }, 1], // 1 = PaymentMethod.ETH
-            value: parseUnits("0.00013", 18) // 0.00013 ETH (~$0.50)
+            value: currentPrice // DYNAMIC VALUE
         }
     ];
 
@@ -109,7 +115,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
             >
                 <TransactionButton
                     className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
-                    text="MINT IDENTITY ($0.50)"
+                    text={`MINT IDENTITY (${displayPrice} ETH)`}
                 />
 
                 <TransactionStatus>

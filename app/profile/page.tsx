@@ -15,6 +15,8 @@ import { getRandomManifest } from "../../utils/manifests";
 
 const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
 
+
+
 interface Profile {
   name: string;
   bio: string;
@@ -401,6 +403,8 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+
 
     </div>
   );
