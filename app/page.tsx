@@ -313,14 +313,14 @@ export default function Home() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   const phrases = [
-                    "Based and builders pilled. 🔵",
-                    "Onchain is the new online. 🌍",
-                    "Staying Based. 🛡️",
-                    "Building the future on Base. 🏗️",
-                    "Base is for everyone. 🤝",
-                    "Just minted my Onchain Identity. 🆔",
-                    "Keep building, keep shipping. 🚢",
-                    "WAGMI on Base. 🚀"
+                    "The future of the internet is being built onchain, and I'm here for it. Verifying my signal on Base. 🔵",
+                    "Identity is more than a profile picture; it's the reputation we build through action. Proud to be part of the onchain economy.",
+                    "Bringing the world onchain means creating systems that are open, accessible, and transparent for everyone. Building on Base. 🌍",
+                    "The most powerful networks are built on trust and verifiable provenance. Solidifying my onchain footprint today.",
+                    "We are not just users; we are owners and creators. Shaping the next era of the web, one block at a time. 🛡️",
+                    "From local connections to global impact. The onchain revolution starts with verifiable identity. 🏗️",
+                    "Believe in a future where value flows as freely as information. Stay Builder. Stay Based. 🚀",
+                    "Connecting with the builders who are architecting the new internet. My onchain identity is my passport."
                   ];
                   const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
                   const text = encodeURIComponent(randomPhrase);
