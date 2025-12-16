@@ -72,40 +72,42 @@ export default function FeedPage() {
                             transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
                         >
                             {/* PREMIUM IDENTITY CARD */}
-                            <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden' }}>
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.cardChip} />
-                                    <div className={styles.verifiedBadge}>
-                                        <div className={styles.verifiedDot} />
-                                        Verified
+                            <Link href={`/profile/${card.owner}`} style={{ textDecoration: 'none' }}>
+                                <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+                                    <div className={styles.cardHeader}>
+                                        <div className={styles.cardChip} />
+                                        <div className={styles.verifiedBadge}>
+                                            <div className={styles.verifiedDot} />
+                                            Verified
+                                        </div>
+                                        <div className={styles.pointsPill}><span>💎</span> #{card.tokenId}</div>
                                     </div>
-                                    <div className={styles.pointsPill}><span>💎</span> #{card.tokenId}</div>
-                                </div>
 
-                                <div className={styles.cardBody}>
-                                    <div className={styles.cardAvatarContainer}>
-                                        {card.avatarUrl ? (
-                                            <img src={card.avatarUrl} alt={card.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', background: '#333' }} />
-                                        )}
+                                    <div className={styles.cardBody}>
+                                        <div className={styles.cardAvatarContainer}>
+                                            {card.avatarUrl ? (
+                                                <img src={card.avatarUrl} alt={card.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', background: '#333' }} />
+                                            )}
+                                        </div>
+                                        <div className={styles.cardInfo}>
+                                            <div className={styles.cardName}>{card.displayName || "Anon"}</div>
+                                            <div className={styles.cardBio}>{card.bio || "Builder"}</div>
+                                        </div>
                                     </div>
-                                    <div className={styles.cardInfo}>
-                                        <div className={styles.cardName}>{card.displayName || "Anon"}</div>
-                                        <div className={styles.cardBio}>{card.bio || "Builder"}</div>
-                                    </div>
-                                </div>
 
-                                <div className={styles.cardFooter}>
-                                    <div className={styles.socialPill} style={{ opacity: 0.7 }}>
-                                        {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
+                                    <div className={styles.cardFooter}>
+                                        <div className={styles.socialPill} style={{ opacity: 0.7 }}>
+                                            {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.qrCodeMini}>
+                                        <QRCodeSVG value={`https://basescan.org/address/${card.owner}`} size={32} bgColor="white" fgColor="black" />
                                     </div>
                                 </div>
-
-                                <div className={styles.qrCodeMini}>
-                                    <QRCodeSVG value={`https://basescan.org/address/${card.owner}`} size={32} bgColor="white" fgColor="black" />
-                                </div>
-                            </div>
+                            </Link>
                         </motion.div>
                     ))}
 
