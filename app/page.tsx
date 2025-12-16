@@ -303,6 +303,41 @@ export default function Home() {
                 ?
               </button>
             </div>
+
+            {/* CREATE RANDOM BASEPOST */}
+            <div style={{ position: 'relative' }}>
+              <motion.div
+                className={styles.menuItem}
+                variants={itemVariants}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  const phrases = [
+                    "Based and builders pilled. 🔵",
+                    "Onchain is the new online. 🌍",
+                    "Staying Based. 🛡️",
+                    "Building the future on Base. 🏗️",
+                    "Base is for everyone. 🤝",
+                    "Just minted my Onchain Identity. 🆔",
+                    "Keep building, keep shipping. 🚢",
+                    "WAGMI on Base. 🚀"
+                  ];
+                  const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                  const text = encodeURIComponent(randomPhrase);
+                  const embedUrl = encodeURIComponent(window.location.origin);
+                  window.open(`https://warpcast.com/~/compose?text=${text}&embeds[]=${embedUrl}`, '_blank');
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className={styles.menuText}>
+                  <h3>CREATE BASEPOST</h3>
+                  <p>Cast random hype</p>
+                </div>
+                <div className={styles.arrow}>→</div>
+              </motion.div>
+            </div>
+
+
           </div>
         )
         }
