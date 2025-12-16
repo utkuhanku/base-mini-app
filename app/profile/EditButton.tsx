@@ -84,7 +84,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
                 }),
                 websites: ""
             }, 1], // 1 = PaymentMethod.ETH
-            value: parseUnits("0.0001", 18) // 0.0001 ETH (~$0.40)
+            value: parseUnits("0.00021", 18) // 0.00021 ETH (~$0.80)
         }
     ];
 
@@ -99,7 +99,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
             >
                 <TransactionButton
                     className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
-                    text="UPDATE CARD ($0.40)"
+                    text="UPDATE CARD ($0.80)"
                 />
 
                 <TransactionStatus>

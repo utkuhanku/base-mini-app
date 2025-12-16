@@ -94,7 +94,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
                 }),
                 websites: ""
             }, 1], // 1 = PaymentMethod.ETH
-            value: parseUnits("0.0003", 18) // 0.0003 ETH (~$1)
+            value: parseUnits("0.00013", 18) // 0.00013 ETH (~$0.50)
         }
     ];
 
@@ -109,7 +109,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
             >
                 <TransactionButton
                     className="mt-0 mr-0 mb-0 ml-0 w-full rounded-none border-b border-white/10 bg-transparent py-4 px-2 text-left font-bold text-white transition-all hover:bg-white/5 hover:pl-5"
-                    text="MINT IDENTITY ($1.00)"
+                    text="MINT IDENTITY ($0.50)"
                 />
 
                 <TransactionStatus>
