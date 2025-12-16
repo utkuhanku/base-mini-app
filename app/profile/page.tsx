@@ -110,24 +110,40 @@ export default function ProfilePage() {
   };
 
   // Sharing
-  const captureAndShare = async (platform: 'native' | 'twitter') => {
+  const captureAndShare = async () => {
     // Check if user has a card
     if (!cardTokenId || cardTokenId === BigInt(0)) {
-      setShowPublishModal(true); // Reusing this existing state which seems to function as a "Mint Prompt"
+      setShowPublishModal(true);
       return;
     }
 
-    if (platform === 'twitter') {
-      const baseUrl = window.location.origin;
-      const params = new URLSearchParams();
-      if (profile.name) params.set('name', profile.name);
-      if (profile.role) params.set('role', profile.role);
+    const baseUrl = window.location.origin;
+    const params = new URLSearchParams();
+    // We can pass current profile state to ensure the OG is fresh even if not fully indexed yet (though dynamic route mostly relies on onchain data, passing params helps the OG route if used directly)
+    // However, for the public profile route /profile/[address], it fetches from chain.
+    // Let's rely on the public profile link which is cleaner: /profile/0x...
 
-      const appUrl = `${baseUrl}?${params.toString()}`;
-      const text = encodeURIComponent(`Verifying my onchain identity on @base\n\n${appUrl}`);
-      // Using x.com ensures better handling on mobile devices and avoids lagacy redirects
-      window.open(`https://x.com/intent/tweet?text=${text}`, '_blank');
-    }
+    // Actually, dynamic OG generation usually takes query params. 
+    // Let's use the main route with params for now as implemented before to ensure visual consistency with local state if needed, 
+    // OR pointer to /profile/[address] if that's preferred.
+    // The previous implementation used baseUrl + params. Let's stick to that for reliability or switch to /profile/[address] if we want to rely on the new page.
+    // Given the new public profile page exists, linking to THAT is better for "Base App" feel.
+    // But the OG image generation currently lives on the main page structure or API? 
+    // The previous code constructed `appUrl` with query params. I will maintain that pattern for safety, but point to the public profile if possible.
+
+    // Let's stick to the previous robust pattern but separate the URL construction.
+    if (profile.name) params.set('name', profile.name);
+    if (profile.role) params.set('role', profile.role);
+
+    // We want the embed to be the USER'S PROFILE.
+    // If we have a public profile route, let's use it.
+    const publicProfileUrl = address ? `${baseUrl}/profile/${address}` : baseUrl;
+
+    const text = encodeURIComponent(`Verifying my onchain identity on @base`);
+    const embedUrl = encodeURIComponent(publicProfileUrl);
+
+    // Warpcast Intent
+    window.open(`https://warpcast.com/~/compose?text=${text}&embeds[]=${embedUrl}`, '_blank');
   };
 
   // Strict Edit Guard
@@ -281,10 +297,10 @@ export default function ProfilePage() {
               Edit Profile
             </button>
             <button
-              onClick={() => captureAndShare('twitter')}
-              style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', color: 'white', fontWeight: 700, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
+              onClick={() => captureAndShare()}
+              style={{ flex: 1, padding: '16px', background: 'rgba(0, 82, 255, 0.2)', borderRadius: '16px', border: '1px solid rgba(0, 82, 255, 0.2)', color: '#0052FF', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
             >
-              Post on X
+              CAST ON BASE APP
             </button>
           </div>
         </div>
