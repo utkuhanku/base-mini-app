@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import styles from "../profile/profile.module.css"; // Reusing profile styles for cards
+import { motion, AnimatePresence } from "framer-motion";
+import styles from "../profile/profile.module.css";
 import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
 
 interface CardProfile {
     tokenId: number;
@@ -32,81 +33,77 @@ export default function FeedPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-black text-white p-4 pb-24">
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <div className={styles.container} style={{ minHeight: '100vh', justifyContent: 'flex-start', paddingTop: '40px' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '420px', display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
                 <Link href="/" style={{
                     position: 'absolute',
                     left: 0,
-                    color: 'rgba(255,255,255,0.6)',
+                    color: 'rgba(255,255,255,0.4)',
                     textDecoration: 'none',
-                    fontSize: '24px'
+                    fontSize: '24px',
+                    transition: 'color 0.2s',
+                    zIndex: 10
                 }}>
                     ←
                 </Link>
-                <motion.h1
-                    className={styles.title}
-                    style={{ fontWeight: 800, letterSpacing: '-1px', fontSize: '2rem', margin: '0 auto' }} // Center title override
+                <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    style={{ width: '100%', textAlign: 'center' }}
                 >
-                    GLOBAL FEED<span className={styles.dot}>.</span>
-                </motion.h1>
+                    <h1 style={{ fontWeight: 800, letterSpacing: '4px', fontSize: '14px', color: 'white', margin: 0 }}>
+                        GLOBAL FEED<span style={{ color: '#0052FF' }}>.</span>
+                    </h1>
+                </motion.div>
             </div>
 
-            <p className="text-center text-gray-500 mb-8">Discover everyone building on Base.</p>
-
             {loading ? (
-                <div className="flex justify-center p-12">
-                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '100px' }}>
+                    <div className={styles.loader} />
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', letterSpacing: '1px' }}>SYNCING NETWORK...</p>
                 </div>
             ) : (
-                <div className="grid gap-6 max-w-md mx-auto">
-                    {cards.map((card) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', maxWidth: '420px' }}>
+                    {cards.map((card, index) => (
                         <motion.div
                             key={card.tokenId}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3 }}
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            {/* Reusing the card style structure roughly */}
-                            <div className={`${styles.businessCard} ${styles.variantClassic}`} style={{ transform: 'none', marginBottom: 0 }}>
+                            {/* PREMIUM IDENTITY CARD */}
+                            <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden' }}>
                                 <div className={styles.cardHeader}>
-                                    <div className={styles.chip}></div>
-                                    <div className={styles.baseLogo}>
-                                        <Image src="/base-logo.svg" alt="Base" width={20} height={20} />
-                                        #{card.tokenId}
+                                    <div className={styles.cardChip} />
+                                    <div className={styles.verifiedBadge}>
+                                        <div className={styles.verifiedDot} />
+                                        Verified
                                     </div>
+                                    <div className={styles.pointsPill}><span>💎</span> #{card.tokenId}</div>
                                 </div>
 
                                 <div className={styles.cardBody}>
-                                    {card.avatarUrl ? (
-                                        <Image src={card.avatarUrl} alt={card.displayName} width={60} height={60} className={styles.cardProfilePic} />
-                                    ) : (
-                                        <div className={styles.cardProfilePlaceholder}>{card.displayName ? card.displayName.charAt(0) : "U"}</div>
-                                    )}
-                                    <div className={styles.cardInfo}>
-                                        <h2 className={styles.cardName}>{card.displayName || "Unknown"}</h2>
-                                        <p className={styles.cardBio}>{card.bio || "No bio"}</p>
+                                    <div className={styles.cardAvatarContainer}>
+                                        {card.avatarUrl ? (
+                                            <img src={card.avatarUrl} alt={card.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', background: '#333' }} />
+                                        )}
                                     </div>
-                                    <div className="flex flex-wrap gap-2 mt-3 pl-4 pr-4">
-                                        {(() => {
-                                            try {
-                                                const links = JSON.parse(card.socials || "[]");
-                                                return links.map((link: any, i: number) => (
-                                                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-                                                        className="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition text-blue-300">
-                                                        {link.title} ↗
-                                                    </a>
-                                                ));
-                                            } catch (e) { return null; }
-                                        })()}
+                                    <div className={styles.cardInfo}>
+                                        <div className={styles.cardName}>{card.displayName || "Anon"}</div>
+                                        <div className={styles.cardBio}>{card.bio || "Builder"}</div>
                                     </div>
                                 </div>
 
                                 <div className={styles.cardFooter}>
-                                    <a href={`https://basescan.org/address/${card.owner}`} target="_blank" className="text-xs text-gray-400 hover:text-white transition">
+                                    <div className={styles.socialPill} style={{ opacity: 0.7 }}>
                                         {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
-                                    </a>
+                                    </div>
+                                </div>
+
+                                <div className={styles.qrCodeMini}>
+                                    <QRCodeSVG value={`https://basescan.org/address/${card.owner}`} size={32} bgColor="white" fgColor="black" />
                                 </div>
                             </div>
                         </motion.div>
@@ -114,14 +111,11 @@ export default function FeedPage() {
 
                     {cards.length === 0 && (
                         <div className="text-center text-gray-600 py-12">
-                            No cards minted yet. Be the first!
-                            <div className="mt-4">
-                                <Link href="/profile" className={styles.button}>
-                                    MINT YOUR CARD
-                                </Link>
-                            </div>
+                            <p style={{ color: '#666' }}>No identities found.</p>
                         </div>
                     )}
+
+                    <div style={{ height: '80px' }} /> {/* Spacer */}
                 </div>
             )}
         </div>

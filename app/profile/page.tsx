@@ -76,11 +76,12 @@ export default function ProfilePage() {
     setManifest(getRandomManifest());
   }, []);
 
-  // Update Logic
+  // Update Logic (State Only)
   const updateProfile = (field: keyof Profile, value: any) => {
+    // STRICT EDIT: We do NOT save to localStorage here. 
+    // We only update the component state.
     const newProfile = { ...profile, [field]: value };
     setProfile(newProfile);
-    localStorage.setItem("userProfile", JSON.stringify(newProfile));
   };
 
   // Image Upload
@@ -126,6 +127,7 @@ export default function ProfilePage() {
     const isDirty = JSON.stringify(profile) !== JSON.stringify(initialProfile);
     if (isDirty) {
       if (confirm("You have unsaved changes. Discard them?")) {
+        // Revert to initial state (last saved state)
         setProfile(initialProfile);
         setIsEditing(false);
       }
@@ -135,10 +137,13 @@ export default function ProfilePage() {
   };
 
   const handleSaveSuccess = (hash: string) => {
+    // STRICT EDIT: Only NOW do we persist to localStorage
+    localStorage.setItem("userProfile", JSON.stringify(profile));
     setInitialProfile(profile);
+
     setIsEditing(false);
     if (!cardTokenId) setShowPublishModal(true);
-    else alert("Profile Updated Successfully!");
+    else alert("Profile Updated Successfully on-chain!");
   };
 
   return (
