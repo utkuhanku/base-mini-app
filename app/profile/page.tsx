@@ -63,6 +63,9 @@ export default function ProfilePage() {
     query: { enabled: !!address }
   });
 
+  // Explicit loading state for card check
+  const isCheckingCard = address && cardTokenId === undefined;
+
   // Load / Init
   useEffect(() => {
     const saved = localStorage.getItem("userProfile");
@@ -183,63 +186,77 @@ export default function ProfilePage() {
       {/* --- HEADER ACTIONS (Minimal) --- */}
       {/* Moved generic actions to flow naturally. Top should be identity focus. */}
 
-      {/* TOGGLE: Creator vs Business */}
-      <div className={styles.cardToggleContainer}>
-        <button
-          className={profile.role === 'creator' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
-          onClick={() => updateProfile('role', 'creator')}
-        >
-          CREATOR
-        </button>
-        <button
-          className={profile.role === 'business' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
-          onClick={() => updateProfile('role', 'business')}
-        >
-          BUSINESS
-        </button>
-      </div>
-
-      {/* --- BLUE IDENTITY CARD (V2) --- */}
-      <div id="base-card-capture" className={profile.role === 'business' ? styles.identityCardBusiness : styles.identityCard}>
-        <div className={styles.manifestOverlay}><div className={styles.manifestText}>{manifest}</div></div>
-
-        <div className={styles.cardHeader}>
-          <div className={styles.cardChip} />
-          <div className={styles.verifiedBadge}><div className={styles.verifiedDot} />Verified ↗</div>
-          <div className={styles.pointsPill}><span>💎</span> 854</div>
-        </div>
-
-        <div className={styles.cardBody}>
-          <div
-            className={styles.cardAvatarContainer}
-            onClick={() => isEditing && fileInputRef.current?.click()}
-            style={{ cursor: isEditing ? 'pointer' : 'default', position: 'relative' }}
+      {/* TOGGLE: Creator vs Business (Only visible if minted) */}
+      {cardTokenId && (
+        <div className={styles.cardToggleContainer}>
+          <button
+            className={profile.role === 'creator' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
+            onClick={() => updateProfile('role', 'creator')}
           >
-            {profile.profilePicUrl ? (
-              <img src={profile.profilePicUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <div style={{ width: '100%', height: '100%', background: '#ccc' }} />
-            )}
-            {isEditing && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px' }}>📷</div>
-            )}
-          </div>
-          <div className={styles.cardInfo}>
-            <div className={styles.cardName}>{profile.name || "Anon"}</div>
-            <div className={styles.cardBio}>{profile.roleTitle || profile.role || "Builder"}</div>
-          </div>
+            CREATOR
+          </button>
+          <button
+            className={profile.role === 'business' ? styles.cardToggleBtnActive : styles.cardToggleBtn}
+            onClick={() => updateProfile('role', 'business')}
+          >
+            BUSINESS
+          </button>
         </div>
+      )}
 
-        <div className={styles.cardFooter}>
-          {profile.twitter && <a href={profile.twitter} target="_blank" className={styles.socialPill}>TWITTER / X ↗</a>}
-          {profile.website && <a href={profile.website} target="_blank" className={styles.socialPill}>WEBSITE ↗</a>}
-          {!profile.twitter && !profile.website && <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>@base.eth</span>}
+      {/* --- BLUE IDENTITY CARD (V2) or GHOST --- */}
+      {!cardTokenId && !isCheckingCard ? (
+        <div className={styles.identityCardGhost} onClick={() => setIsEditing(true)} style={{ cursor: 'pointer' }}>
+          <div className={styles.manifestOverlay}><div className={styles.manifestText}>{manifest}</div></div>
+          <div className={styles.ghostContent}>
+            <div className={styles.ghostIcon}>🆔</div>
+            <div className={styles.ghostTitle}>Identity Unclaimed</div>
+            <div className={styles.ghostSubtitle}>Mint your on-chain identity to start building your reputation on Base.</div>
+            <div className={styles.ghostAction}>TAP TO CREATE</div>
+          </div>
         </div>
+      ) : (
+        <div id="base-card-capture" className={profile.role === 'business' ? styles.identityCardBusiness : styles.identityCard}>
+          <div className={styles.manifestOverlay}><div className={styles.manifestText}>{manifest}</div></div>
 
-        <div className={styles.qrCodeMini}>
-          <QRCodeSVG value={`https://base.org?user=${address}`} size={32} bgColor="white" fgColor="black" />
+          <div className={styles.cardHeader}>
+            <div className={styles.cardChip} />
+            <div className={styles.verifiedBadge}><div className={styles.verifiedDot} />Verified ↗</div>
+            <div className={styles.pointsPill}><span>💎</span> 854</div>
+          </div>
+
+          <div className={styles.cardBody}>
+            <div
+              className={styles.cardAvatarContainer}
+              onClick={() => isEditing && fileInputRef.current?.click()}
+              style={{ cursor: isEditing ? 'pointer' : 'default', position: 'relative' }}
+            >
+              {profile.profilePicUrl ? (
+                <img src={profile.profilePicUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#ccc' }} />
+              )}
+              {isEditing && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px' }}>📷</div>
+              )}
+            </div>
+            <div className={styles.cardInfo}>
+              <div className={styles.cardName}>{profile.name || "Anon"}</div>
+              <div className={styles.cardBio}>{profile.roleTitle || profile.role || "Builder"}</div>
+            </div>
+          </div>
+
+          <div className={styles.cardFooter}>
+            {profile.twitter && <a href={profile.twitter} target="_blank" className={styles.socialPill}>TWITTER / X ↗</a>}
+            {profile.website && <a href={profile.website} target="_blank" className={styles.socialPill}>WEBSITE ↗</a>}
+            {!profile.twitter && !profile.website && <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>@base.eth</span>}
+          </div>
+
+          <div className={styles.qrCodeMini}>
+            <QRCodeSVG value={`https://base.org?user=${address}`} size={32} bgColor="white" fgColor="black" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* --- ACTION AREA (Edit / Share) --- */}
       {isEditing ? (
@@ -280,7 +297,11 @@ export default function ProfilePage() {
             <button className={styles.cancelButton} onClick={handleCancelEdit} style={{ flex: 1, padding: '16px', background: 'rgba(255,59,48,0.15)', border: 'none', borderRadius: '16px', color: '#ff3b30', fontWeight: 700 }}>
               CANCEL
             </button>
-            {cardTokenId ? (
+            {isCheckingCard ? (
+              <div style={{ flex: 1, padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', textAlign: 'center', color: '#666', fontSize: '12px' }}>
+                CHECKING STATUS...
+              </div>
+            ) : cardTokenId ? (
               <EditButton profile={profile} onUpdateSuccess={handleSaveSuccess} />
             ) : (
               <MintButton profile={profile} onMintSuccess={handleSaveSuccess} />
@@ -294,7 +315,7 @@ export default function ProfilePage() {
               onClick={() => setIsEditing(true)}
               style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
             >
-              Edit Profile
+              {cardTokenId ? "EDIT PROFILE" : "CREATE IDENTITY"}
             </button>
             <button
               onClick={() => captureAndShare()}

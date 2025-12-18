@@ -48,13 +48,13 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     });
 
     // Fallback if read fails (safe default to avoid crash, but read should work)
-    // Default 0.0006 ETH if fetch pending/failed
-    const currentPrice = editPriceWei ? BigInt(editPriceWei.toString()) : parseUnits("0.0006", 18);
+    // Default 0.000225 ETH if fetch pending/failed
+    const currentPrice = editPriceWei ? BigInt(editPriceWei.toString()) : parseUnits("0.000225", 18);
 
     // Format for display (e.g. "0.0003")
     const displayPrice = editPriceWei ? formatEther(editPriceWei as bigint) : "...";
 
-    const isReady = !isLoading && !isError && !!editPriceWei;
+    const isReady = !isLoading && !isError && editPriceWei !== undefined;
 
     const handleOnStatus = useCallback((status: any) => {
         console.log('Transaction status:', status);
