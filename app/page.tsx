@@ -27,7 +27,7 @@ import styles from "./page.module.css";
 
 import { useReadContract } from "wagmi";
 import { parseAbi } from "viem";
-import StrictOnboardingModal from "./components/StrictOnboardingModal";
+
 
 // Constants
 const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x4003055676749a0433EA698A8B70E45d398FC87f";
@@ -45,8 +45,7 @@ export default function Home() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [activeHelp, setActiveHelp] = useState<string | null>(null);
 
-  // Strict Onboarding State
-  const [showStrictModal, setShowStrictModal] = useState(false);
+
 
   // 1. Perform Quick Auth on Mount
   useEffect(() => {
@@ -97,29 +96,36 @@ export default function Home() {
   }, [wagmiConnected, address]);
 
 
-  // 2. CHECK FOR CARD (STRICT MODE)
+  // 2. CHECK FOR CARD & FETCH DATA
   const { data: cardTokenId, isLoading: isCardLoading } = useReadContract({
     address: CARD_SBT_ADDRESS as `0x${string}`,
     abi: parseAbi(["function cardOf(address owner) view returns (uint256)"]),
     functionName: "cardOf",
     args: address ? [address as `0x${string}`] : undefined,
     query: {
-      enabled: !!address, // Only run if address is available
+      enabled: !!address,
     }
   });
 
-  useEffect(() => {
-    if (address && !isCardLoading) {
-      if (!cardTokenId || Number(cardTokenId) === 0) {
-        const timer = setTimeout(() => {
-          setShowStrictModal(true);
-        }, 2000); // 2 second delay
-        return () => clearTimeout(timer);
-      } else {
-        setShowStrictModal(false);
-      }
+  const { data: cardData } = useReadContract({
+    address: CARD_SBT_ADDRESS as `0x${string}`,
+    abi: parseAbi([
+      "struct Profile { string displayName; string avatarUrl; string bio; string socials; string websites; }",
+      "function getCard(uint256 tokenId) view returns (Profile memory)"
+    ]),
+    functionName: "getCard",
+    args: cardTokenId ? [cardTokenId] : undefined,
+    query: {
+      enabled: !!cardTokenId && Number(cardTokenId) > 0,
     }
-  }, [address, cardTokenId, isCardLoading]);
+  });
+
+  // Extract Profile DataSafely
+  const profileName = cardData?.displayName || "Anon";
+  const profileRole = cardData?.bio || "Builder"; // Using bio as role/title for preview
+  const profilePic = cardData?.avatarUrl || null;
+
+
 
 
   const containerVariants = {
@@ -155,7 +161,8 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      {showStrictModal && <StrictOnboardingModal />}
+      {/* Strict Modal Removed for Cleaner Landing Experience */}
+
       <WelcomePopup />
       <motion.div
         className={styles.content}
@@ -163,7 +170,7 @@ export default function Home() {
         initial="hidden"
         animate="visible"
       >
-        {/* Modern Absolute Theme Toggle */}
+        {/* Toggle Restored */}
         <div style={{
           position: 'absolute',
           top: '20px',
@@ -177,6 +184,7 @@ export default function Home() {
         }}>
           <ThemeToggle />
         </div>
+
 
         <div className={styles.heroHeader}>
           <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -206,10 +214,12 @@ export default function Home() {
 
         {!isWalletConnected ? (
           <motion.div variants={itemVariants} className={styles.connectPrompt}>
-            <p>Connect your wallet to mint and explore.</p>
+            <p className={styles.subtitle} style={{ marginBottom: '24px', opacity: 0.7 }}>
+              Connect to access the Base Identity Protocol.
+            </p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Wallet>
-                <ConnectWallet className={styles.connectButtonOverride}>
+                <ConnectWallet className={styles.basePostButton}>
                   <Avatar className="h-6 w-6" />
                   <Name />
                 </ConnectWallet>
@@ -229,114 +239,109 @@ export default function Home() {
             </div>
           </motion.div>
         ) : (
-          <div className={styles.menu}>
-            <div style={{ position: 'relative' }}>
-              <Link href="/profile" style={{ textDecoration: 'none', flex: 1 }}>
-                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
-                  <div className={styles.menuText}>
-                    <h3>MY IDENTITY</h3>
-                    <p>View & Share Card</p>
-                  </div>
-                  <div className={styles.arrow}>→</div>
-                </motion.div>
-              </Link>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('identity'); }}
-                style={{
-                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
-                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
-                }}
-              >
-                ?
-              </button>
-            </div>
-
-            {/* Global Feed */}
-            <div style={{ position: 'relative' }}>
-              <Link href="/feed" style={{ textDecoration: 'none', flex: 1 }}>
-                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
-                  <div className={styles.menuText}>
-                    <h3>COMMUNITY FEED</h3>
-                    <p>Explore Global Profiles</p>
-                  </div>
-                  <div className={styles.arrow}>→</div>
-                </motion.div>
-              </Link>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('feed'); }}
-                style={{
-                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
-                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
-                }}
-              >
-                ?
-              </button>
-            </div>
-
-            {/* Connection Minting */}
-            <div style={{ position: 'relative' }}>
-              <Link href="/connect" style={{ textDecoration: 'none', flex: 1 }}>
-                <motion.div className={styles.menuItem} variants={itemVariants} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
-                  <div className={styles.menuText}>
-                    <h3>MINT CONNECTION</h3>
-                    <p>Bond with others</p>
-                  </div>
-                  <div className={styles.arrow}>→</div>
-                </motion.div>
-              </Link>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHelp('connect'); }}
-                style={{
-                  position: 'absolute', right: '48px', top: '50%', transform: 'translateY(-50%)',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  background: 'rgba(0, 82, 255, 0.1)', border: '1px solid rgba(0, 82, 255, 0.4)',
-                  color: '#0052FF', fontSize: '11px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 20
-                }}
-              >
-                ?
-              </button>
-            </div>
-
-            {/* CREATE RANDOM BASEPOST */}
-            <div style={{ position: 'relative' }}>
+          <div className={styles.menu} style={{ gap: '16px' }}>
+            {/* 1. IDENTITY CARD (Smart Preview) */}
+            <Link href="/profile" style={{ textDecoration: 'none', gridColumn: 'span 2' }}>
               <motion.div
-                className={styles.menuItem}
+                className={styles.dashboardCardPrimary}
                 variants={itemVariants}
-                whileHover={{ x: 4 }}
+                whileHover={{ scale: 1.02, borderColor: '#0052FF' }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  const phrases = [
-                    "The future of the internet is being built onchain, and I'm here for it. Verifying my signal on Base. 🔵",
-                    "Identity is more than a profile picture; it's the reputation we build through action. Proud to be part of the onchain economy.",
-                    "Bringing the world onchain means creating systems that are open, accessible, and transparent for everyone. Building on Base. 🌍",
-                    "The most powerful networks are built on trust and verifiable provenance. Solidifying my onchain footprint today.",
-                    "We are not just users; we are owners and creators. Shaping the next era of the web, one block at a time. 🛡️",
-                    "From local connections to global impact. The onchain revolution starts with verifiable identity. 🏗️",
-                    "Believe in a future where value flows as freely as information. Stay Builder. Stay Based. 🚀",
-                    "Connecting with the builders who are architecting the new internet. My onchain identity is my passport."
-                  ];
-                  const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-                  const text = encodeURIComponent(randomPhrase);
-                  const embedUrl = encodeURIComponent(window.location.origin);
-                  window.open(`https://warpcast.com/~/compose?text=${text}&embeds[]=${embedUrl}`, '_blank');
+                style={{
+                  background: !cardTokenId || Number(cardTokenId) === 0
+                    ? 'linear-gradient(135deg, rgba(0,82,255,0.1) 0%, rgba(0,0,0,0) 100%)' // Keep specific create gradient or map to variable?
+                    // Actually, Create Card should probably utilize the theme too, but gold badge handles status.
+                    // Let's use the variable but maybe override for "Create" state if unique.
+                    // For consistency, let's use the variable but add the noise texture conditionally via CSS class if possible, or just use variable.
+                    : 'var(--card-gradient-primary)',
+                  border: '1px solid var(--card-border)',
+                  boxShadow: 'var(--card-shadow)'
                 }}
-                style={{ cursor: 'pointer' }}
               >
-                <div className={styles.menuText}>
-                  <h3>CREATE BASEPOST</h3>
-                  <p>Cast random hype</p>
+                {/* Status Badge */}
+                <div style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    letterSpacing: '1px',
+                    color: !cardTokenId || Number(cardTokenId) === 0 ? '#FFD700' : '#00FF94',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: !cardTokenId || Number(cardTokenId) === 0 ? '#FFD700' : '#00FF94', boxShadow: !cardTokenId || Number(cardTokenId) === 0 ? '0 0 10px #FFD700' : '0 0 10px #00FF94' }} />
+                    {!cardTokenId || Number(cardTokenId) === 0 ? 'UNCLAIMED' : 'VERIFIED'}
+                  </div>
                 </div>
-                <div className={styles.arrow}>→</div>
-              </motion.div>
-            </div>
 
+                {/* Content Area */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', gap: '16px' }}>
+
+                  {!cardTokenId || Number(cardTokenId) === 0 ? (
+                    /* STATE: UNCLAIMED (Bold Call to Action) */
+                    <div style={{ width: '100%' }}>
+                      <div style={{ fontSize: '11px', color: '#888', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        Start Your Journey
+                      </div>
+                      <h2 style={{ fontSize: '32px', fontWeight: 900, lineHeight: '0.9', margin: 0, color: 'white', letterSpacing: '-1px' }}>
+                        CREATE IDENTITY <span style={{ color: '#0052FF' }}>→</span>
+                      </h2>
+                    </div>
+                  ) : (
+                    /* STATE: VERIFIED (Mini Card Visual) */
+                    <>
+                      {/* Avatar Preview */}
+                      <div style={{
+                        width: '64px', height: '64px', borderRadius: '50%',
+                        border: '2px solid rgba(255,255,255,0.2)', overflow: 'hidden', flexShrink: 0, background: '#333'
+                      }}>
+                        {profilePic ? (
+                          <img src={profilePic} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>👤</div>
+                        )}
+                      </div>
+
+                      <div style={{ paddingBottom: '4px' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 800, color: 'white', lineHeight: '1.1' }}>
+                          {profileName}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#888', fontWeight: 500 }}>
+                          {profileRole}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#0052FF', marginTop: '4px', fontWeight: 700, letterSpacing: '0.5px' }}>
+                          VIEW FULL ID →
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* 2. GLOBAL FEED (Secondary) */}
+            <Link href="/feed" style={{ textDecoration: 'none', gridColumn: 'span 2' }}>
+              <motion.div
+                className={styles.dashboardCardSecondary}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '2px', color: '#666', marginBottom: '4px' }}>
+                      EXPLORE
+                    </div>
+                    <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'white' }}>Global Feed</h3>
+                  </div>
+                  <div style={{ opacity: 0.5 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
 
           </div>
         )
@@ -378,16 +383,7 @@ export default function Home() {
                 </>
               )}
 
-              {activeHelp === 'connect' && (
-                <>
-                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', marginBottom: '12px', letterSpacing: '-0.5px' }}>MINT CONNECTION</div>
-                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)' }}>
-                    The core of the social graph. Meet someone IRL, take a photo, and mint a permanent bond onchain.
-                    <br /><br />
-                    <span style={{ color: '#0052FF' }}>This is step 3: Solidifying trust.</span>
-                  </div>
-                </>
-              )}
+
 
               <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '11px', opacity: 0.5, cursor: 'pointer' }} onClick={() => setActiveHelp(null)}>
                 TAP ANYWHERE TO CLOSE

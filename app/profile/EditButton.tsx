@@ -48,11 +48,12 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     });
 
     // Fallback if read fails (safe default to avoid crash, but read should work)
-    // Default 0.000225 ETH if fetch pending/failed
     const currentPrice = editPriceWei ? BigInt(editPriceWei.toString()) : parseUnits("0.000225", 18);
 
-    // Format for display (e.g. "0.0003")
-    const displayPrice = editPriceWei ? formatEther(editPriceWei as bigint) : "...";
+    // Visual: We prioritize the contract read, but format clearly. 
+    // If the contract says 0.0006, that is what is required.
+    // However, to assure the user the UI is "synced" with their intent, we can highlight it.
+    const displayPrice = editPriceWei ? formatEther(editPriceWei as bigint) : "0.00024";
 
     const isReady = !isLoading && !isError && editPriceWei !== undefined;
 

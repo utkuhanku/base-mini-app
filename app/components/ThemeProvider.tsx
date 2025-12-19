@@ -23,7 +23,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             setTheme(saved);
             document.documentElement.setAttribute("data-theme", saved);
         } else {
-            // Default to dark if nothing saved
+            // Default to dark (Anthracite) as requested
             setTheme("dark");
             document.documentElement.setAttribute("data-theme", "dark");
         }

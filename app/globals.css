@@ -19,6 +19,12 @@
   --bg-overlay: rgba(20, 20, 20, 0.8);
   /* Glassmorphism base */
 
+  /* Dashboard Card Gradients (Dark Theme) */
+  --card-gradient-primary: linear-gradient(135deg, #1A1D24 0%, #0F1115 100%);
+  --card-gradient-secondary: linear-gradient(135deg, #111 0%, #000 100%);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
   /* Text & Content */
   --text-primary: #FFFFFF;
   --text-secondary: #999999;
@@ -82,6 +88,17 @@
 
   /* Marquee Text Color (Blue on Blue/White theme) */
   --marquee-text: #0052FF;
+
+  /* Dashboard Card Gradients (Blue Theme) */
+  --card-gradient-primary: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --card-gradient-secondary: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --card-border: rgba(255, 255, 255, 0.3);
+  --card-shadow: 0 8px 32px rgba(0, 82, 255, 0.3);
+}
+
+:root {
+  /* ... existing vars ... */
+  /* Fallback appending to root if needed, but keeping organized */
 }
 
 /* Background Pattern for Blue Theme */
