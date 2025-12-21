@@ -341,7 +341,7 @@ export default function Home() {
             </Link>
 
             {/* 2. GLOBAL FEED (Secondary) */}
-            <Link href="/feed" style={{ textDecoration: 'none', gridColumn: 'span 2' }}>
+            <Link href="/feed" style={{ textDecoration: 'none', gridColumn: 'span 1' }}>
               <motion.div
                 className={styles.dashboardCardSecondary}
                 variants={itemVariants}
@@ -353,10 +353,10 @@ export default function Home() {
                     <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '2px', color: '#666', marginBottom: '4px' }}>
                       EXPLORE
                     </div>
-                    <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'white' }}>Global Feed</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Feed</h3>
                   </div>
                   <div style={{ opacity: 0.5 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="2" y1="12" x2="22" y2="12"></line>
                       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
@@ -365,6 +365,47 @@ export default function Home() {
                 </div>
               </motion.div>
             </Link>
+
+
+            {/* 3. BASE POSTING (New Feature) */}
+            <motion.div
+              style={{
+                textDecoration: 'none',
+                gridColumn: 'span 1',
+                cursor: 'pointer'
+              }}
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                const hypePhrases = [
+                  "Onchain is the new online. @baseposting 🔵",
+                  "Nothing stops the builders. Base is inevitable. @baseposting",
+                  "Based and blue-pilled. The future is here. @baseposting 🛡️",
+                  "Just deployed on Base. Fees low, vibes high. @baseposting",
+                  "Crypto is better on Base. Join the movement. @baseposting 🚀",
+                  "Stay Base, Stay Safe, Stay Onchain. @baseposting",
+                  "Everything is onchain. Everything is Base. @baseposting 🔵"
+                ];
+                const randomPhrase = hypePhrases[Math.floor(Math.random() * hypePhrases.length)];
+                const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(randomPhrase)}`;
+                window.open(intentUrl, '_blank');
+              }}
+            >
+              <div className={styles.dashboardCardSecondary} style={{ background: 'linear-gradient(135deg, rgba(0,82,255,0.05) 0%, rgba(0,0,0,0) 100%)', border: '1px solid rgba(0,82,255,0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '4px' }}>
+                      BASE POSTING
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Hype It</h3>
+                  </div>
+                  <div style={{ fontSize: '20px' }}>
+                    🔵
+                  </div>
+                </div>
+              </div>
+            </motion.div>
 
           </div>
         )
