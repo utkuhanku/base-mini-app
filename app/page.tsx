@@ -53,8 +53,12 @@ export default function Home() {
       setIsLoadingAuth(true);
       setAuthError(null);
       try {
-        // Ensure SDK is ready (optional but good practice)
-        // await sdk.actions.ready(); 
+        // Ensure SDK is ready
+        try {
+          await sdk.actions.ready();
+        } catch (e) {
+          console.warn("Farcaster SDK ready signal failed", e);
+        }
 
         // Get nonce/token from Farcaster
         const result = await sdk.quickAuth.getToken();
