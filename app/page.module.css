@@ -49,6 +49,7 @@
   line-height: 1;
   letter-spacing: -2px;
   background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.7) 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 1rem 0;
@@ -79,49 +80,70 @@
   text-align: center;
 }
 
-/* --- DASHBOARD GRID --- */
+/* --- PREMIUM MINIMAL GRID --- */
 .dashboardGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
 .dashboardCardPrimary {
-  background: linear-gradient(145deg, #1A1D24 0%, #0F1115 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  /* "Void & Signal" Theme */
+  background: #050505;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* Ultra-thin feel */
+  border-radius: 16px;
+  /* Slightly tighter radius */
   padding: 24px;
-  height: 200px;
+  height: 220px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
 }
 
 .dashboardCardPrimary:hover {
-  border-color: #0052FF;
-  background: linear-gradient(145deg, #22252C 0%, #15171C 100%);
+  border-color: rgba(0, 82, 255, 0.5);
+  /* Signal Blue Border */
+  background: #080808;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -12px rgba(0, 82, 255, 0.2);
 }
 
 .dashboardCardSecondary {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  background: #050505;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   padding: 20px;
-  height: 100px;
+  height: 110px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .dashboardCardSecondary:hover {
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: #0A0A0A;
+  transform: translateY(-2px);
+}
+
+/* Base Posting Special State */
+.dashboardCardSecondary[data-variant="bop"] {
+  background: linear-gradient(180deg, rgba(0, 82, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%);
+  border-color: rgba(0, 82, 255, 0.15);
+}
+
+.dashboardCardSecondary[data-variant="bop"]:hover {
+  border-color: #0052FF;
+  box-shadow: 0 8px 32px -8px rgba(0, 82, 255, 0.3);
 }
 
 /* Menu Item Legacy (Keep for strict modal fallback just in case or delete later) */

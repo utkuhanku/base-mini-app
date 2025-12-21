@@ -391,28 +391,41 @@ export default function Home() {
                 const signature = " @utkus_eth Stay Based 🟦";
                 const finalOverlay = randomPhrase + signature;
 
-                // Use x.com/share to avoid Base App regex bug treating 'intent' as a username
-                const intentUrl = `https://x.com/share?text=${encodeURIComponent(finalOverlay)}`;
+                // DEEP LINK STRATEGY
+                // 1. Try to open the Twitter App directly using custom scheme
+                const appIntent = `twitter://post?message=${encodeURIComponent(finalOverlay)}`;
+                const webIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalOverlay)}`;
 
-                // CRITICAL FIX: Use SDK to open URL. This forces the host app to handle it (likely opening system browser/app)
-                // instead of the internal WebView trying to route it as a profile.
-                if (sdk && sdk.actions && sdk.actions.openUrl) {
-                  sdk.actions.openUrl(intentUrl);
-                } else {
-                  // Fallback for local dev / non-frame env
-                  window.open(intentUrl, '_blank');
-                }
+                // Try deep link first
+                window.location.href = appIntent;
+
+                // Fallback (simulated via timeout, though inconsistent in some webviews)
+                // In a simple web context we can't easily check installed apps involving window.open
+                // But for Base App, the `twitter://` scheme is often handled by the OS.
+
+                // If that fails/does nothing (user doesn't have app), we can provide a backup button or reliance
+                // on the OS error handler.
+                // Alternatively, `sdk.actions.openUrl` works best for web links.
+
+                setTimeout(() => {
+                  // Fallback to web intent via SDK if app launch fails
+                  if (sdk && sdk.actions && sdk.actions.openUrl) {
+                    sdk.actions.openUrl(webIntent);
+                  } else {
+                    window.open(webIntent, '_blank');
+                  }
+                }, 500);
               }}
             >
-              <div className={styles.dashboardCardSecondary} style={{ background: 'linear-gradient(135deg, rgba(0,82,255,0.05) 0%, rgba(0,0,0,0) 100%)', border: '1px solid rgba(0,82,255,0.1)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                  <div>
-                    <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '4px', opacity: 0.8 }}>
+              <div className={styles.dashboardCardSecondary} data-variant="bop">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '6px', opacity: 1 }}>
                       STAY BASED
                     </div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Base Posting</h3>
+                    <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'white', letterSpacing: '-0.5px' }}>Base Posting</h3>
                   </div>
-                  <div style={{ fontSize: '20px' }}>
+                  <div style={{ fontSize: '24px', filter: 'drop-shadow(0 0 12px rgba(0,82,255,0.5))' }}>
                     🔵
                   </div>
                 </div>
