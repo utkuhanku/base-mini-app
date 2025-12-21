@@ -125,8 +125,8 @@ export default function Home() {
   });
 
   // Extract Profile DataSafely
-  const profileName = cardData?.displayName || "Anon";
-  const profileRole = cardData?.bio || "Builder"; // Using bio as role/title for preview
+  const profileName = cardData?.displayName || "Future Legend";
+  const profileRole = cardData?.bio || "Wayfarer"; // Using bio as role/title for preview
   const profilePic = cardData?.avatarUrl || null;
 
 
@@ -280,14 +280,33 @@ export default function Home() {
                 <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', gap: '16px' }}>
 
                   {!cardTokenId || Number(cardTokenId) === 0 ? (
-                    /* STATE: UNCLAIMED (Bold Call to Action) */
+                    /* STATE: UNCLAIMED or DISCONNECTED (Bold Call to Action) */
                     <div style={{ width: '100%' }}>
                       <div style={{ fontSize: '11px', color: '#888', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                        Start Your Journey
+                        {isAuthenticated && !isWalletConnected ? "Wallet Disconnected" : "Start Your Journey"}
                       </div>
-                      <h2 style={{ fontSize: '32px', fontWeight: 900, lineHeight: '0.9', margin: 0, color: 'white', letterSpacing: '-1px' }}>
-                        CREATE IDENTITY <span style={{ color: '#0052FF' }}>→</span>
-                      </h2>
+
+                      {isAuthenticated && !isWalletConnected ? (
+                        <div style={{
+                          padding: '12px 16px',
+                          background: 'rgba(255, 215, 0, 0.1)',
+                          border: '1px solid #FFD700',
+                          borderRadius: '12px',
+                          color: '#FFD700',
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '8px'
+                        }}>
+                          <span>⚠️</span> SYNC WALLET TO VIEW CARD
+                        </div>
+                      ) : (
+                        <h2 style={{ fontSize: '32px', fontWeight: 900, lineHeight: '0.9', margin: 0, color: 'white', letterSpacing: '-1px' }}>
+                          CREATE IDENTITY <span style={{ color: '#0052FF' }}>→</span>
+                        </h2>
+                      )}
                     </div>
                   ) : (
                     /* STATE: VERIFIED (Mini Card Visual) */
