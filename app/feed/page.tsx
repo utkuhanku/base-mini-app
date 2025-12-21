@@ -64,17 +64,34 @@ export default function FeedPage() {
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', maxWidth: '420px' }}>
-                    {cards.map((card, index) => (
-                        <motion.div
-                            key={card.tokenId}
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                            {/* PREMIUM IDENTITY CARD */}
-                            <Link href={`/profile/${card.owner}`} style={{ textDecoration: 'none' }}>
-                                <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-                                    <div className={styles.cardHeader}>
+                    {cards.map((card, index) => {
+                        // Parse Socials
+                        let twitter = "";
+                        let website = "";
+                        let roleTitle = "";
+                        let customLinks: any[] = [];
+                        try {
+                            const socialData = JSON.parse(card.socials || "{}");
+                            twitter = socialData.twitter || "";
+                            website = socialData.website || "";
+                            roleTitle = socialData.roleTitle || "";
+                            customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                        } catch (e) {
+                            // ignore
+                        }
+
+                        return (
+                            <motion.div
+                                key={card.tokenId}
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                            >
+                                {/* PREMIUM IDENTITY CARD */}
+                                <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden' }}>
+                                    <Link href={`/profile/${card.owner}`} style={{ textDecoration: 'none', position: 'absolute', inset: 0, zIndex: 0 }} />
+
+                                    <div className={styles.cardHeader} style={{ position: 'relative', zIndex: 1 }}>
                                         <div className={styles.cardChip} />
                                         <div className={styles.verifiedBadge}>
                                             <div className={styles.verifiedDot} />
@@ -83,7 +100,7 @@ export default function FeedPage() {
                                         <div className={styles.pointsPill}><span>💎</span> #{card.tokenId}</div>
                                     </div>
 
-                                    <div className={styles.cardBody}>
+                                    <div className={styles.cardBody} style={{ position: 'relative', zIndex: 1 }}>
                                         <div className={styles.cardAvatarContainer}>
                                             {card.avatarUrl ? (
                                                 <img src={card.avatarUrl} alt={card.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -93,23 +110,57 @@ export default function FeedPage() {
                                         </div>
                                         <div className={styles.cardInfo}>
                                             <div className={styles.cardName}>{card.displayName || "Anon"}</div>
-                                            <div className={styles.cardBio}>{card.bio || "Builder"}</div>
+                                            <div className={styles.cardBio}>{roleTitle || card.bio || "Builder"}</div>
                                         </div>
                                     </div>
 
-                                    <div className={styles.cardFooter}>
-                                        <div className={styles.socialPill} style={{ opacity: 0.7 }}>
-                                            {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
-                                        </div>
+                                    <div className={styles.cardFooter} style={{ position: 'relative', zIndex: 2, gap: '8px', flexWrap: 'wrap' }}>
+                                        {twitter && (
+                                            <a
+                                                href={twitter}
+                                                target="_blank"
+                                                className={styles.socialPill}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                TWITTER ↗
+                                            </a>
+                                        )}
+                                        {website && (
+                                            <a
+                                                href={website}
+                                                target="_blank"
+                                                className={styles.socialPill}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                WEBSITE ↗
+                                            </a>
+                                        )}
+                                        {customLinks.map((link, i) => (
+                                            <a
+                                                key={i}
+                                                href={link.url}
+                                                target="_blank"
+                                                className={styles.socialPill}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {link.label?.toUpperCase() || "LINK"} ↗
+                                            </a>
+                                        ))}
+
+                                        {!twitter && !website && customLinks.length === 0 && (
+                                            <div className={styles.socialPill} style={{ opacity: 0.7, pointerEvents: 'none' }}>
+                                                {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className={styles.qrCodeMini}>
                                         <QRCodeSVG value={`https://basescan.org/address/${card.owner}`} size={32} bgColor="white" fgColor="black" />
                                     </div>
                                 </div>
-                            </Link>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        )
+                    })}
 
                     {cards.length === 0 && (
                         <div className="text-center text-gray-600 py-12">

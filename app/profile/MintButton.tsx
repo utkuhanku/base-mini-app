@@ -58,7 +58,7 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
     const isReady = !isLoading && !isError && mintPriceWei !== undefined;
 
     const handleOnStatus = useCallback((status: any) => {
-        console.log('Transaction status:', status);
+
         if (status.statusName === 'success') {
             onMintSuccess(status.transactionReceipts[0].transactionHash);
         }

@@ -19,6 +19,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Your onchain identity and event history.",
       images: [minikitConfig.frame.imageUrl],
     },
+    appleWebApp: {
+      title: "Identity",
+      statusBarStyle: "black-translucent",
+      capable: true,
+    },
     other: {
       "fc:frame": JSON.stringify({
         version: "next",

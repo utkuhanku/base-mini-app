@@ -58,7 +58,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     const isReady = !isLoading && !isError && editPriceWei !== undefined;
 
     const handleOnStatus = useCallback((status: any) => {
-        console.log('Transaction status:', status);
+
         if (status.statusName === 'success') {
             onUpdateSuccess(status.transactionReceipts[0].transactionHash);
         }
