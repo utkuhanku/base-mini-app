@@ -393,8 +393,15 @@ export default function Home() {
 
                 // Use x.com/share to avoid Base App regex bug treating 'intent' as a username
                 const intentUrl = `https://x.com/share?text=${encodeURIComponent(finalOverlay)}`;
-                // Attempt to force external browser if possible, but standard blank is best we can do without specific SDKs
-                window.open(intentUrl, '_blank');
+
+                // CRITICAL FIX: Use SDK to open URL. This forces the host app to handle it (likely opening system browser/app)
+                // instead of the internal WebView trying to route it as a profile.
+                if (sdk && sdk.actions && sdk.actions.openUrl) {
+                  sdk.actions.openUrl(intentUrl);
+                } else {
+                  // Fallback for local dev / non-frame env
+                  window.open(intentUrl, '_blank');
+                }
               }}
             >
               <div className={styles.dashboardCardSecondary} style={{ background: 'linear-gradient(135deg, rgba(0,82,255,0.05) 0%, rgba(0,0,0,0) 100%)', border: '1px solid rgba(0,82,255,0.1)' }}>
