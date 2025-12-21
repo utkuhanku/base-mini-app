@@ -391,8 +391,8 @@ export default function Home() {
                 const signature = " @utkus_eth Stay Based 🟦";
                 const finalOverlay = randomPhrase + signature;
 
-                // Use x.com to avoid potential deep-link redirects to 'intent' user on legacy parsers
-                const intentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(finalOverlay)}`;
+                // Use x.com/share to avoid Base App regex bug treating 'intent' as a username
+                const intentUrl = `https://x.com/share?text=${encodeURIComponent(finalOverlay)}`;
                 // Attempt to force external browser if possible, but standard blank is best we can do without specific SDKs
                 window.open(intentUrl, '_blank');
               }}
@@ -400,10 +400,10 @@ export default function Home() {
               <div className={styles.dashboardCardSecondary} style={{ background: 'linear-gradient(135deg, rgba(0,82,255,0.05) 0%, rgba(0,0,0,0) 100%)', border: '1px solid rgba(0,82,255,0.1)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                   <div>
-                    <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '4px' }}>
-                      BASE POSTING
+                    <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '4px', opacity: 0.8 }}>
+                      STAY BASED
                     </div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Hype It</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Base Posting</h3>
                   </div>
                   <div style={{ fontSize: '20px' }}>
                     🔵
