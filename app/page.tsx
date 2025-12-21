@@ -199,7 +199,7 @@ export default function Home() {
           </motion.div>
 
           <motion.h1 className={styles.title} variants={itemVariants}>
-            IDENTITY<span className={styles.dot}>.</span>
+            ONCHAIN <br /> IDENTITY<span className={styles.dot}>.</span>
           </motion.h1>
 
           {isAuthenticated ? (
@@ -208,7 +208,7 @@ export default function Home() {
             </motion.p>
           ) : (
             <motion.p className={styles.subtitle} variants={itemVariants}>
-              Please authenticate to access your profile.
+              Enter your onchain identity to continue.
             </motion.p>
           )}
         </div>

@@ -65,7 +65,8 @@ export default function PublicProfilePage({ params }: PageProps) {
             profile.roleTitle = socials.roleTitle;
             profile.twitter = socials.twitter;
             profile.website = socials.website;
-            profile.links = socials.links || [];
+            // Support both custom links array and legacy fields
+            profile.links = Array.isArray(socials.links) ? socials.links : [];
         } catch (e) {
             // ignore JSON error
         }
@@ -121,10 +122,20 @@ export default function PublicProfilePage({ params }: PageProps) {
                     </div>
                 </div>
 
-                <div className={styles.cardFooter}>
+                <div className={styles.cardFooter} style={{ flexWrap: 'wrap', gap: '8px' }}>
                     {profile.twitter && <a href={profile.twitter} target="_blank" className={styles.socialPill}>TWITTER / X ↗</a>}
                     {profile.website && <a href={profile.website} target="_blank" className={styles.socialPill}>WEBSITE ↗</a>}
-                    {!profile.twitter && !profile.website && <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>@base.eth</span>}
+
+                    {/* Render Custom Links */}
+                    {profile.links.map((link: any, i: number) => (
+                        <a key={i} href={link.url} target="_blank" className={styles.socialPill}>
+                            {(link.label || "LINK").toUpperCase()} ↗
+                        </a>
+                    ))}
+
+                    {!profile.twitter && !profile.website && profile.links.length === 0 && (
+                        <span style={{ fontSize: 9, opacity: 0.5, fontStyle: 'italic' }}>@base.eth</span>
+                    )}
                 </div>
 
                 <div className={styles.qrCodeMini}>
