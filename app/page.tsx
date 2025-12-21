@@ -125,7 +125,7 @@ export default function Home() {
   });
 
   // Extract Profile DataSafely
-  const profileName = cardData?.displayName || "Future Legend";
+  const profileName = cardData?.displayName || "My Identity";
   const profileRole = cardData?.bio || "Wayfarer"; // Using bio as role/title for preview
   const profilePic = cardData?.avatarUrl || null;
 
@@ -388,7 +388,12 @@ export default function Home() {
                   "Everything is onchain. Everything is Base. @baseposting 🔵"
                 ];
                 const randomPhrase = hypePhrases[Math.floor(Math.random() * hypePhrases.length)];
-                const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(randomPhrase)}`;
+                const signature = " @utkus_eth Stay Based 🟦";
+                const finalOverlay = randomPhrase + signature;
+
+                // Use x.com to avoid potential deep-link redirects to 'intent' user on legacy parsers
+                const intentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(finalOverlay)}`;
+                // Attempt to force external browser if possible, but standard blank is best we can do without specific SDKs
                 window.open(intentUrl, '_blank');
               }}
             >
