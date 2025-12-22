@@ -129,6 +129,8 @@ export default function Home() {
   const profileRole = cardData?.bio || "Wayfarer"; // Using bio as role/title for preview
   const profilePic = cardData?.avatarUrl || null;
 
+  const hasCard = !!cardTokenId && Number(cardTokenId) > 0;
+
 
 
 
@@ -243,140 +245,73 @@ export default function Home() {
             </div>
           </motion.div>
         ) : (
-          <div className={styles.menu} style={{ gap: '16px' }}>
-            {/* 1. IDENTITY CARD (Smart Preview) */}
-            <Link href="/profile" style={{ textDecoration: 'none', gridColumn: 'span 2' }}>
+          <div className={styles.dashboardGrid}>
+
+            {/* 1. IDENTITY CARD (Void Style) */}
+            <Link href={hasCard ? `/profile/${address}` : "/connect"} style={{ textDecoration: 'none', width: '100%' }}>
               <motion.div
-                className={styles.dashboardCardPrimary}
+                className={styles.voidCard}
+                data-active={hasCard ? "true" : "false"}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, borderColor: '#0052FF' }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  background: !cardTokenId || Number(cardTokenId) === 0
-                    ? 'linear-gradient(135deg, rgba(0,82,255,0.1) 0%, rgba(0,0,0,0) 100%)' // Keep specific create gradient or map to variable?
-                    // Actually, Create Card should probably utilize the theme too, but gold badge handles status.
-                    // Let's use the variable but maybe override for "Create" state if unique.
-                    // For consistency, let's use the variable but add the noise texture conditionally via CSS class if possible, or just use variable.
-                    : 'var(--card-gradient-primary)',
-                  border: '1px solid var(--card-border)',
-                  boxShadow: 'var(--card-shadow)'
-                }}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.99 }}
               >
-                {/* Status Badge */}
-                <div style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{
-                    fontSize: '10px',
-                    fontWeight: 800,
-                    letterSpacing: '1px',
-                    color: !cardTokenId || Number(cardTokenId) === 0 ? '#FFD700' : '#00FF94',
-                    display: 'flex', alignItems: 'center', gap: '6px'
-                  }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: !cardTokenId || Number(cardTokenId) === 0 ? '#FFD700' : '#00FF94', boxShadow: !cardTokenId || Number(cardTokenId) === 0 ? '0 0 10px #FFD700' : '0 0 10px #00FF94' }} />
-                    {!cardTokenId || Number(cardTokenId) === 0 ? 'UNCLAIMED' : 'VERIFIED'}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span className={styles.voidLabel}>IDENTITY LAYER</span>
+                  {!hasCard && !isWalletConnected ? (
+                    <h3 className={styles.voidTitle} style={{ color: '#666' }}>Connect Wallet</h3>
+                  ) : !hasCard && isWalletConnected ? (
+                    <h3 className={styles.voidTitle}>Create Identity <span style={{ color: '#0052FF' }}>→</span></h3>
+                  ) : (
+                    <div>
+                      <h3 className={styles.voidTitle}>{profileName}</h3>
+                      <span style={{ fontSize: '12px', color: '#666', marginTop: '4px', display: 'block' }}>{profileRole}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Content Area */}
-                <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', gap: '16px' }}>
-
-                  {!cardTokenId || Number(cardTokenId) === 0 ? (
-                    /* STATE: UNCLAIMED or DISCONNECTED (Bold Call to Action) */
-                    <div style={{ width: '100%' }}>
-                      <div style={{ fontSize: '11px', color: '#888', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                        {isAuthenticated && !isWalletConnected ? "Wallet Disconnected" : "Start Your Journey"}
-                      </div>
-
-                      {isAuthenticated && !isWalletConnected ? (
-                        <div style={{
-                          padding: '12px 16px',
-                          background: 'rgba(255, 215, 0, 0.1)',
-                          border: '1px solid #FFD700',
-                          borderRadius: '12px',
-                          color: '#FFD700',
-                          fontSize: '14px',
-                          fontWeight: 700,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          marginBottom: '8px'
-                        }}>
-                          <span>⚠️</span> SYNC WALLET TO VIEW CARD
-                        </div>
-                      ) : (
-                        <h2 style={{ fontSize: '32px', fontWeight: 900, lineHeight: '0.9', margin: 0, color: 'white', letterSpacing: '-1px' }}>
-                          CREATE IDENTITY <span style={{ color: '#0052FF' }}>→</span>
-                        </h2>
-                      )}
+                <div className={styles.voidIcon}>
+                  {hasCard ? (
+                    // Avatar or Icon
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#333', overflow: 'hidden' }}>
+                      {profilePic ? <img src={profilePic} alt="" style={{ width: '100%', height: '100%' }} /> : null}
                     </div>
                   ) : (
-                    /* STATE: VERIFIED (Mini Card Visual) */
-                    <>
-                      {/* Avatar Preview */}
-                      <div style={{
-                        width: '64px', height: '64px', borderRadius: '50%',
-                        border: '2px solid rgba(255,255,255,0.2)', overflow: 'hidden', flexShrink: 0, background: '#333'
-                      }}>
-                        {profilePic ? (
-                          <img src={profilePic} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>👤</div>
-                        )}
-                      </div>
-
-                      <div style={{ paddingBottom: '4px' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 800, color: 'white', lineHeight: '1.1' }}>
-                          {profileName}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#888', fontWeight: 500 }}>
-                          {profileRole}
-                        </div>
-                        <div style={{ fontSize: '10px', color: '#0052FF', marginTop: '4px', fontWeight: 700, letterSpacing: '0.5px' }}>
-                          VIEW FULL ID →
-                        </div>
-                      </div>
-                    </>
+                    <span style={{ fontSize: '24px' }}>👤</span>
                   )}
                 </div>
               </motion.div>
             </Link>
 
-            {/* 2. GLOBAL FEED (Secondary) */}
-            <Link href="/feed" style={{ textDecoration: 'none', gridColumn: 'span 1' }}>
+            {/* 2. GLOBAL FEED (Void Style) */}
+            <Link href="/feed" style={{ textDecoration: 'none', width: '100%' }}>
               <motion.div
-                className={styles.dashboardCardSecondary}
+                className={styles.voidCard}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.99 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                  <div>
-                    <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '2px', color: '#666', marginBottom: '4px' }}>
-                      EXPLORE
-                    </div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'white' }}>Feed</h3>
-                  </div>
-                  <div style={{ opacity: 0.5 }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="2" y1="12" x2="22" y2="12"></line>
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span className={styles.voidLabel}>NETWORK STATE</span>
+                  <h3 className={styles.voidTitle}>Global Feed</h3>
+                </div>
+                <div className={styles.voidIcon}>
+                  🌐
                 </div>
               </motion.div>
             </Link>
 
 
-            {/* 3. BASE POSTING (New Feature) */}
+            {/* 3. BASE POSTING (Void Style) */}
             <motion.div
               style={{
                 textDecoration: 'none',
-                gridColumn: 'span 1',
+                width: '100%',
                 cursor: 'pointer'
               }}
               variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => {
                 const hypePhrases = [
                   "Onchain is the new online. @baseposting 🔵",
@@ -392,23 +327,12 @@ export default function Home() {
                 const finalOverlay = randomPhrase + signature;
 
                 // DEEP LINK STRATEGY
-                // 1. Try to open the Twitter App directly using custom scheme
                 const appIntent = `twitter://post?message=${encodeURIComponent(finalOverlay)}`;
                 const webIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalOverlay)}`;
 
-                // Try deep link first
                 window.location.href = appIntent;
 
-                // Fallback (simulated via timeout, though inconsistent in some webviews)
-                // In a simple web context we can't easily check installed apps involving window.open
-                // But for Base App, the `twitter://` scheme is often handled by the OS.
-
-                // If that fails/does nothing (user doesn't have app), we can provide a backup button or reliance
-                // on the OS error handler.
-                // Alternatively, `sdk.actions.openUrl` works best for web links.
-
                 setTimeout(() => {
-                  // Fallback to web intent via SDK if app launch fails
                   if (sdk && sdk.actions && sdk.actions.openUrl) {
                     sdk.actions.openUrl(webIntent);
                   } else {
@@ -417,17 +341,13 @@ export default function Home() {
                 }, 500);
               }}
             >
-              <div className={styles.dashboardCardSecondary} data-variant="bop">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '2px', color: '#0052FF', marginBottom: '6px', opacity: 1 }}>
-                      STAY BASED
-                    </div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'white', letterSpacing: '-0.5px' }}>Base Posting</h3>
-                  </div>
-                  <div style={{ fontSize: '24px', filter: 'drop-shadow(0 0 12px rgba(0,82,255,0.5))' }}>
-                    🔵
-                  </div>
+              <div className={styles.voidCard} data-variant="bop">
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span className={styles.voidLabel} style={{ color: '#0052FF' }}>STAY BASED</span>
+                  <h3 className={styles.voidTitle}>Base Posting</h3>
+                </div>
+                <div className={styles.voidIcon} style={{ opacity: 1, filter: 'drop-shadow(0 0 8px rgba(0,82,255,0.4))' }}>
+                  🔵
                 </div>
               </div>
             </motion.div>

@@ -80,70 +80,86 @@
   text-align: center;
 }
 
-/* --- PREMIUM MINIMAL GRID --- */
+/* --- VOID CONCEPT (Hyper-Minimal) --- */
 .dashboardGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Tight gap */
   width: 100%;
 }
 
-.dashboardCardPrimary {
-  /* "Void & Signal" Theme */
-  background: #050505;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  /* Ultra-thin feel */
-  border-radius: 16px;
-  /* Slightly tighter radius */
+.voidCard {
+  /* Invisible container, content defines structure */
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  border-left: 2px solid transparent;
+  /* Status Indicator */
   padding: 24px;
-  height: 220px;
+  min-height: 140px;
   display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
-}
-
-.dashboardCardPrimary:hover {
-  border-color: rgba(0, 82, 255, 0.5);
-  /* Signal Blue Border */
-  background: #080808;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px -12px rgba(0, 82, 255, 0.2);
-}
-
-.dashboardCardSecondary {
-  background: #050505;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
-  height: 110px;
-  display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  align-items: flex-start;
   position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
   overflow: hidden;
 }
 
-.dashboardCardSecondary:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: #0A0A0A;
-  transform: translateY(-2px);
+.voidCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: #333;
+  /* Reveal structure on hover */
+  transform: translateX(4px);
+  /* Micro-movement */
 }
 
-/* Base Posting Special State */
-.dashboardCardSecondary[data-variant="bop"] {
-  background: linear-gradient(180deg, rgba(0, 82, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%);
-  border-color: rgba(0, 82, 255, 0.15);
+.voidCard[data-active="true"] {
+  border-left-color: #0052FF;
+  background: linear-gradient(90deg, rgba(0, 82, 255, 0.05) 0%, transparent 100%);
 }
 
-.dashboardCardSecondary[data-variant="bop"]:hover {
-  border-color: #0052FF;
-  box-shadow: 0 8px 32px -8px rgba(0, 82, 255, 0.3);
+.voidLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.voidTitle {
+  font-family: var(--font-base);
+  font-size: 24px;
+  font-weight: 300;
+  /* Light weight for elegance */
+  letter-spacing: -1px;
+  color: white;
+  margin: 0;
+}
+
+.voidIcon {
+  font-size: 24px;
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+.voidCard:hover .voidIcon {
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Special Case: Base Posting */
+.voidCard[data-variant="bop"] {
+  border-left-color: rgba(0, 82, 255, 0.3);
+}
+
+.voidCard[data-variant="bop"]:hover {
+  border-left-color: #0052FF;
+  background: linear-gradient(90deg, rgba(0, 82, 255, 0.1) 0%, transparent 100%);
+  box-shadow: inset 0 0 20px rgba(0, 82, 255, 0.05);
 }
 
 /* Menu Item Legacy (Keep for strict modal fallback just in case or delete later) */

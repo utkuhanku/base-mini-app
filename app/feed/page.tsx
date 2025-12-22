@@ -71,13 +71,28 @@ export default function FeedPage() {
                         let roleTitle = "";
                         let customLinks: any[] = [];
                         try {
-                            const socialData = JSON.parse(card.socials || "{}");
-                            twitter = socialData.twitter || "";
-                            website = socialData.website || "";
-                            roleTitle = socialData.roleTitle || "";
-                            customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                            if (card.socials && typeof card.socials === 'string') {
+                                // Clean potential double stringifying if present
+                                let raw = card.socials;
+                                if (raw.startsWith('"') && raw.endsWith('"')) {
+                                    raw = JSON.parse(raw);
+                                }
+                                const socialData = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+                                twitter = socialData.twitter || "";
+                                website = socialData.website || "";
+                                roleTitle = socialData.roleTitle || "";
+                                customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                            } else if (typeof card.socials === 'object') {
+                                // Handle if it's already an object (though unlikely from raw SC return usually)
+                                const socialData = card.socials as any;
+                                twitter = socialData.twitter || "";
+                                website = socialData.website || "";
+                                roleTitle = socialData.roleTitle || "";
+                                customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                            }
                         } catch (e) {
-                            // ignore
+                            console.error("Error parsing socials for card:", card.tokenId, e);
                         }
 
                         return (
