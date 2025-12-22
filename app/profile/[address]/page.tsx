@@ -51,7 +51,7 @@ export default function PublicProfilePage({ params }: PageProps) {
         roleTitle: "",
         twitter: "",
         website: "",
-        links: []
+        links: [] as any[]
     };
 
     if (profileData) {
@@ -71,12 +71,28 @@ export default function PublicProfilePage({ params }: PageProps) {
                 }
 
                 // 2. Parse if still string
-                const socials = typeof encoded === 'string' ? JSON.parse(encoded) : encoded;
+                const parsed = typeof encoded === 'string' ? JSON.parse(encoded) : encoded;
 
-                profile.roleTitle = socials.roleTitle;
-                profile.twitter = socials.twitter;
-                profile.website = socials.website;
-                profile.links = Array.isArray(socials.links) ? socials.links : [];
+                if (Array.isArray(parsed)) {
+                    // Legacy Array Handling
+                    profile.links = parsed.map((l: any) => ({
+                        label: l.label || l.title || "Link",
+                        url: l.url
+                    }));
+                    // Extract Twitter
+                    const tw = profile.links.find((l: any) => l.label.toLowerCase().includes("twitter") || l.label.toLowerCase().includes("x") || l.url.includes("x.com"));
+                    if (tw) profile.twitter = tw.url;
+
+                    // Extract Website
+                    const web = profile.links.find((l: any) => l.label.toLowerCase().includes("website"));
+                    if (web) profile.website = web.url;
+                } else {
+                    // Standard Object Structure
+                    profile.roleTitle = parsed.roleTitle;
+                    profile.twitter = parsed.twitter;
+                    profile.website = parsed.website;
+                    profile.links = Array.isArray(parsed.links) ? parsed.links : [];
+                }
             }
         } catch (e) {
             console.error("Profile parse error", e);

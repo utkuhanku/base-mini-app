@@ -77,12 +77,28 @@ export default function FeedPage() {
                                 if (raw.startsWith('"') && raw.endsWith('"')) {
                                     raw = JSON.parse(raw);
                                 }
-                                const socialData = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                                const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
-                                twitter = socialData.twitter || "";
-                                website = socialData.website || "";
-                                roleTitle = socialData.roleTitle || "";
-                                customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                                if (Array.isArray(parsed)) {
+                                    // Legacy: Data is just an array of links
+                                    customLinks = parsed.map((l: any) => ({
+                                        label: l.label || l.title || "Link",
+                                        url: l.url
+                                    }));
+                                    // Try to extract known platforms
+                                    const tw = customLinks.find(l => l.label.toLowerCase().includes("twitter") || l.label.toLowerCase().includes("x") || l.url.includes("x.com"));
+                                    if (tw) twitter = tw.url;
+
+                                    const web = customLinks.find(l => l.label.toLowerCase().includes("website"));
+                                    if (web) website = web.url;
+                                } else {
+                                    // Standard Object
+                                    const socialData = parsed;
+                                    twitter = socialData.twitter || "";
+                                    website = socialData.website || "";
+                                    roleTitle = socialData.roleTitle || "";
+                                    customLinks = Array.isArray(socialData.links) ? socialData.links : [];
+                                }
                             } else if (typeof card.socials === 'object') {
                                 // Handle if it's already an object (though unlikely from raw SC return usually)
                                 const socialData = card.socials as any;
