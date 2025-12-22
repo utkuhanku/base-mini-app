@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import styles from "../profile/profile.module.css";
+import { motion } from "framer-motion";
+import styles from "../page.module.css";
 import Link from "next/link";
-import { QRCodeSVG } from "qrcode.react";
+import { useRouter } from "next/navigation";
 
 interface CardProfile {
     tokenId: number;
@@ -18,6 +18,7 @@ interface CardProfile {
 export default function FeedPage() {
     const [cards, setCards] = useState<CardProfile[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         fetch("/api/cards")
@@ -34,6 +35,7 @@ export default function FeedPage() {
 
     return (
         <div className={styles.container} style={{ minHeight: '100vh', justifyContent: 'flex-start', paddingTop: '40px' }}>
+            {/* Header */}
             <div style={{ position: 'relative', width: '100%', maxWidth: '420px', display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
                 <Link href="/" style={{
                     position: 'absolute',
@@ -46,24 +48,20 @@ export default function FeedPage() {
                 }}>
                     ←
                 </Link>
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{ width: '100%', textAlign: 'center' }}
-                >
+                <div style={{ width: '100%', textAlign: 'center' }}>
                     <h1 style={{ fontWeight: 800, letterSpacing: '4px', fontSize: '14px', color: 'white', margin: 0 }}>
-                        GLOBAL FEED<span style={{ color: '#0052FF' }}>.</span>
+                        NETWORK STATE<span style={{ color: '#0052FF' }}>.</span>
                     </h1>
-                </motion.div>
+                </div>
             </div>
 
             {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '100px' }}>
                     <div className={styles.loader} />
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', letterSpacing: '1px' }}>SYNCING NETWORK...</p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', letterSpacing: '1px' }}>SYNCING...</p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', maxWidth: '420px' }}>
+                <div className={styles.dashboardGrid} style={{ maxWidth: '420px', width: '100%' }}>
                     {cards.map((card, index) => {
                         // Parse Socials
                         let twitter = "";
@@ -72,7 +70,6 @@ export default function FeedPage() {
                         let customLinks: any[] = [];
                         try {
                             if (card.socials && typeof card.socials === 'string') {
-                                // Clean potential double stringifying if present
                                 let raw = card.socials;
                                 if (raw.startsWith('"') && raw.endsWith('"')) {
                                     raw = JSON.parse(raw);
@@ -80,12 +77,11 @@ export default function FeedPage() {
                                 const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
                                 if (Array.isArray(parsed)) {
-                                    // Legacy: Data is just an array of links
+                                    // Legacy Array
                                     customLinks = parsed.map((l: any) => ({
                                         label: l.label || l.title || "Link",
                                         url: l.url
                                     }));
-                                    // Try to extract known platforms
                                     const tw = customLinks.find(l => l.label.toLowerCase().includes("twitter") || l.label.toLowerCase().includes("x") || l.url.includes("x.com"));
                                     if (tw) twitter = tw.url;
 
@@ -100,7 +96,6 @@ export default function FeedPage() {
                                     customLinks = Array.isArray(socialData.links) ? socialData.links : [];
                                 }
                             } else if (typeof card.socials === 'object') {
-                                // Handle if it's already an object (though unlikely from raw SC return usually)
                                 const socialData = card.socials as any;
                                 twitter = socialData.twitter || "";
                                 website = socialData.website || "";
@@ -111,82 +106,73 @@ export default function FeedPage() {
                             console.error("Error parsing socials for card:", card.tokenId, e);
                         }
 
+                        // Determine Display Role
+                        const displayRole = roleTitle || "CITIZEN";
+
                         return (
                             <motion.div
                                 key={card.tokenId}
-                                initial={{ opacity: 0, y: 50 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.05 }}
                             >
-                                {/* PREMIUM IDENTITY CARD */}
-                                <div className={styles.identityCard} style={{ position: 'relative', overflow: 'hidden' }}>
-                                    <Link href={`/profile/${card.owner}`} style={{ textDecoration: 'none', position: 'absolute', inset: 0, zIndex: 0 }} />
-
-                                    <div className={styles.cardHeader} style={{ position: 'relative', zIndex: 1 }}>
-                                        <div className={styles.cardChip} />
-                                        <div className={styles.verifiedBadge}>
-                                            <div className={styles.verifiedDot} />
-                                            Verified
-                                        </div>
-                                        <div className={styles.pointsPill}><span>💎</span> #{card.tokenId}</div>
+                                <div
+                                    className={styles.voidCard}
+                                    onClick={() => router.push(`/profile/${card.owner}`)}
+                                    style={{ padding: '20px', minHeight: 'auto', alignItems: 'center' }}
+                                >
+                                    {/* Avatar (Void Style - Small) */}
+                                    <div style={{ marginRight: '16px', position: 'relative' }}>
+                                        {card.avatarUrl ? (
+                                            <img src={card.avatarUrl} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.2)' }} />
+                                        ) : (
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#222', border: '1px solid #333' }} />
+                                        )}
+                                        <div style={{ position: 'absolute', bottom: -2, right: -2, width: '10px', height: '10px', background: '#0052FF', borderRadius: '50%', border: '2px solid black' }} />
                                     </div>
 
-                                    <div className={styles.cardBody} style={{ position: 'relative', zIndex: 1 }}>
-                                        <div className={styles.cardAvatarContainer}>
-                                            {card.avatarUrl ? (
-                                                <img src={card.avatarUrl} alt={card.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            ) : (
-                                                <div style={{ width: '100%', height: '100%', background: '#333' }} />
-                                            )}
+                                    {/* Text Content */}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                                            <span className={styles.voidLabel} style={{ marginBottom: 0, fontSize: '9px', color: '#0052FF' }}>{displayRole.toUpperCase()}</span>
+                                            <span style={{ fontSize: '9px', color: '#444' }}>#{card.tokenId}</span>
                                         </div>
-                                        <div className={styles.cardInfo}>
-                                            <div className={styles.cardName}>{card.displayName || "Anon"}</div>
-                                            <div className={styles.cardBio}>{roleTitle || card.bio || "Builder"}</div>
-                                        </div>
+                                        <h3 className={styles.voidTitle} style={{ fontSize: '18px', fontWeight: 600 }}>{card.displayName}</h3>
+                                        {card.bio && (
+                                            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '90%' }}>
+                                                {card.bio}
+                                            </p>
+                                        )}
                                     </div>
 
-                                    <div className={styles.cardFooter} style={{ position: 'relative', zIndex: 2, gap: '8px', flexWrap: 'wrap' }}>
+                                    {/* Social Actions (Right Side) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                                        {/* Twitter */}
                                         {twitter && (
                                             <a
                                                 href={twitter}
                                                 target="_blank"
-                                                className={styles.socialPill}
                                                 onClick={(e) => e.stopPropagation()}
+                                                style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                                                onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
+                                                onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
                                             >
-                                                TWITTER ↗
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                                             </a>
                                         )}
+                                        {/* Website */}
                                         {website && (
                                             <a
                                                 href={website}
                                                 target="_blank"
-                                                className={styles.socialPill}
                                                 onClick={(e) => e.stopPropagation()}
+                                                style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}
+                                                onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
+                                                onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
                                             >
-                                                WEBSITE ↗
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                                             </a>
                                         )}
-                                        {customLinks.map((link, i) => (
-                                            <a
-                                                key={i}
-                                                href={link.url}
-                                                target="_blank"
-                                                className={styles.socialPill}
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {link.label?.toUpperCase() || "LINK"} ↗
-                                            </a>
-                                        ))}
-
-                                        {!twitter && !website && customLinks.length === 0 && (
-                                            <div className={styles.socialPill} style={{ opacity: 0.7, pointerEvents: 'none' }}>
-                                                {card.owner.slice(0, 6)}...{card.owner.slice(-4)}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className={styles.qrCodeMini}>
-                                        <QRCodeSVG value={`https://basescan.org/address/${card.owner}`} size={32} bgColor="white" fgColor="black" />
                                     </div>
                                 </div>
                             </motion.div>
@@ -195,11 +181,11 @@ export default function FeedPage() {
 
                     {cards.length === 0 && (
                         <div className="text-center text-gray-600 py-12">
-                            <p style={{ color: '#666' }}>No identities found.</p>
+                            <p style={{ color: '#333', letterSpacing: '2px', fontSize: '10px' }}>VOID IS EMPTY</p>
                         </div>
                     )}
 
-                    <div style={{ height: '80px' }} /> {/* Spacer */}
+                    <div style={{ height: '80px' }} />
                 </div>
             )}
         </div>
