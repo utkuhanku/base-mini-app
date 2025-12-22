@@ -61,14 +61,25 @@ export default function PublicProfilePage({ params }: PageProps) {
         profile.profilePicUrl = p[1];
         profile.bio = p[2];
         try {
-            const socials = JSON.parse(p[3] || "{}");
-            profile.roleTitle = socials.roleTitle;
-            profile.twitter = socials.twitter;
-            profile.website = socials.website;
-            // Support both custom links array and legacy fields
-            profile.links = Array.isArray(socials.links) ? socials.links : [];
+            let encoded = p[3];
+            if (!encoded || encoded === "{}") {
+                // empty
+            } else {
+                // 1. Handle double stringifying (common in some onchain writes)
+                if (typeof encoded === 'string' && encoded.startsWith('"') && encoded.endsWith('"')) {
+                    try { encoded = JSON.parse(encoded); } catch (e) { }
+                }
+
+                // 2. Parse if still string
+                const socials = typeof encoded === 'string' ? JSON.parse(encoded) : encoded;
+
+                profile.roleTitle = socials.roleTitle;
+                profile.twitter = socials.twitter;
+                profile.website = socials.website;
+                profile.links = Array.isArray(socials.links) ? socials.links : [];
+            }
         } catch (e) {
-            // ignore JSON error
+            console.error("Profile parse error", e);
         }
     }
 
