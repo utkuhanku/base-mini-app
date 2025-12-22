@@ -1,43 +1,34 @@
-
 import { createPublicClient, http, parseAbi } from 'viem';
-import { base } from 'viem/chains';
-
-const CARD_ADDRESS = "0x4003055676749a0433EA698A8B70E45d398FC87f";
-const TOKEN_ID = 1n; // User is #1
-
-const client = createPublicClient({
-    chain: base,
-    transport: http(),
-});
+import { base, baseSepolia } from 'viem/chains';
 
 async function main() {
-    console.log(`Reading Card #${TOKEN_ID} from ${CARD_ADDRESS}...`);
-
-    const data = await client.readContract({
-        address: CARD_ADDRESS,
-        abi: parseAbi([
-            "function profiles(uint256) view returns (string displayName, string avatarUrl, string bio, string socials, string websites)"
-        ]),
-        functionName: "profiles",
-        args: [TOKEN_ID]
+    const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http()
     });
 
-    console.log("\nRAW DATA RETURNED:");
-    console.log("Name:", data[0]);
-    console.log("Avatar:", data[1]);
-    console.log("Bio:", data[2]);
-    console.log("Socials (RAW):", data[3]);
-    console.log("Websites:", data[4]);
+    const CONTRACT_ADDRESS = "0x4003055676749a0433EA698A8B70E45d398FC87f";
 
-    console.log("\n--- PARSING ATTEMPT ---");
-    try {
-        let encoded = data[3];
-        console.log("Type:", typeof encoded);
+    console.log("Reading profiles from contract...");
 
-        if (typeof encoded === 'string' && encoded.startsWith('"') && encoded.endsWith('"')) {
-            console.log("Detected double stringify, peeling one layer...");
-            encoded = JSON.parse(encoded);
-            console.log("New Value:", encoded);
+    for (let i = 1; i <= 5; i++) {
+        try {
+            const data = await publicClient.readContract({
+                address: CONTRACT_ADDRESS,
+                abi: parseAbi([
+                    "function profiles(uint256) view returns (string displayName, string avatarUrl, string bio, string socials, string websites)"
+                ]),
+                functionName: "profiles",
+                args: [BigInt(i)]
+            });
+
+            const [name, avatar, bio, socials, websites] = data as [string, string, string, string, string];
+            console.log(`\n--- TOKEN #${i} ---`);
+            console.log("Name:", name);
+            console.log("Bio:", bio);
+            console.log("Socials (RAW):", socials);
+        } catch (e) {
+            // console.log(`Token #${i} error or not existent`);
         }
 
         const parsed = JSON.parse(encoded);

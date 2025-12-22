@@ -19,7 +19,7 @@ const client = createPublicClient({
     transport: http()
 });
 
-export const revalidate = 60; // Cache for 60 seconds
+export const revalidate = 0; // Disable cache for debugging
 
 export async function GET() {
     // Fallback logic handled by constant above
