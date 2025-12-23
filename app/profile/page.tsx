@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAccount, useReadContract } from "wagmi";
@@ -30,7 +30,7 @@ interface Profile {
   links: { label: string; url: string }[];
 }
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { address } = useAccount();
   const searchParams = useSearchParams();
   const shouldCreate = searchParams.get('create');
@@ -639,5 +639,13 @@ export default function ProfilePage() {
 
       </motion.div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className={styles.container}><div className={styles.loader}></div></div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }

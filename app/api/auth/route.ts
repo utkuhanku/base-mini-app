@@ -1,6 +1,8 @@
 import { verifyQuickAuthRequest } from "@/lib/auth/quickAuth";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const payload = await verifyQuickAuthRequest(request);
