@@ -114,6 +114,8 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
                 contracts={calls}
                 className="w-full"
                 chainId={TARGET_CHAIN.id}
+                // @ts-ignore
+                isSponsored={!!process.env.NEXT_PUBLIC_PAYMASTER_URL} // Enable sponsorship if URL is present
                 onStatus={handleOnStatus}
                 onError={handleError}
             >
