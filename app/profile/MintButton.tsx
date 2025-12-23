@@ -48,13 +48,13 @@ export default function MintButton({ onMintSuccess, profile }: MintButtonProps) 
     });
 
     // Fallback if read fails (safe default to avoid crash, but read should work)
-    // Default 0.00018 ETH (~$0.60) if fetch pending/failed
-    const currentPrice = mintPriceWei ? BigInt(mintPriceWei.toString()) : parseUnits("0.00018", 18);
+    // Default 0.0003 ETH (~$1.00) if fetch pending/failed - MATCHING ONCHAIN PRICE
+    const currentPrice = mintPriceWei !== undefined ? BigInt(mintPriceWei.toString()) : parseUnits("0.0003", 18);
 
     // Format for display (e.g. "0.0003")
-    const displayPrice = mintPriceWei ? formatEther(mintPriceWei as bigint) : "...";
+    const displayPrice = mintPriceWei !== undefined ? formatEther(mintPriceWei as bigint) : "0.0003";
 
-    // Allow 0 price (don't use !!mintPriceWei as it returns false for 0n)
+    // Allow 0 price
     const isReady = !isLoading && !isError && mintPriceWei !== undefined;
 
     const handleOnStatus = useCallback((status: any) => {
