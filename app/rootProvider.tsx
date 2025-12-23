@@ -32,11 +32,8 @@ export function RootProvider({ children }: { children: ReactNode }) {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
           chain={targetChain}
-          // @ts-ignore
-          config={{
-            paymaster: process.env.NEXT_PUBLIC_PAYMASTER_URL,
-          }}
         >
           {children}
         </OnchainKitProvider>
