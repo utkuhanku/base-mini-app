@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { useReadContract } from "wagmi";
+import { useReadContract, useAccount } from "wagmi";
 import { parseAbi } from "viem";
 import Link from "next/link";
 import styles from "../profile.module.css";
@@ -18,9 +18,15 @@ interface PageProps {
 }
 
 export default function PublicProfilePage({ params }: PageProps) {
-    const { address } = params;
+    const { address } = params; // Keep original name to avoid wider diffs
+    const { address: userAddress } = useAccount(); // User's wallet
+
     const [showScore, setShowScore] = useState(false);
     const [activeHelp, setActiveHelp] = useState<string | null>(null);
+
+    const isOwner = userAddress && address && userAddress.toLowerCase() === address.toLowerCase();
+
+    // ... existing state ...
 
     // 1. Get Token ID
     const { data: tokenId } = useReadContract({
@@ -111,7 +117,7 @@ export default function PublicProfilePage({ params }: PageProps) {
     return (
         <div className={styles.container}>
             {/* Header / Back Link */}
-            <div style={{ width: '100%', maxWidth: '420px', display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ width: '100%', maxWidth: '420px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <Link href="/feed" style={{
                     color: 'rgba(255,255,255,0.6)',
                     textDecoration: 'none',
@@ -125,6 +131,22 @@ export default function PublicProfilePage({ params }: PageProps) {
                 }}>
                     ← BACK
                 </Link>
+
+                {isOwner && (
+                    <Link href="/profile" style={{
+                        color: '#0052FF',
+                        background: 'rgba(0, 82, 255, 0.1)',
+                        border: '1px solid rgba(0, 82, 255, 0.2)',
+                        padding: '8px 16px',
+                        borderRadius: '100px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        letterSpacing: '0.5px'
+                    }}>
+                        EDIT PROFILE ✏️
+                    </Link>
+                )}
             </div>
 
             {/* --- BLUE IDENTITY CARD --- */}
