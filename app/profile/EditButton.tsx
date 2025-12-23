@@ -109,6 +109,7 @@ export default function EditButton({ onUpdateSuccess, profile }: EditButtonProps
     return (
         <div className="flex w-full flex-col gap-2">
             <Transaction
+                key={currentPrice.toString()} // Force re-init when price loads/changes
                 contracts={calls}
                 className="w-full"
                 chainId={TARGET_CHAIN.id}
