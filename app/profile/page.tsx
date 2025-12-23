@@ -7,6 +7,8 @@ import { useAccount, useReadContract } from "wagmi";
 import { parseAbi } from "viem";
 import imageCompression from 'browser-image-compression';
 
+import { useSearchParams } from "next/navigation";
+
 import MintButton from "./MintButton";
 import EditButton from "./EditButton";
 import ScoreView from "./ScoreView";
@@ -30,6 +32,8 @@ interface Profile {
 
 export default function ProfilePage() {
   const { address } = useAccount();
+  const searchParams = useSearchParams();
+  const shouldCreate = searchParams.get('create');
 
   // Initial State
   const initialProfileState: Profile = {
@@ -48,6 +52,14 @@ export default function ProfilePage() {
 
   const [manifest, setManifest] = useState("BUILD ON BASE");
   const [isEditing, setIsEditing] = useState(false);
+
+  // Auto-open Edit Mode if create param is present
+  useEffect(() => {
+    if (shouldCreate === 'true') {
+      setIsEditing(true);
+    }
+  }, [shouldCreate]);
+
   const [showScore, setShowScore] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [activeHelp, setActiveHelp] = useState<string | null>(null);

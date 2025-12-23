@@ -248,7 +248,7 @@ export default function Home() {
           <div className={styles.dashboardGrid}>
 
             {/* 1. IDENTITY CARD (Void Style) */}
-            <Link href={hasCard ? `/profile/${address}` : "/connect"} style={{ textDecoration: 'none', width: '100%' }}>
+            <Link href={hasCard ? `/profile/${address}` : "/profile?create=true"} style={{ textDecoration: 'none', width: '100%' }}>
               <motion.div
                 className={styles.voidCard}
                 data-active={hasCard ? "true" : "false"}
