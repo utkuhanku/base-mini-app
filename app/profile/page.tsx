@@ -252,12 +252,14 @@ function ProfileContent() {
     if (lastSignal) setDailySignal(true);
   }, []);
 
-  const handleDailySignal = () => {
-    const text = "Checking in on @base. Building onchain every day. 🔵";
-    const intent = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+  const handleDailyPost = () => {
+    const text = "Building my onchain identity on @base. 🔵";
+    // Embed the current app URL so others can join
+    const embedUrl = encodeURIComponent(window.location.origin);
+    const intent = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${embedUrl}`;
     window.open(intent, '_blank');
-    // Set signal as true (optimistic)
-    localStorage.setItem(`daily_signal_${new Date().toISOString().split('T')[0]}`, 'true');
+
+    localStorage.setItem(`daily_post_${new Date().toISOString().split('T')[0]}`, 'true');
     setDailySignal(true);
   };
 
@@ -352,16 +354,16 @@ function ProfileContent() {
               <div className={styles.verifiedBadge}>
                 {socialScore?.badge === 'Diamond' ? '💎' : socialScore?.badge === 'Gold' ? '🥇' : '🔵'} {socialScore?.badge || 'Citizen'}
               </div>
-              <div className={styles.pointsPill}>
-                {socialScore?.followers ? (
-                  <span>{socialScore.followers > 5000 ? '5K+ Users' :
-                    socialScore.followers > 1000 ? '1K+ Users' :
-                      socialScore.followers > 500 ? '500+ Users' :
-                        socialScore.followers > 100 ? '100+ Users' :
-                          `${socialScore.followers} Users`}</span>
-                ) : (
-                  <span>...</span>
-                )}
+              <div className={styles.pointsPill} style={{ gap: '6px', padding: '4px 12px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span style={{ fontWeight: 700, fontSize: '13px' }}>
+                  {socialScore?.followers ? socialScore.followers.toLocaleString() : '...'}
+                </span>
               </div>
             </div>
 
@@ -466,21 +468,33 @@ function ProfileContent() {
 
             {/* Daily Signal Button */}
             <button
-              onClick={handleDailySignal}
+              onClick={handleDailyPost}
               disabled={dailySignal}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: dailySignal ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255,255,255,0.05)',
+                background: dailySignal ? 'rgba(0, 255, 0, 0.1)' : 'var(--bg-card)',
                 border: dailySignal ? '1px solid rgba(0, 255, 0, 0.3)' : '1px solid var(--border-subtle)',
                 borderRadius: '16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                color: dailySignal ? '#00FF00' : 'var(--text-secondary)',
-                fontWeight: 600,
-                cursor: dailySignal ? 'default' : 'pointer'
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                color: dailySignal ? '#00FF00' : 'var(--text-primary)',
+                fontWeight: 700,
+                fontSize: '14px',
+                letterSpacing: '0.5px',
+                cursor: dailySignal ? 'default' : 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: dailySignal ? 'none' : '0 4px 12px rgba(0,0,0,0.1)'
               }}
             >
-              {dailySignal ? '✅ Daily Signal Sent' : '📡 Send Daily Signal'}
+              {dailySignal ? (
+                <>
+                  <span>✅</span> DAILY POST SENT
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '18px' }}>📡</span> DAILY BASE POST
+                </>
+              )}
             </button>
           </div>
         )
