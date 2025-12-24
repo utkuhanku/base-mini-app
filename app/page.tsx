@@ -194,22 +194,22 @@ export default function Home() {
 
         <div className={styles.heroHeader}>
           <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ background: '#0052FF', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: 'var(--base-blue)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Image src="/base-logo.svg" alt="Base" width={20} height={20} style={{ filter: 'brightness(0) invert(1)' }} />
             </div>
             <span style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '1px', color: 'var(--base-blue)', textTransform: 'uppercase' }}>On Base</span>
           </motion.div>
 
-          <motion.h1 className={styles.title} variants={itemVariants}>
-            ONCHAIN <br /> IDENTITY<span className={styles.dot}>.</span>
+          <motion.h1 className={styles.title} variants={itemVariants} style={{ color: 'var(--text-primary)' }}>
+            ONCHAIN <br /> IDENTITY<span className={styles.dot} style={{ color: 'var(--base-blue)' }}>.</span>
           </motion.h1>
 
           {isAuthenticated ? (
-            <motion.p className={styles.subtitle} variants={itemVariants}>
-              <span className={styles.highlight}>Authorized</span> • FID {fid}
+            <motion.p className={styles.subtitle} variants={itemVariants} style={{ color: 'var(--text-secondary)' }}>
+              <span className={styles.highlight} style={{ color: 'var(--base-blue)', background: 'var(--base-blue-faint)' }}>Authorized</span> • FID {fid}
             </motion.p>
           ) : (
-            <motion.p className={styles.subtitle} variants={itemVariants}>
+            <motion.p className={styles.subtitle} variants={itemVariants} style={{ color: 'var(--text-secondary)' }}>
               Enter your onchain identity to continue.
             </motion.p>
           )}

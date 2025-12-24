@@ -226,6 +226,42 @@ function ProfileContent() {
     else alert("Profile Updated Successfully on-chain!");
   };
 
+
+  // Social Score State
+  const [socialScore, setSocialScore] = useState<{ followers: number, badge: string, score: number } | null>(null);
+
+  // Fetch Social Score (Simulated)
+  useEffect(() => {
+    if (address) {
+      import("../../utils/scoring").then(({ calculateScore }) => {
+        calculateScore(address).then(data => {
+          setSocialScore({
+            followers: data.followers,
+            badge: data.badge,
+            score: data.normalizedScore
+          });
+        });
+      });
+    }
+  }, [address]);
+
+  // Daily Signal (Local Storage)
+  const [dailySignal, setDailySignal] = useState(false);
+  useEffect(() => {
+    const lastSignal = localStorage.getItem(`daily_signal_${new Date().toISOString().split('T')[0]}`);
+    if (lastSignal) setDailySignal(true);
+  }, []);
+
+  const handleDailySignal = () => {
+    const text = "Checking in on @base. Building onchain every day. 🔵";
+    const intent = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(intent, '_blank');
+    // Set signal as true (optimistic)
+    localStorage.setItem(`daily_signal_${new Date().toISOString().split('T')[0]}`, 'true');
+    setDailySignal(true);
+  };
+
+
   return (
     <div className={styles.container}>
       <input
@@ -250,7 +286,7 @@ function ProfileContent() {
         style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
         {/* --- HEADER ACTIONS (Minimal) --- */}
-        {/* Moved generic actions to flow naturally. Top should be identity focus. */}
+
 
         {/* TOGGLE: Creator vs Business (Only visible if Editing) */}
         {isEditing && (
@@ -313,8 +349,20 @@ function ProfileContent() {
 
             <div className={styles.cardHeader}>
               <div className={styles.cardChip} />
-              <div className={styles.verifiedBadge}><div className={styles.verifiedDot} />Verified ↗</div>
-              <div className={styles.pointsPill}><span>💎</span> 854</div>
+              <div className={styles.verifiedBadge}>
+                {socialScore?.badge === 'Diamond' ? '💎' : socialScore?.badge === 'Gold' ? '🥇' : '🔵'} {socialScore?.badge || 'Citizen'}
+              </div>
+              <div className={styles.pointsPill}>
+                {socialScore?.followers ? (
+                  <span>{socialScore.followers > 5000 ? '5K+ Users' :
+                    socialScore.followers > 1000 ? '1K+ Users' :
+                      socialScore.followers > 500 ? '500+ Users' :
+                        socialScore.followers > 100 ? '100+ Users' :
+                          `${socialScore.followers} Users`}</span>
+                ) : (
+                  <span>...</span>
+                )}
+              </div>
             </div>
 
             <div className={styles.cardBody}>
@@ -404,17 +452,36 @@ function ProfileContent() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setIsEditing(true)}
-                style={{ flex: 1, padding: '16px', background: 'white', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
+                style={{ flex: 1, padding: '16px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '16px', color: 'var(--text-primary)', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
               >
                 {cardTokenId ? "EDIT PROFILE" : "CREATE IDENTITY"}
               </button>
               <button
                 onClick={() => captureAndShare()}
-                style={{ flex: 1, padding: '16px', background: 'rgba(0, 82, 255, 0.2)', borderRadius: '16px', border: '1px solid rgba(0, 82, 255, 0.2)', color: '#0052FF', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
+                style={{ flex: 1, padding: '16px', background: 'var(--base-blue-faint)', borderRadius: '16px', border: '1px solid var(--base-blue)', color: 'var(--base-blue)', fontWeight: 800, fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}
               >
-                CAST ON BASE APP
+                SHARE
               </button>
             </div>
+
+            {/* Daily Signal Button */}
+            <button
+              onClick={handleDailySignal}
+              disabled={dailySignal}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: dailySignal ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255,255,255,0.05)',
+                border: dailySignal ? '1px solid rgba(0, 255, 0, 0.3)' : '1px solid var(--border-subtle)',
+                borderRadius: '16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                color: dailySignal ? '#00FF00' : 'var(--text-secondary)',
+                fontWeight: 600,
+                cursor: dailySignal ? 'default' : 'pointer'
+              }}
+            >
+              {dailySignal ? '✅ Daily Signal Sent' : '📡 Send Daily Signal'}
+            </button>
           </div>
         )
         }
