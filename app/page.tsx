@@ -1,5 +1,6 @@
 "use client";
 import sdk from "@farcaster/miniapp-sdk";
+import { SignInButton, useProfile } from "@farcaster/auth-kit";
 
 import {
   ConnectWallet,
@@ -35,7 +36,14 @@ const CARD_SBT_ADDRESS = process.env.NEXT_PUBLIC_CARD_SBT_ADDRESS || "0x40030556
 export default function Home() {
   const router = useRouter();
 
-  const { address, isConnected: wagmiConnected } = useAccount();
+  /* Auth Logic Integration */
+  const { address: wagmiAddress, isConnected: wagmiConnected } = useAccount();
+  const { profile: authProfile, isAuthenticated: authKitConnected } = useProfile();
+
+  // Effective Address (Wallet > Farcaster Custody)
+  // This allows desktop users (SIWF) to view their potential card if they have one on their custody address
+  const address = wagmiAddress || authProfile?.custody;
+
   const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   // Quick Auth State
@@ -96,8 +104,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setIsWalletConnected(wagmiConnected && !!address);
-  }, [wagmiConnected, address]);
+    setIsWalletConnected(wagmiConnected || authKitConnected);
+    if (authKitConnected && authProfile?.fid) {
+      setFid(authProfile.fid);
+      setIsAuthenticated(true);
+    }
+  }, [wagmiConnected, address, authKitConnected, authProfile]);
 
 
   // 2. CHECK FOR CARD & FETCH DATA
@@ -221,27 +233,44 @@ export default function Home() {
         {!isWalletConnected ? (
           <motion.div variants={itemVariants} className={styles.connectPrompt}>
             <p className={styles.subtitle} style={{ marginBottom: '24px', opacity: 0.7 }}>
-              Connect to access the Base Identity Protocol.
+              Connect Identity to access the Base Protocol.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Wallet>
-                <ConnectWallet className={styles.basePostButton}>
-                  <Avatar className="h-6 w-6" />
-                  <Name />
-                </ConnectWallet>
-                <WalletDropdown>
-                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                    <Avatar />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              {/* Desktop Auth Option */}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <SignInButton
+                  onSuccess={({ fid, username }) => {
+                    console.log("Signed in with Farcaster", fid, username);
+                    if (fid) {
+                      setFid(fid);
+                      setIsAuthenticated(true);
+                    }
+                  }}
+                />
+              </div>
+
+              <div style={{ fontSize: '12px', opacity: 0.5 }}>OR</div>
+
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Wallet>
+                  <ConnectWallet className={styles.basePostButton}>
+                    <Avatar className="h-6 w-6" />
                     <Name />
-                    <Address />
-                    <EthBalance />
-                  </Identity>
-                  <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com">
-                    Wallet
-                  </WalletDropdownLink>
-                  <WalletDropdownDisconnect />
-                </WalletDropdown>
-              </Wallet>
+                  </ConnectWallet>
+                  <WalletDropdown>
+                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                      <Avatar />
+                      <Name />
+                      <Address />
+                      <EthBalance />
+                    </Identity>
+                    <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com">
+                      Wallet
+                    </WalletDropdownLink>
+                    <WalletDropdownDisconnect />
+                  </WalletDropdown>
+                </Wallet>
+              </div>
             </div>
           </motion.div>
         ) : (
