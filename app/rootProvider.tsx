@@ -25,29 +25,18 @@ const config = createConfig({
   ssr: true,
 });
 
-import "@farcaster/auth-kit/styles.css";
-import { AuthKitProvider } from "@farcaster/auth-kit";
-
-const authKitConfig = {
-  rpcUrl: "https://mainnet.optimism.io", // Mainnet Optimism RPC for Farcaster
-  domain: "base-mini-app-beryl.vercel.app", // Domain from MiniKit Config
-  siweUri: "https://base-mini-app-beryl.vercel.app/login", // Redirect URI (optional, but good practice)
-};
-
 export function RootProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <AuthKitProvider config={authKitConfig}>
-          <OnchainKitProvider
-            apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-            chain={targetChain}
-          >
-            {children}
-          </OnchainKitProvider>
-        </AuthKitProvider>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={targetChain}
+        >
+          {children}
+        </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

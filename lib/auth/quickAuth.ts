@@ -39,6 +39,7 @@ export type QuickAuthPayload = {
     username?: string;
     displayName?: string;
     pfpUrl?: string;
+    custody?: string;
     authenticated: true;
 };
 
@@ -63,8 +64,8 @@ export async function verifyQuickAuthRequest(request: NextRequest): Promise<Quic
         // The JWT might contain basic profile info if configured, but primarily it proves FID ownership.
         return {
             fid: Number(result.sub),
-            // Future: if quick-auth returns username/etc in payload, map it here.
-            // For now, we return minimal trusted data.
+            // Map custody address if available in the JWT payload claims
+            custody: (result as any).custody || (result as any).custody_address,
             authenticated: true,
         };
     } catch (e) {

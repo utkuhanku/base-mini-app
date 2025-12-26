@@ -1,6 +1,6 @@
 "use client";
 import sdk from "@farcaster/miniapp-sdk";
-import { SignInButton, useProfile } from "@farcaster/auth-kit";
+
 
 import {
   ConnectWallet,
@@ -38,21 +38,20 @@ export default function Home() {
 
   /* Auth Logic Integration */
   const { address: wagmiAddress, isConnected: wagmiConnected } = useAccount();
-  const { profile: authProfile, isAuthenticated: authKitConnected } = useProfile();
-
-  // Effective Address (Wallet > Farcaster Custody)
-  // This allows desktop users (SIWF) to view their potential card if they have one on their custody address
-  const address = wagmiAddress || authProfile?.custody;
-
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   // Quick Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [fid, setFid] = useState<number | null>(null);
+  const [custodyAddress, setCustodyAddress] = useState<string | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [activeHelp, setActiveHelp] = useState<string | null>(null);
 
+  // Effective Address (Wallet > Farcaster Custody)
+  // This allows desktop users (SIWF) to view their potential card if they have one on their custody address
+  const address = wagmiAddress || custodyAddress;
+
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
 
   // 1. Perform Quick Auth on Mount
@@ -90,6 +89,9 @@ export default function Home() {
         const data = await response.json();
         if (data.success && data.user?.fid) {
           setFid(data.user.fid);
+          if (data.user.custody) {
+            setCustodyAddress(data.user.custody);
+          }
           setIsAuthenticated(true);
         }
       } catch (err) {
@@ -104,12 +106,9 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setIsWalletConnected(wagmiConnected || authKitConnected);
-    if (authKitConnected && authProfile?.fid) {
-      setFid(authProfile.fid);
-      setIsAuthenticated(true);
-    }
-  }, [wagmiConnected, address, authKitConnected, authProfile]);
+    // If authenticated via Farcaster SDK or connected via Wallet
+    setIsWalletConnected(wagmiConnected || isAuthenticated);
+  }, [wagmiConnected, isAuthenticated]);
 
 
   // 2. CHECK FOR CARD & FETCH DATA
@@ -236,20 +235,9 @@ export default function Home() {
               Connect Identity to access the Base Protocol.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              {/* Desktop Auth Option */}
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <SignInButton
-                  onSuccess={({ fid, username }) => {
-                    console.log("Signed in with Farcaster", fid, username);
-                    if (fid) {
-                      setFid(fid);
-                      setIsAuthenticated(true);
-                    }
-                  }}
-                />
-              </div>
 
-              <div style={{ fontSize: '12px', opacity: 0.5 }}>OR</div>
+
+
 
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <Wallet>
